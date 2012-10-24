@@ -1,0 +1,28 @@
+{% extends 'full.html' %}
+{% load url from future %}
+
+{% block content %}
+
+<form method="post" action="{% url 'django.contrib.auth.views.login' %}" class="form-horizontal">
+{% csrf_token %}
+<fieldset>
+<legend>Login</legend>
+{% for field in form %}
+    <div class="control-group{% if form.errors %} error{% endif %}">
+        <label class="control-label"> {{ field.label_tag }}</label>
+        <div class="controls"> {{ field }}
+            {% if form.errors and forloop.first %}<span class="help-inline">Your username and password didn't match, please try again</span>{% endif %}
+        </div> 
+    </div>
+{% endfor %}
+<div class="control-group">
+    <div class="controls">
+        <input type="submit" value="login" class="btn btn-primary"/>
+        <input type="hidden" name="next" value="{{ next }}" />
+    </div>
+</div>
+</fieldset>
+</form>
+
+
+{% endblock %}
