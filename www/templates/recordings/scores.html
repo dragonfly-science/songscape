@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1> Kiwi calls </h1>
+<table class="table">
+<tr>
+<th>Call index </th>
+<th>Sonogram </th>
+</tr>
+{% for score in scores %}
+    <tr>
+        <td>
+            {{ score.kiwi_index }}
+        </td>
+        <td>
+            <img src="/static/sonograms/{{ score.sonogram.name }}">
+        </td>
+    </tr>
+{% endfor %}
+</table>
+{% endblock content %}
