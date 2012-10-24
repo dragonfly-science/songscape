@@ -4,6 +4,8 @@ import os
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
+from local_settings import SECRET_KEY, GIT_HOME
+
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
@@ -59,6 +61,22 @@ MEDIA_URL = ''
 # Example: "/home/media/media.lawrence.com/static/"
 STATIC_ROOT = ''
 
+
+# Additional locations of static files
+STATICFILES_DIRS = (
+    # Put strings here, like "/home/html/static" or "C:/www/django/static".
+    # Always use forward slashes, even on Windows.
+    # Don't forget to use absolute paths, not relative paths.
+    os.path.join(GIT_HOME, 'static/'),
+)
+
+TEMPLATE_DIRS = (
+    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
+    # Always use forward slashes, even on Windows.
+    # Don't forget to use absolute paths, not relative paths.
+    os.path.join(GIT_HOME, "www/templates"),
+)
+
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = '/static/'
@@ -68,13 +86,6 @@ STATIC_URL = '/static/'
 # Examples: "http://foo.com/static/admin/", "/static/admin/".
 ADMIN_MEDIA_PREFIX = '/static/admin/'
 
-# Additional locations of static files
-STATICFILES_DIRS = (
-    # Put strings here, like "/home/html/static" or "C:/www/django/static".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    '/home/edward/songscape/static/',
-)
 
 # List of finder classes that know how to find static files in
 # various locations.
@@ -84,8 +95,6 @@ STATICFILES_FINDERS = (
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
-# Make this unique, and don't share it with anybody.
-SECRET_KEY = '2t0k+x%yk@p(w-^$l*r&dwam!^&468505e!8ntyoen%v9f2y4$'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -104,12 +113,6 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'www.urls'
 
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    "/home/edward/songscape/www/templates",
-)
 
 INSTALLED_APPS = (
     'django.contrib.auth',
