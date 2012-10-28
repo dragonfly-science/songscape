@@ -46,4 +46,5 @@ class Score(models.Model):
     filename = models.TextField()
     sonogram = models.ImageField(upload_to=settings.SONOGRAM_DIR, null=True, blank=True)
     kiwi = models.NullBooleanField(null=True, blank=True)
-     
+
+
