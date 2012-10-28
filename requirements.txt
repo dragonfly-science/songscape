@@ -1,0 +1,5 @@
+Django==1.4.2
+PIL==1.1.7
+numpy==1.6.2
+matplotlib==1.1.1
+
