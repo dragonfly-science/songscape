@@ -1,21 +1,28 @@
 {% extends 'base.html' %}
 
+
+
 {% block content %}
-<h1> Kiwi calls </h1>
-<table class="table">
-<tr>
-<th>Call index </th>
-<th>Sonogram </th>
-</tr>
+
+<ul class="pager">
+{% if scores.has_previous %}
+  <li class="previous">
+    <a href="?page={{ scores.previous_page_number }}">&larr; Previous</a>
+  </li>
+{% endif %}
+{% if scores.has_next %}
+  <li class="next">
+    <a href="?page={{ scores.next_page_number }}">Next &rarr;</a>
+  </li>
+{% endif %}
+</ul>
+
+
 {% for score in scores %}
-    <tr>
-        <td>
             {{ score.kiwi_index }}
-        </td>
-        <td>
+            {{ score.datetime }}
             <img src="/static/sonograms/{{ score.sonogram.name }}">
-        </td>
-    </tr>
 {% endfor %}
-</table>
+
+
 {% endblock content %}
