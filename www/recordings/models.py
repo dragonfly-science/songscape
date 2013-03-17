@@ -37,14 +37,53 @@ class Deployment(models.Model):
     def __unicode__(self):
         return '%s %s %s'%(self.site.code, self.recorder.code, self.start)
 
-class Score(models.Model):
+class SoundFile(models.Model)
     datetime = models.DateTimeField()
-    deployment = models.ForeignKey(Deployment)
-    energy_index = models.FloatField()
-    kiwi_index = models.FloatField()
-    date_scored = models.DateTimeField(auto_now_add=True)
-    filename = models.TextField()
-    sonogram = models.ImageField(upload_to=settings.SONOGRAM_DIR, null=True, blank=True)
-    kiwi = models.NullBooleanField(null=True, blank=True)
+    deployment = models.ForeignKeyField(Deployment)
+    sha1 = models.TextField()
+    sample_rate = models.IntegerField()
+    duration = models.FloatField()
+    nchannels = models.IntegerFieldField()
+    path = models.TextField()
+
+    def __save__(self):
+        wav = wave.open(self.path)
+        (nchannels, sampwidth, framerate, nframes, comptype, compname) = wav.getparams()
+        self.sample_rate = framerate
+        self.duration = nframes/float(framerate)
+        self.nchannels = nchannels
+
+    def get_audio(self, offset=0, duration=0):
+        """Returns the audio associated with a snippet"""
+        wav = wave.open(self.path)
+        if offset:
+            wav.readframes(offset*self.sample_rate*self.nchannels) #Read to the offset in seconds
+        if not duration:
+            duration = self.duration - offset
+        frames = wav.readframes(duration*self.sample_rate*self.nchannels)
+        audio = np.array(struct.unpack_from ("%dh" % (len(frames)/2,), frames))
+        return audio
+
+class Snippet(models.Model):
+    sound_file = modles.ForeignKey(SoundFile)
+    offset = models.FloatField()
+    duration = models.FloatField()
+    sonogram = models.ImageField(upload_to=settings.SONOGRAM_DIR, null=True, blank=True) 
+    mp3 = models.FileField(upload_to=settings.MP3_DIR, null=True, blank=True) 
+    
+    def get_audio(self):
+        return self.sound_file.get_audio(self.offset, self.duration)
+
+class Score(models.Model):
+    snippet = models.ForeignKey(Snippet)
+    scorer = models.ForeignKey(Scorer)
+    score = models.FloatField(null=True, blank=True)
+
+class Scorer(models.Model):
+    name = models.SlugField()
+    description = models.TextField()
+    version = models.TextField()
+    code = models.TextField()
+
 
 
