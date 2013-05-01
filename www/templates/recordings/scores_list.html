@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+
+
+{% block content %}
+
+<ul class="pager">
+{% if scores.has_previous %}
+  <li class="previous">
+    <a href="?page={{ scores.previous_page_number }}">&larr; Previous</a>
+  </li>
+{% endif %}
+    <li class="disabled"><a>Showing {{ scores.start_index }}&ndash;{{ scores.end_index }} of {{ scores.paginator.count }} records</a></li>
+{% if scores.has_next %}
+  <li class="next">
+    <a href="?page={{ scores.next_page_number }}">Next &rarr;</a>
+  </li>
+{% endif %}
+</ul>
+
+
+<table data-provides="rowlink" class="table table-striped table-hover table-bordered">
+  <thead>
+    <tr>
+    <th>ID</th>
+    <th>Site</th>
+    <th>Date</th>
+    <th>Score</th>
+    <th>Noise</th>
+    <th>Kiwi</th>
+</thead>
+<tbody>
+{% for score in scores %}
+    <tr>
+    <td>{% if score.sonogram %}<a href="{% url score %}?id={{ score.id }}">{{ score.id }}</a>{% else %}{{ score.id }}{% endif %}</td>
+    <td>{{ score.deployment.site }}</td>
+    <td>{{ score.datetime }}</td>
+    <td>{{ score.kiwi_index }}</td>
+    <td>{{ score.energy_index }}</td>
+    <td>{{ score.kiwi }}</td>
+    </tr>
+{% endfor %}
+</tbody>
+</table>
+
+{% endblock content %}

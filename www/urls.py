@@ -11,7 +11,8 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 urlpatterns = patterns('',
     # Examples:
-     url(r'^$', 'www.recordings.views.scores', name='scores'),
+     url(r'^score/$', 'www.recordings.views.scores', name='score'),
+     url(r'^list/$', 'www.recordings.views.scores_list', name='score_list'),
     (r'^admin/', include(admin.site.urls)),
     (r'^login/$',   'django.contrib.auth.views.login',    {'template_name': 'account/login.html'}),
     (r'^logout/$',  'django.contrib.auth.views.logout',   {'next_page': '/'}),
