@@ -153,5 +153,7 @@ LOGGING = {
 
 SONOGRAM_DIR = os.path.join(STATICFILES_DIRS[0], 'sonograms')
 MP3_DIR = os.path.join(STATICFILES_DIRS[0], 'mp3')
+DATA_DIR = os.path.join(STATICFILES_DIRS[0], 'data')
+
 
 
