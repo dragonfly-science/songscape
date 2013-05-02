@@ -23,7 +23,7 @@ class Command(BaseCommand):
                 row['Latitude'] = None
             if not row['Longitude'].strip():
                 row['Longitude'] = None
-            o = Site(code=row['Code'], latitude=row['Latitude'], longitude=row['Longitude'], comments=row['Comments'])
+            o = Site(code=row['Code'], latitude=row['Latitude'], longitude=row['Longitude'], description=row['Comments'])
             o.save()
 
         recorders = csv.DictReader(open(os.path.join(DIR, 'Recorders.csv')))

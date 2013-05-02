@@ -17,20 +17,6 @@ from django.conf import settings
 
 from recordings.models import Score, Deployment
 
-def kiwi_index(audio, framerate, NFFT=256):
-    """Returns an index of whether an audio clip contains a kiwicall. The higher the  index the more the signal if
-    like a kiwi"""
-    clf()
-    spec = mlab.specgram(audio, NFFT=NFFT, Fs=framerate)
-    spec2 = mlab.specgram(mean(log(spec[0][55:65,]), 0), NFFT=2048, noverlap=2000, Fs=framerate/256.0)
-    max_kiwi = max(np.mean(spec2[0][20:30, ], 0))
-    min_kiwi = min(np.mean(spec2[0][10:40, ], 0))
-    return max_kiwi/min_kiwi, spec
-
-def intensity_index(spec):
-    """Returns an index that is related to the background noise in an audio clip"""
-    return sum(np.min(spec[0][10:, ], 1))
-
 def get_starttime(filename, count=0):
     """returns the start time, by parsing the filename of a WAV file from the DOC recorders"""
     timestamp = mktime(strptime(filename, "%d%m%y_%H%M%S.wav"))
