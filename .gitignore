@@ -8,3 +8,4 @@ www/birdscape.db
 *.swp
 *~
 data/*
+media/*
