@@ -28,11 +28,14 @@ class Command(BaseCommand):
                     try:
                         deployment = Deployment.objects.get(recorder__code=recorder_code, start__lt=starttime, end__gt=starttime)
                         path = os.path.join(root, f)
-                        recording = Recording(datetime=starttime, deployment=deployment, path=path)
                         try:
-                            recording = Recording.objects.get(sha1=recording.get_hash())
+                            recording = Recording.objects.get(path=path)
                         except Recording.DoesNotExist:
-                            recording.save()
+                            recording = Recording(datetime=starttime, deployment=deployment, path=path)
+                            try:
+                                recording = Recording.objects.get(sha1=recording.get_hash())
+                            except Recording.DoesNotExist:
+                                recording.save()
                         #Now generate the snippets
                         if not recording.snippets.count():
                             f = wave.open(path, 'r')
@@ -41,12 +44,12 @@ class Command(BaseCommand):
                                 rate = f.getframerate()
                                 length = frames/float(rate)
                                 snippet_length = 60
-                                snippet_overlap = 1
-                                snippet_minimum = 10
+                                snippet_overlap = 0
+                                snippet_minimum = 59.9
                                 seconds = 0
-                                while seconds + snippet_minimum < length: #Discard any snippets that are less than 10s long
+                                while seconds + snippet_minimum < length: #Discard any snippets that are less than snippet_minimum long
                                     offset = max(seconds - snippet_overlap, 0)
-                                    duration = min(seconds + snippet_length + snippet_overlap, length)
+                                    duration = min(snippet_length + 2*snippet_overlap, length - offset)
                                     Snippet(recording=recording, offset=offset, duration=duration).save()
                                     seconds += snippet_length
                             finally:
