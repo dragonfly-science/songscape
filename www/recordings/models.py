@@ -3,6 +3,7 @@ import wave
 import numpy as np
 import struct
 import datetime
+from contextlib import closing
 
 from django.db import models
 from django.conf import settings
@@ -92,13 +93,15 @@ class Recording(models.Model):
 
     def get_audio(self, offset=0, duration=0):
         """Returns the audio associated with a snippet"""
-        wav = wave.open(self.path, 'r')
-        if offset:
-            wav.readframes(int(offset*self.sample_rate*self.nchannels)) #Read to the offset in seconds
-        if not duration:
-            duration = self.duration - offset
-        frames = wav.readframes(int(duration*self.sample_rate*self.nchannels))
+        with closing(wave.open(self.path, 'r')) as wav:
+            wav.rewind()
+            if offset:
+                wav.readframes(int(offset*self.sample_rate*self.nchannels)) #Read to the offset in seconds
+            if not duration:
+                duration = self.duration - offset
+            frames = wav.readframes(int(duration*self.sample_rate*self.nchannels))
         audio = np.array(struct.unpack_from ("%dh" % (len(frames)/2,), frames))
+        print audio.shape, len(frames)
         return audio
 
 class Snippet(models.Model):
@@ -150,6 +153,4 @@ class Score(models.Model):
     
     class Meta:
         unique_together = (('snippet', 'detector'),)
-
-
     
