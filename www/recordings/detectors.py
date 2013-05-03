@@ -17,6 +17,9 @@ class DetectorClass(object):
     version = None
     description = None
 
+    def __str__(self):
+        return self.__unicode__()
+
     def __unicode__(self):
         return "%s %s" % (self.code, self.version)
 
