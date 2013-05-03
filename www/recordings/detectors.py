@@ -27,7 +27,7 @@ class DetectorClass(object):
         """Returns a tuple of a number and a string"""
         raise NotImplementedError
 
-    def get_database_detector(self, add=False):
+    def get_database_detector(self, add=True):
         try:
             detector = Detector.objects.get(code=self.code, version=self.version)
         except Detector.DoesNotExist:
@@ -43,6 +43,8 @@ class DetectorClass(object):
                     description=self.description,
                 )
                 detector.save()
+            else:
+                raise
         return detector
 
     def save_score(self, snippet):
