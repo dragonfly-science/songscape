@@ -8,7 +8,7 @@ class OrganisationAdmin(admin.ModelAdmin):
 admin.site.register(Organisation, OrganisationAdmin)
 
 class SiteAdmin(admin.ModelAdmin):
-    list_display = ('code', 'latitude', 'longitude', 'altitude', 'comments',)
+    list_display = ('code', 'latitude', 'longitude', 'altitude', 'description',)
 admin.site.register(Site, SiteAdmin)
 
 class RecorderAdmin(admin.ModelAdmin):

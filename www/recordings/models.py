@@ -1,10 +1,14 @@
 import hashlib
+import os
 import wave
 import numpy as np
 import struct
 import datetime
 from contextlib import closing
 
+from pylab import clf, specgram, savefig
+
+from django.core.files.images import ImageFile
 from django.db import models
 from django.conf import settings
 
@@ -112,12 +116,23 @@ class Snippet(models.Model):
     soundfile = models.FileField(upload_to=settings.MP3_DIR, null=True, blank=True)
     
     def __unicode__(self):
-        return '%s %s %s'%(self.recording.deployment.site.code, 
+        return '%s-%s-%s'%(self.recording.deployment.site.code, 
             self.recording.deployment.recorder.code, 
-            self.datetime)
+            datetime.datetime.strftime(self.datetime, '%Y%m%d-%H%M%S')
+        )
     
     def get_audio(self):
         return self.recording.get_audio(self.offset, self.duration)
+
+    def get_sonogram(self, replace=False, NFFT=256):
+        if not self.sonogram or replace:
+            clf()
+            filename = "%s.png" % (self,)
+            specgram(self.get_audio(), NFFT=NFFT, Fs=self.recording.sample_rate, hold=False)
+            savefig(os.path.join(settings.SONOGRAM_DIR, filename))
+            self.sonogram = ImageFile(os.path.join(settings.SONOGRAM_DIR, filename))
+            self.save()
+        return self.sonogram
 
     @property
     def datetime(self):
