@@ -101,7 +101,6 @@ class Recording(models.Model):
                 duration = self.duration - offset
             frames = wav.readframes(int(duration*self.sample_rate*self.nchannels))
         audio = np.array(struct.unpack_from ("%dh" % (len(frames)/2,), frames))
-        print audio.shape, len(frames)
         return audio
 
 class Snippet(models.Model):
@@ -113,7 +112,9 @@ class Snippet(models.Model):
     soundfile = models.FileField(upload_to=settings.MP3_DIR, null=True, blank=True)
     
     def __unicode__(self):
-        return '%s (%s s)' % (self.recording, self.offset)
+        return '%s %s %s'%(self.recording.deployment.site.code, 
+            self.recording.deployment.recorder.code, 
+            self.datetime)
     
     def get_audio(self):
         return self.recording.get_audio(self.offset, self.duration)
