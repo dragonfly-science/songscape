@@ -4,7 +4,7 @@ import os
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-from local_settings import SECRET_KEY, GIT_HOME
+from local_settings import SECRET_KEY, GIT_HOME, RECORDINGS_PATH
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -136,10 +136,16 @@ INSTALLED_APPS = (
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'filters': {
+    'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        }
+    },
     'handlers': {
         'mail_admins': {
             'level': 'ERROR',
-            'class': 'django.utils.log.AdminEmailHandler'
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler',
         }
     },
     'loggers': {
@@ -147,6 +153,7 @@ LOGGING = {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
             'propagate': True,
+            'filters': ['require_debug_false'],
         },
     }
 }
