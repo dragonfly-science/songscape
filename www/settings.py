@@ -48,7 +48,7 @@ USE_L10N = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = ''
+MEDIA_ROOT = os.path.join(GIT_HOME, 'media/')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -158,7 +158,7 @@ LOGGING = {
     }
 }
 
-SONOGRAM_DIR = os.path.join(STATICFILES_DIRS[0], 'sonograms')
+SONOGRAM_DIR = 'sonograms/'
 MP3_DIR = os.path.join(STATICFILES_DIRS[0], 'mp3')
 DATA_DIR = os.path.join(STATICFILES_DIRS[0], 'data')
 
