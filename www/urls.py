@@ -11,8 +11,8 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 urlpatterns = patterns('',
     # Examples:
-     url(r'^snippet/$', 'www.recordings.views.snippets', name='snippet'),
-     url(r'^list/$', 'www.recordings.views.snippets_list', name='snippet_list'),
+     url(r'^snippet/(?P<id>\d+)/$', 'www.recordings.views.snippet', name='snippet'),
+     url(r'^scores/(?P<code>[\w-]+)/(?P<version>[0-9\.]+)/$', 'www.recordings.views.scores', name='scores_list'),
     (r'^admin/', include(admin.site.urls)),
     (r'^login/$',   'django.contrib.auth.views.login',    {'template_name': 'account/login.html'}),
     (r'^logout/$',  'django.contrib.auth.views.logout',   {'next_page': '/'}),
@@ -20,6 +20,6 @@ urlpatterns = patterns('',
     (r'^accounts/change_password/done/$', 'django.contrib.auth.views.password_change_done'),
     #(r'^accounts/profile/$', redirect_to, {'url': '/'}),
     #(r'^accounts/login/$', redirect_to, {'url': '/login/'}),
-    #url(r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root':settings.STATIC_ROOT}),
+    url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root':settings.MEDIA_ROOT}),
 )
 urlpatterns += staticfiles_urlpatterns()

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+
+{% block content %}
+
+<ul class="pager">
+{% if previous_id %}
+  <li class="previous">
+    <a href="{% url snippet previous_id %}">&larr; Previous</a>
+  </li>
+{% endif %}
+{% if next_id %}
+  <li class="next">
+    <a href="{% url snippet next_id %}">Next &rarr;</a>
+  </li>
+{% endif %}
+</ul>
+
+{{ snippet.datetime }}
+<img src="{{ snippet.sonogram.url }}">
+
+
+{% endblock content %}
