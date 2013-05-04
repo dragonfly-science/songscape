@@ -1,19 +1,47 @@
-from recordings.models import Snippet
+from recordings.models import Snippet, Score, Detector
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-fields = ('id',
-    'energy_index__lt',
-    'energy_index__gt',
-    'kiwi_index__lt',
-    'kiwi_index__gt',
-    'datetime__gt',
-    'datetime__lt',
-    'sonogram__isnull',
-    'kiwi__isnull',
-    'kiwi',
+fields = (
+    'score__lt',
+    'score__gt',
+    'score',
+    'snippet__id',
+    'snippet__recording__datetime__gt',
+    'snippet__recording__datetime__lt',
+    'snippet__sonogram__isnull',
+    'snippet__recording__deployment__site__code',
+    'snippet__recording__deployment__recorder',
     )
     
+def _get_filters(request):
+    filters = {}
+    for field in fields:
+        value = request.GET.get(field) or None
+        if value:
+            filters[field] = value
+    return filters
+
+def _get_order(request):
+    return request.GET.getlist('order')
+
+def _get_parameters(request):
+    """Get the request parameters, apart from page"""
+    parameters = request.GET.copy()
+    while parameters.has_key('page'):
+        del parameters['page']
+    return parameters.urlencode()
+
+def _paginate(request, queryset, per_page=500, default_page=1):
+    page = request.GET.get('page') or default_page
+    paginator = Paginator(queryset, per_page)
+    try:
+        results = paginator.page(page)
+    except PageNotAnInteger:
+        results = paginator.page(1)
+    except EmptyPage:
+        results = paginator.page(paginator.num_pages)
+    return results
 
 def _get_snippets(request, per_page, page=1, **filters):
     page = request.GET.get('page') or page
@@ -21,7 +49,6 @@ def _get_snippets(request, per_page, page=1, **filters):
         value = request.GET.get(field) or None
         if value:
             filters[field] = value
-    print filters
     snippets_list = Snippet.objects.select_related().filter(**filters)
     paginator = Paginator(snippets_list, per_page)
     try:
@@ -32,13 +59,37 @@ def _get_snippets(request, per_page, page=1, **filters):
         snippets = paginator.page(paginator.num_pages)
     return snippets
 
-def snippets(request):
-    snippets = _get_snippets(request, 1)
-    return render(request, 'recordings/snippets.html', {'snippets':snippets})
+def snippet(request, id):
+    snippets = request.session.get('snippets', [])
+    if int(id) in snippets:
+        index = snippets.index(int(id))
+        try:
+            next_id = snippets[index + 1] 
+        except IndexError:
+            next_id = None
+        try:
+            previous_id = snippets[index - 1] 
+        except IndexError:
+            previous_id = None
+    else:
+        next_id = None
+        previous_id = None
+    snippet = Snippet.objects.get(id=id)
+    return render(request, 'recordings/snippet.html', {'snippet':snippet, 'next_id':next_id, 'previous_id':previous_id})
 
-def snippets_list(request):
-    snippets = _get_snippets(request, 500)
-    return render(request, 'recordings/snippets_list.html', {'snippets':snippets})
+def scores(request, code, version, default_page=1, per_page=500):
+    filters = _get_filters(request)
+    order = _get_order(request)
+    request_parameters = _get_parameters(request)
+    detector = Detector.objects.get(code=code, version=version)
+    queryset = Score.objects.filter(detector=detector).select_related().filter(**filters).order_by(*order)
+    request.session['snippets'] =  [score.snippet.id for score in queryset]
+    scores = _paginate(request,
+        queryset,
+        default_page=default_page,
+        per_page=per_page,
+    )
+    return render(request, 'recordings/scores_list.html', {'scores': scores, 'request_parameters': request_parameters})
 
     
     

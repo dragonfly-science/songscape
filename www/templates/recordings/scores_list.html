@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+
+
+{% block content %}
+
+<ul class="pager">
+{% if scores.has_previous %}
+  <li class="previous">
+    <a href="?page={{ scores.previous_page_number }}{% if request_parameters %}&{{ request_parameters }}{% endif %}">&larr; Previous</a>
+  </li>
+{% endif %}
+    <li class="disabled"><a>Showing {{ scores.start_index }}&ndash;{{ scores.end_index }} of {{ scores.paginator.count }} records</a></li>
+{% if scores.has_next %}
+  <li class="next">
+    <a href="?page={{ scores.next_page_number }}{% if request_parameters %}&{{ request_parameters }}{% endif %}">Next &rarr;</a>
+  </li>
+{% endif %}
+</ul>
+
+
+<table data-provides="rowlink" class="table table-striped table-hover table-bordered">
+  <thead>
+    <tr>
+    <th>ID</th>
+    <th>Site</th>
+    <th>Date</th>
+    <th>Score</th>
+</thead>
+<tbody>
+{% for s in scores %}
+    <tr>
+    <td>{% if s.snippet.sonogram %}<a href="{% url snippet s.snippet.id %}">{{ s.snippet.id }}</a>{% else %}{{ s.snippet.id }}{% endif %}</td>
+    <td>{{ s.snippet.recording.deployment.site }}</td>
+    <td>{{ s.snippet.datetime }}</td>
+    <td>{{ s.score }}</td>
+    </tr>
+{% endfor %}
+</tbody>
+</table>
+
+{% endblock content %}
