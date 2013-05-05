@@ -96,8 +96,7 @@ class Recording(models.Model):
         self.sha1 = self.get_hash()
         super(Recording, self).save(*args, **kwargs)
 
-    def get_audio(self, offset=0, duration=0):
-        """Returns the audio associated with a snippet"""
+    def _get_frames(self, offset, duration):
         with closing(wave.open(self.path, 'r')) as wav:
             wav.rewind()
             if offset:
@@ -105,8 +104,12 @@ class Recording(models.Model):
             if not duration:
                 duration = self.duration - offset
             frames = wav.readframes(int(duration*self.sample_rate*self.nchannels))
-        audio = np.array(struct.unpack_from ("%dh" % (len(frames)/2,), frames))
-        return audio
+        return frames
+
+    def get_audio(self, offset=0, duration=0):
+        """Returns the audio associated with a snippet"""
+        frames = self._get_frames(offset, duration)
+        return np.array(struct.unpack_from ("%dh" % (len(frames)/2,), frames))
 
 class Snippet(models.Model):
     recording = models.ForeignKey(Recording, related_name='snippets')
@@ -115,6 +118,9 @@ class Snippet(models.Model):
     sonogram = models.ImageField(upload_to=settings.SONOGRAM_DIR, null=True, blank=True) 
     soundcloud = models.IntegerField(null=True, blank=True)
     soundfile = models.FileField(upload_to=settings.MP3_DIR, null=True, blank=True)
+    
+    class Meta:
+        unique_together = (('recording', 'offset', 'duration'),)
     
     def __unicode__(self):
         return '%s-%s-%s'%(self.recording.deployment.site.code, 
