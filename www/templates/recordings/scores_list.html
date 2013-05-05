@@ -30,7 +30,7 @@
 <tbody>
 {% for s in scores %}
     <tr>
-    <td>{% if s.snippet.sonogram %}<a href="{% url snippet s.snippet.id %}">{{ s.snippet.id }}</a>{% else %}{{ s.snippet.id }}{% endif %}</td>
+    <td>{% if s.snippet.sonogram %}<a href="{% url 'snippet' s.snippet.id %}">{{ s.snippet.id }}</a>{% else %}{{ s.snippet.id }}{% endif %}</td>
     <td>{{ s.snippet.recording.deployment.site }}</td>
     <td>{{ s.snippet.datetime }}</td>
     <td>{{ s.score }}</td>

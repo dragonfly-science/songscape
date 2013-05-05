@@ -1,6 +1,10 @@
+import wave
 from recordings.models import Snippet, Score, Detector
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.http import StreamingHttpResponse, HttpResponse
+from tempfile import TemporaryFile
+from django.core.servers.basehttp import FileWrapper
 
 fields = (
     'score__lt',
@@ -91,5 +95,19 @@ def scores(request, code, version, default_page=1, per_page=500):
     )
     return render(request, 'recordings/scores_list.html', {'scores': scores, 'request_parameters': request_parameters})
 
-    
+def play_snippet(request, id):
+    snippet = Snippet.objects.get(id=id)
+    wav_file = TemporaryFile()
+    wav_writer = wave.open(wav_file, 'wb')
+    wav_writer.setframerate(snippet.recording.sample_rate)
+    wav_writer.setsampwidth(2)
+    wav_writer.setnchannels(snippet.recording.nchannels)
+    wav_writer.writeframes(snippet.recording._get_frames(snippet.offset, snippet.duration))
+    wav_writer.close()
+    wav_length= wav_file.tell()
+    wav_file.seek(0)
+    response = StreamingHttpResponse(FileWrapper(wav_file), content_type='audio/wav')
+    response['Content-Length'] = wav_length
+    return response
+
     

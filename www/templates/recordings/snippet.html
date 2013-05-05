@@ -7,18 +7,21 @@
 <ul class="pager">
 {% if previous_id %}
   <li class="previous">
-    <a href="{% url snippet previous_id %}">&larr; Previous</a>
+    <a href="{% url 'snippet' previous_id %}">&larr; Previous</a>
   </li>
 {% endif %}
 {% if next_id %}
   <li class="next">
-    <a href="{% url snippet next_id %}">Next &rarr;</a>
+    <a href="{% url 'snippet' next_id %}">Next &rarr;</a>
   </li>
 {% endif %}
 </ul>
 
+<audio controls> 
+ <source src="{% url 'play' snippet.id %}" type="audio/wav">
+ "Hmm can't play the sound"
+</audio>
 {{ snippet.datetime }}
 <img src="{{ snippet.sonogram.url }}">
-
 
 {% endblock content %}
