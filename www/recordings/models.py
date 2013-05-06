@@ -146,7 +146,8 @@ class Snippet(models.Model):
             gca().set_xlabel('Time (s)')
             savefig(string_buffer, format='png')
             imagefile = ContentFile(string_buffer.getvalue())
-            self.sonogram.delete()
+            if self.sonogram:
+                self.sonogram.delete()
             self.sonogram.save(filename, imagefile, save=True)
         return self.sonogram
 
