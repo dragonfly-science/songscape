@@ -7,7 +7,7 @@ import datetime
 from contextlib import closing
 from cStringIO import StringIO
 
-from pylab import clf, specgram, savefig, close
+from pylab import figure, specgram, savefig, close, gca
 
 from django.core.files.base import ContentFile
 from django.db import models
@@ -131,14 +131,22 @@ class Snippet(models.Model):
     def get_audio(self):
         return self.recording.get_audio(self.offset, self.duration)
 
-    def save_sonogram(self, replace=False, NFFT=256):
-        if not self.sonogram or replace or (self.sonogram and not os.path.exists(self.sonogram.path)):
-            clf()
+    def save_sonogram(self, replace=False, NFFT=512):
+        if not self.sonogram or \
+                replace or \
+                (self.sonogram and not os.path.exists(self.sonogram.path)):
+            fig = figure(figsize=(10, 5))
             filename = "%s.png" % (self,)
-            specgram(self.get_audio(), NFFT=NFFT, Fs=self.recording.sample_rate, hold=False)
+            specgram(self.get_audio(), 
+                NFFT=NFFT, 
+                Fs=self.recording.sample_rate, 
+                hold=False)
             string_buffer = StringIO()
+            gca().set_ylabel('Frequency (Hz)')
+            gca().set_xlabel('Time (s)')
             savefig(string_buffer, format='png')
             imagefile = ContentFile(string_buffer.getvalue())
+            self.sonogram.delete()
             self.sonogram.save(filename, imagefile, save=True)
         return self.sonogram
 
