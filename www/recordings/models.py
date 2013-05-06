@@ -149,6 +149,7 @@ class Snippet(models.Model):
             if self.sonogram:
                 self.sonogram.delete()
             self.sonogram.save(filename, imagefile, save=True)
+            close()
         return self.sonogram
 
     @property
