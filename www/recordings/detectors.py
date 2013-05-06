@@ -71,7 +71,7 @@ class SimpleKiwiDetector(DetectorClass):
         NFFT = int(0.032*framerate)
         clf()
         spec = mlab.specgram(audio, NFFT=NFFT, Fs=framerate)
-        freqs = where((spec[1] >= 1600)*(spec[1] <= 2200))
+        freqs = np.where((spec[1] >= 1600)*(spec[1] <= 2200))
         spec2 = mlab.specgram(mean(log(spec[0][freqs[0],]), 0), NFFT=2048, noverlap=2000, Fs=0.032)
         max_kiwi = max(np.mean(spec2[0][20:30, ], 0))
         min_kiwi = min(np.mean(spec2[0][10:40, ], 0))

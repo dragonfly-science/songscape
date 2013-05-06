@@ -1,3 +1,4 @@
+import sys
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 
@@ -16,5 +17,5 @@ class Command(BaseCommand):
                     detector.save_score(snippet)
                     print detector, snippet, snippet.scores.latest('datetime').score
                 except:
-                    print detector, snippet, 'Scoring failed'
+                    print detector, snippet, 'Scoring failed', sys.exc_info()[0]
                 
