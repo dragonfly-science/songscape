@@ -111,6 +111,14 @@ class Recording(models.Model):
         frames = self._get_frames(offset, duration)
         return np.array(struct.unpack_from ("%dh" % (len(frames)/2,), frames))
 
+
+class Tag(models.Model):
+    name = models.CharField(max_length=32)
+    
+    def __unicode__(self):
+        return '%s' % (self.name)
+
+
 class Snippet(models.Model):
     recording = models.ForeignKey(Recording, related_name='snippets')
     offset = models.FloatField() #seconds
@@ -152,9 +160,29 @@ class Snippet(models.Model):
             close()
         return self.sonogram
 
+    def url_path(self):
+        full_path = self.recording.path
+        # hack hack
+        return '/media/' + full_path.split('songscape/')[1]
+
+    def end_time(self):
+        return self.offset + self.duration
+
     @property
     def datetime(self):
         return self.recording.datetime + datetime.timedelta(seconds=self.offset)
+
+
+class Analysis(models.Model):
+    name = models.CharField(max_length=32)
+    description = models.TextField(default="")
+    datetime = models.DateTimeField(auto_now=True)
+    tags = models.ManyToManyField(Tag)
+    snippets = models.ManyToManyField(Snippet)
+
+    def __unicode__(self):
+        return '%s' % (self.name)
+
 
 class Signal(models.Model):
     code = models.SlugField(max_length=20) 
@@ -188,3 +216,4 @@ class Score(models.Model):
     class Meta:
         unique_together = (('snippet', 'detector'),)
     
+

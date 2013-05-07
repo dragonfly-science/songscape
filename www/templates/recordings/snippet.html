@@ -17,11 +17,9 @@
 {% endif %}
 </ul>
 
-<audio controls> 
- <source src="{% url 'play' snippet.id %}" type="audio/wav">
+<audio id="audio_player" src="{{ snippet.url_path }}#t={{ snippet.offset }},{{ snippet.end_time }}" type="audio/wav">
  "Hmm can't play the sound"
 </audio>
 {{ snippet.datetime }}
 <img src="{{ snippet.sonogram.url }}">
-
 {% endblock content %}
