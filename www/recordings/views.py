@@ -1,10 +1,13 @@
 import wave
-from recordings.models import Snippet, Score, Detector
+from recordings.models import Snippet, Score, Detector, Tag, Analysis
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import StreamingHttpResponse, HttpResponse
+from django.http import StreamingHttpResponse, HttpResponse, HttpResponseRedirect
 from tempfile import TemporaryFile
 from django.core.servers.basehttp import FileWrapper
+from django.conf import settings
+
+from .forms import TagForm
 
 fields = (
     'score__lt',
@@ -110,4 +113,14 @@ def play_snippet(request, id):
     response['Content-Length'] = wav_length
     return response
 
-    
+
+def tags(request):
+    tags = Tag.objects.all()
+    if request.method == 'POST': # If the form has been submitted...
+        form = TagForm(request.POST) # A form bound to the POST data
+        if form.is_valid(): # All validation rules pass
+            form.save()
+            return HttpResponseRedirect('/tags') # Redirect after POST
+    else:
+        form = TagForm() # An unbound form
+    return render(request, 'recordings/tag_list.html', {'tags': tags, 'form': form})

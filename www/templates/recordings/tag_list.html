@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+
+{% block content %}
+
+<div class="row">
+	<div class="span4">
+		<h3>Existing Tags</h3>
+		<ul>
+			{% for tag in tags %}
+			<li>{{ tag }}</li>
+			{% endfor %}
+		</ul>
+	</div>
+	<div class="span4">
+		<h3>Create a new tag</h3>
+		<form action="/tags" method="post">{% csrf_token %}
+			{{ form.as_p }}
+			<input type="submit" value="Submit" />
+		</form>
+	</div>
+</div>
+
+{% endblock %}
