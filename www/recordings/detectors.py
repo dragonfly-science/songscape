@@ -60,7 +60,12 @@ class SimpleKiwiDetector(DetectorClass):
     code='simple-kiwi'
     signal = 'kiwi'
     description = 'Simple kiwi detector based on spectral analysis'
-    version = '0.1'
+    version = '0.1.1'
+    window = 0.032
+    lower_call_frequency = 1600
+    upper_call_frequency = 2200
+    lower_syllable_frequency = 0.5
+    upper_syllable_frequency = 1.1
 
     def __unicode__(self):
         return "%s %s" % (self.code, self.version)
@@ -68,14 +73,15 @@ class SimpleKiwiDetector(DetectorClass):
     def score(self, snippet):
         audio = snippet.get_audio()
         framerate = snippet.recording.sample_rate
-        NFFT = int(0.032*framerate)
+        NFFT = int(self.window*framerate)
         clf()
-        spec = mlab.specgram(audio, NFFT=NFFT, Fs=framerate)
-        freqs = np.where((spec[1] >= 1600)*(spec[1] <= 2200))
-        spec2 = mlab.specgram(mean(log(spec[0][freqs[0],]), 0), NFFT=2048, noverlap=2000, Fs=0.032)
-        max_kiwi = max(np.mean(spec2[0][20:30, ], 0))
-        min_kiwi = min(np.mean(spec2[0][10:40, ], 0))
-        return (max_kiwi/min_kiwi,)
+        spec = mlab.specgram(audio, NFFT=NFFT, noverlap=NFFT/2, Fs=framerate)
+        freqs = np.where((spec[1] >= self.lower_call_frequency)*(spec[1] <= self.upper_call_frequency))
+        spec2 = mlab.specgram(mean(log(spec[0][freqs[0],]), 0), NFFT=1024, noverlap=512, Fs=2/self.window)
+        freqs2 = np.where((spec2[1] >= self.lower_syllable_frequency)*(spec2[1] <= self.upper_syllable_frequency))
+        max_kiwi = max(np.max(spec2[0][freqs2[0],:], 0))
+        mean_kiwi = np.exp(np.mean(np.mean(np.log(spec2[0][freqs2[0], :]), 0)))
+        return (max_kiwi/mean_kiwi,)
 
 class IntensityDetector(DetectorClass):
     code='intensity'
