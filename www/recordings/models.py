@@ -55,7 +55,6 @@ class Deployment(models.Model):
     start = models.DateTimeField()
     end = models.DateTimeField(null=True, blank=True)
     comments = models.TextField(null=True, blank=True)
-    code = models.SlugField(max_length=32, unique=True)
     
     def __unicode__(self):
         return '%s %s %s'%(self.site, self.recorder, self.start)
@@ -139,9 +138,8 @@ class Snippet(models.Model):
         unique_together = (('recording', 'offset', 'duration'),)
     
     def __unicode__(self):
-        return '%s-%s-%s'%(self.recording.deployment.site.code, 
-            self.recording.deployment.recorder.code, 
-            datetime.datetime.strftime(self.datetime, '%Y%m%d-%H%M%S')
+        return '%s-%s-%s'%(self.recording.deployment.recorder, 
+            datetime.datetime.strftime(self.datetime, '%Y%m%d-%H%M%S'), self.duration
         )
     
     def get_audio(self):
@@ -182,14 +180,14 @@ class Snippet(models.Model):
 
 
 class Signal(models.Model):
-    code = models.SlugField(max_length=32) 
+    code = models.SlugField(max_length=32, unique=True) 
     description = models.TextField(null=True, blank=True)
     
     def __unicode__(self):
         return self.code
 
 class Detector(models.Model):
-    code = models.SlugField(max_length=32, unique=True) 
+    code = models.SlugField(max_length=32) 
     signal = models.ForeignKey(Signal, related_name='detectors')
     description = models.TextField(null=True, blank=True)
     version = models.TextField()
@@ -216,16 +214,20 @@ class Score(models.Model):
 
 class Analysis(models.Model):
     name = models.CharField(max_length=32)
+    code = models.SlugField(max_length=32)
     description = models.TextField(default="")
     datetime = models.DateTimeField(auto_now=True)
     tags = models.ManyToManyField(Tag)
-    ubertag = models.ForeignKey(Tag, related_name="ubertag", null=True, blank=True)
+    ubertag = models.ForeignKey(Tag, related_name="ubertags", null=True, blank=True)
     deployments = models.ManyToManyField(Deployment)
     detectors = models.ManyToManyField(Detector)
-    user = models.ForeignKey(User)  # who created it
-
+    organisation = models.ForeignKey(Organisation, related_name="analyses")
+    
     def __unicode__(self):
         return '%s' % (self.name)
+
+    class Meta:
+        unique_together = (('organisation', 'code'),)
 
 
 class Identification(models.Model):

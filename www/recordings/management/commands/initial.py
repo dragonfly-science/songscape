@@ -17,25 +17,27 @@ class Command(BaseCommand):
             o = Organisation(code=row['Code'], name=row['Name'])
             o.save()
 
+        rfpt_org = Organisation.objects.get(code='RFPT')
         sites = csv.DictReader(open(os.path.join(DIR, 'Sites.csv')))
         for row in sites:
             if not row['Latitude'].strip():
                 row['Latitude'] = None
             if not row['Longitude'].strip():
                 row['Longitude'] = None
-            o = Site(code=row['Code'], latitude=row['Latitude'], longitude=row['Longitude'], description=row['Comments'])
+
+            o = Site(code=row['Code'], latitude=row['Latitude'], longitude=row['Longitude'], description=row['Comments'], organisation=rfpt_org)
             o.save()
 
         recorders = csv.DictReader(open(os.path.join(DIR, 'Recorders.csv')))
         for row in recorders:
-            org = Organisation.objects.get(code=row['Owner'])
-            o = Recorder(code=row['Code'], organisation=org)
+            o = Recorder(code=row['Code'], organisation=rfpt_org)
             o.save()
         
         deployments = csv.DictReader(open(os.path.join(DIR, 'Deployments.csv')))
         for row in deployments:
             site = Site.objects.get(code=row['Site'])
             recorder = Recorder.objects.get(code=row['Recorder'].strip())
+            
             if not row['Deploy_time']:
                 row['Deploy_time'] = '00:00:00'
             if not row['Recovery_time']:
@@ -45,6 +47,6 @@ class Command(BaseCommand):
                 end = datetime.strptime(row['Recovery_date'] + ' ' + row['Recovery_time'], '%d/%m/%Y %H:%M:%S')
             else:
                 end = None
-            o = Deployment(site=site, recorder=recorder, start=start, end=end, comments=row['Comments'])
+            o = Deployment(site=site, recorder=recorder, start=start, end=end, comments=row['Comments'], owner=rfpt_org)
             o.save()
 
