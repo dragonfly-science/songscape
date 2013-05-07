@@ -1,5 +1,5 @@
 import wave
-from recordings.models import Snippet, Score, Detector, Tag, Analysis
+from recordings.models import Snippet, Score, Detector, Tag, Analysis, Deployment
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import StreamingHttpResponse, HttpResponse, HttpResponseRedirect
@@ -124,3 +124,12 @@ def tags(request):
     else:
         form = TagForm() # An unbound form
     return render(request, 'recordings/tag_list.html', {'tags': tags, 'form': form})
+
+
+def analysis_create(request):
+    deployments = Deployment.objects.all()
+    tags = Tag.objects.all()
+    if request.method == 'POST':
+        print request.POST
+        print request.POST['tags']
+    return render(request, 'recordings/analysis_create.html', {'deployments': deployments, 'tags': tags})
