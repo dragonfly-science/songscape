@@ -76,7 +76,7 @@ see http://twitter.github.com/bootstrap/examples/fluid.html -->
             {% else %}
                 {% if not form.password %}
             <ul class="nav pull-right">
-                <li><a href="/login/" >Login</a></li> 
+                <li><a href="{% url 'django.contrib.auth.views.login' %}" >Login</a></li> 
             </ul>
                 {% endif %}
             {% endif %}
