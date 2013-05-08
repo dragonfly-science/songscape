@@ -1,5 +1,5 @@
 import wave
-from recordings.models import Snippet, Score, Detector, Tag, Analysis, Deployment
+from recordings.models import Snippet, Score, Detector, Tag, Analysis, Deployment, Organisation
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import StreamingHttpResponse, HttpResponse, HttpResponseRedirect
@@ -142,11 +142,31 @@ def analysis_create(request):
     deployments = Deployment.objects.all()
     detectors = Detector.objects.all()
     tags = Tag.objects.all()
+    organisations = Organisation.objects.all()
     if request.method == 'POST':
-        print request.POST
-        print request.POST['tags']
+        POST = request.POST
+        name = POST.get('name')
+        description = POST.get('description')  if 'description' in POST else ''
+        organisation = Organisation.objects.get(id__exact=POST.get('organisation'))
+        analysis = Analysis(name=name,
+                            description=description,
+                            organisation=organisation)
+        analysis.save()
+        deployment_ids = POST.getlist('deployments')
+        if 'all' in deployment_ids:
+            deployment_ids = Deployment.objects.all().values_list('id', flat=True)
+        analysis.deployments.add(*deployment_ids)
+        analysis.tags.add(*POST.getlist('tags'))
+        analysis.detectors.add(*POST.getlist('detectors'))
+        return HttpResponseRedirect('/analysis')
     return render(request,
                   'recordings/analysis_create.html',
                   {'deployments': deployments,
                    'tags': tags,
-                   'detectors': detectors})
+                   'detectors': detectors,
+                   'organisations': organisations})
+
+def analysis_list(request):
+    return render(request,
+                  'recordings/analysis_list.html',
+                  {'analyses': Analysis.objects.all()})
