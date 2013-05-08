@@ -7,7 +7,7 @@ import datetime
 from contextlib import closing
 from cStringIO import StringIO
 
-from pylab import figure, specgram, savefig, close, gca
+from pylab import figure, specgram, savefig, close, gca, clf
 
 from django.core.files.base import ContentFile
 from django.db import models
@@ -135,6 +135,7 @@ class Snippet(models.Model):
         if not self.sonogram or \
                 replace or \
                 (self.sonogram and not os.path.exists(self.sonogram.path)):
+            clf()
             fig = figure(figsize=(10, 5))
             filename = "%s.png" % (self,)
             specgram(self.get_audio(), 
