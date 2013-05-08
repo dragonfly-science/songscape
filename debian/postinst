@@ -27,11 +27,11 @@ set_config () {
     perl -i -e '$field=shift;$value=shift if (scalar(@ARGV)>1);$value||="";while (<>) { s/^(\s*$field\s*=\s*).*/$1$value/; print; }' $1 $2 $3;
 }
 
-LOCAL_SETTINGS=/var/www/django/songscape/trident/local_settings.py
+LOCAL_SETTINGS=/var/www/django/songscape/songscape/local_settings.py
 
 case "$1" in
     configure)
-        cp /var/www/django/songscape/trident/local_settings.py.TEMPLATE ${LOCAL_SETTINGS}
+        cp /var/www/django/songscape/songscape/local_settings.py.TEMPLATE ${LOCAL_SETTINGS}
 
         # Add config entries to $LOCAL_SETTINGS based on answers to debconf questions
         db_get songscape/db_host
@@ -57,6 +57,9 @@ case "$1" in
 
         db_get songscape/server_email
         set_config SERVER_EMAIL "'${RET}'" ${LOCAL_SETTINGS}
+
+        db_get songscape/django_secret_key
+        set_config SECRET_KEY "'${RET}'" ${LOCAL_SETTINGS}
 
         mkdir -p /var/log/sitelogs/songscape
         chown www-data:www-data /var/log/sitelogs/songscape

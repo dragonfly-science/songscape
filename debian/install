@@ -1,4 +1,3 @@
-trident var/www/django/tridentsystems.co.nz
-manage.py var/www/django/tridentsystems.co.nz
-apache.conf.template etc/tridentsystems.co.nz
-requirements.txt etc/tridentsystems.co.nz
+www var/www/django/songscape
+apache.conf.template etc/songscape
+requirements.txt etc/songscape

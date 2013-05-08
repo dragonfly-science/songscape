@@ -147,9 +147,6 @@ SONOGRAM_DIR = 'sonograms/'
 MP3_DIR = 'mp3/' # this was joined with RECORDINGS_PATH
 DATA_DIR = 'data/' # this was joined with RECORDINGS_PATH
 
-# We should generate this per server
-SECRET_KEY = 'kt=r&&n$9rb@&4bq(#+iy#4go&%+q6l6ql=%xc_lq1s3$wq48_'
-
 try:
     from local_settings import *
 except ImportError:

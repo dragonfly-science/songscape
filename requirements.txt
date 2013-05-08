@@ -4,3 +4,4 @@ numpy==1.7.1
 matplotlib==1.2.1
 git+https://github.com/ferrouswheel/dragonfab.git
 fabric
+south
