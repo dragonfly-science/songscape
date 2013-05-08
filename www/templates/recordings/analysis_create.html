@@ -43,11 +43,35 @@
 		</div>
 	</div>
 	<div class="row">
-		<div class="span4">
+		<div class="span3">
 			<input type="text" placeholder="Enter a name for your analysis" name="name" required>
 		</div>
-		<div class="span4">
+		<div class="span3">
 			<textarea rows="3" placeholder="Optional Description"></textarea>
+		</div>
+			<div class="span3">
+			<div class="control-group">
+				<label class="control-label" for="tags">Select organisation</label>
+				<select size="3" name="organisation" id="organisation" required>
+					{% for organisation in organisations %}
+					<option value="{{ organisation.id }}">
+						{{ organisation }}
+					</option>
+					{% endfor %}
+		 		</select>
+			</div>
+	</div>
+	<div class="row">
+		<div class="span6">
+		<div class="well">
+		<label>Optional: select ubertag</label>
+		{% for tag in tags %}
+		<label class="radio inline">
+  		<input type="radio" name="ubertag" value="{{ tag.id }}">
+  			{{ tag.name }}
+		</label>
+		{% endfor %}
+		</div>
 		</div>
 	</div>
 	<div class="row">
