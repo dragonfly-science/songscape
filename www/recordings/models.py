@@ -256,11 +256,14 @@ class Analysis(SlugMixin, models.Model):
     detectors = models.ManyToManyField(Detector)
     organisation = models.ForeignKey(Organisation, related_name="analyses")
     
+    class Meta:
+        unique_together = (('organisation', 'code'),)
+
     def __unicode__(self):
         return '%s' % (self.name)
 
-    class Meta:
-        unique_together = (('organisation', 'code'),)
+    def normal_tags(self):
+        return self.tags.all().exclude(id__exact=self.ubertag.id)
 
 
 class Identification(models.Model):
@@ -268,6 +271,7 @@ class Identification(models.Model):
     analysis = models.ForeignKey(Analysis)
     snippet = models.ForeignKey(Snippet)
     scores = models.ManyToManyField(Score)  # This holds the list of scores that the user saw when they made the identification
-    tags = models.ManyToManyField(Tag)
+    true_tags = models.ManyToManyField(Tag, related_name="true_tags")
+    false_tags = models.ManyToManyField(Tag, related_name="false_tags")
     comment = models.TextField(default="")
 
