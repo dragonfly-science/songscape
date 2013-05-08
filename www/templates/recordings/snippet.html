@@ -17,11 +17,16 @@
 {% endif %}
 </ul>
 
+{% if snippet.sonogram %}
 <audio controls> 
  <source src="{% url 'play' snippet.id %}" type="audio/wav">
  "Hmm can't play the sound"
 </audio>
 {{ snippet.datetime }}
 <img src="{{ snippet.sonogram.url }}">
-
+{% else %}
+<h2> Boohoo. Nothing to see here</h2>
+{% endif %}
 {% endblock content %}
+
+
