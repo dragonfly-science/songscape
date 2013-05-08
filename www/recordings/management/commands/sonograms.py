@@ -13,8 +13,9 @@ class Command(BaseCommand):
         snippets = Snippet.objects.filter(sonogram='')
         for snippet in snippets:
             try:
-                snippet.save_sonogram(replace=True)
-                print snippet
+                snippet.save_sonogram(replace=False)
+                sys.stdout.write('\r%s' % snippet )
+                sys.stdout.flush()
             except KeyboardInterrupt:
                 break
             except:
