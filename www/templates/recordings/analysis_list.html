@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+
+<h3> List of currently defined analyses </h3>
+
+<ul>
+{% for analysis in analyses %}
+	<li>{{ analysis }}</li>
+{% endfor %}
+</ul>
+
+<a class="btn" href="{% url 'analysis_create' %}">Create a new analysis</a>
+
+{% endblock content %}

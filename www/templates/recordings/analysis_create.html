@@ -35,7 +35,7 @@
 				<select multiple="multiple" size="10" name="tags" id="tags" required>
 					{% for tag in tags %}
 					<option value="{{ tag.id }}">
-						{{ tag }}
+						{{ tag.name }}
 					</option>
 					{% endfor %}
 		 		</select>
@@ -43,11 +43,23 @@
 		</div>
 	</div>
 	<div class="row">
-		<div class="span4">
+		<div class="span3">
 			<input type="text" placeholder="Enter a name for your analysis" name="name" required>
 		</div>
-		<div class="span4">
+		<div class="span3">
 			<textarea rows="3" placeholder="Optional Description"></textarea>
+		</div>
+		<div class="span3">
+			<div class="control-group">
+				<label class="control-label" for="tags">Select organisation</label>
+				<select size="3" name="organisation" id="organisation" required>
+					{% for organisation in organisations %}
+					<option value="{{ organisation.id }}">
+						{{ organisation }}
+					</option>
+					{% endfor %}
+		 		</select>
+			</div>
 		</div>
 	</div>
 	<div class="row">

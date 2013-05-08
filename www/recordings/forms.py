@@ -6,3 +6,4 @@ from .models import Tag
 class TagForm(ModelForm):
 	class Meta:
 		model = Tag
+		fields = ('name',)
