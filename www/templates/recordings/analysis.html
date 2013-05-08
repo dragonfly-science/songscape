@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+
+<a class="btn" href="{% url 'analysis_next' analysis.code %}">Next unidentified snippet</a>
+
+<hr class="bs-docs-separator">
+<h3>Control the Analysis</h3>
+<form method="get">
+<select>
+	{% for sort in sort_options %}
+	<option value="{{ sort }}">{{ sort }}</option>
+	{% endfor %}
+</select>
+</form>
+
+{% endblock %}
