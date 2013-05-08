@@ -158,6 +158,9 @@ def analysis_create(request):
         analysis.deployments.add(*deployment_ids)
         analysis.tags.add(*POST.getlist('tags'))
         analysis.detectors.add(*POST.getlist('detectors'))
+        if 'ubertag' in POST:
+            analysis.ubertag = Tag.objects.get(id__exact=POST['ubertag'])
+            analysis.save()
         return HttpResponseRedirect('/analysis')
     return render(request,
                   'recordings/analysis_create.html',
