@@ -11,6 +11,8 @@ db_input $PRIORITY songscape/db_port || true
 db_input $PRIORITY songscape/db_name || true
 db_input $PRIORITY songscape/db_user || true
 db_input $PRIORITY songscape/db_pass || true
-db_input $PRIORITY songscape/servername || true
+db_input $PRIORITY songscape/email_host || true
+db_input $PRIORITY songscape/server_email || true
+db_input $PRIORITY songscape/django_secret_key || true
 db_input medium songscape/use_snakeoil_certs || true
 db_go
