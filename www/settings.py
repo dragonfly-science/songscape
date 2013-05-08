@@ -4,50 +4,34 @@ import os
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-from local_settings import SECRET_KEY, GIT_HOME, RECORDINGS_PATH
-
 ADMINS = (
-    # ('Your Name', 'your_email@example.com'),
+    ('Joel Pitt', 'joel@dragonfly.co.nz'),
 )
+
+# What is GIT_HOME? Can we create it from the settings file path?
+#from local_settings import GIT_HOME, RECORDINGS_PATH
+GIT_HOME = os.path.dirname(__file__)
+#RECORDINGS_PATH = os.path.dirname(__file__)
 
 MANAGERS = ADMINS
 
-try:
-    from local_settings import DATABASES
-except ImportError:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2','mysql','sqlite3'
-            'NAME': 'songscape',# Or path to database file if using sqlite3.
-            'USER': 'dba',# Not used with sqlite3.
-            'PASSWORD': '',# Not used with sqlite3.
-            'HOST': 'localhost',# Set to empty string for localhost. Not used with sqlite3.
-            'PORT': '',# Set to empty string for default. Not used with sqlite3.
-        }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2', 
+        'NAME': 'songscape',
+        'USER': 'dba',
+        'PASSWORD': '',
+        'HOST': 'localhost',
+        'PORT': '',
     }
+}
 
-# Local time zone for this installation. Choices can be found here:
-# http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
-# although not all choices may be available on all operating systems.
-# On Unix systems, a value of None will cause Django to use the same
-# timezone as the operating system.
-# If running in a Windows environment this must be set to the same as your
-# system time zone.
-TIME_ZONE = 'America/Chicago'
-
-# Language code for this installation. All choices can be found here:
-# http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = 'en-us'
+TIME_ZONE = 'Pacific/Auckland'
+LANGUAGE_CODE = 'en-nz'
+USE_I18N = True
+USE_L10N = True
 
 SITE_ID = 1
-
-# If you set this to False, Django will make some optimizations so as not
-# to load the internationalization machinery.
-USE_I18N = True
-
-# If you set this to False, Django will not format dates, numbers and
-# calendars according to the current locale
-USE_L10N = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
@@ -64,13 +48,11 @@ MEDIA_URL = '/media/'
 # Example: "/home/media/media.lawrence.com/static/"
 STATIC_ROOT = ''
 
-
-# Additional locations of static files
 STATICFILES_DIRS = (
-    # Put strings here, like "/home/html/static" or "C:/www/django/static".
-    # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    RECORDINGS_PATH,
+    # ... I don't think we want to collect/copy all the recordings data when
+    # we run collectstatic
+    #RECORDINGS_PATH,
     os.path.join(GIT_HOME, 'static/'),
 )
 
@@ -85,18 +67,13 @@ TEMPLATE_DIRS = (
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = '/static/'
 
-# URL prefix for admin static files -- CSS, JavaScript and images.
-# Make sure to use a trailing slash.
-# Examples: "http://foo.com/static/admin/", "/static/admin/".
 ADMIN_MEDIA_PREFIX = '/static/admin/'
-
 
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 
@@ -125,12 +102,12 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # Uncomment the next line to enable the admin:
-     'django.contrib.admin',
-    # Uncomment the next line to enable admin documentation:
-     'django.contrib.admindocs',
-     'recordings',
-     'south',
+    
+    'django.contrib.admin',
+    'django.contrib.admindocs',
+
+    'recordings',
+    'south',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -163,9 +140,15 @@ LOGGING = {
     }
 }
 
+# Is RECORDINGS_PATH the root for the other 3?
+RECORDINGS_PATH = ''
 SONOGRAM_DIR = 'sonograms/'
-MP3_DIR = os.path.join(STATICFILES_DIRS[0], 'mp3')
-DATA_DIR = os.path.join(STATICFILES_DIRS[0], 'data')
+MP3_DIR = 'mp3/' # this was joined with RECORDINGS_PATH
+DATA_DIR = 'data/' # this was joined with RECORDINGS_PATH
 
+try:
+    from local_settings import *
+except ImportError:
+    pass
 
 

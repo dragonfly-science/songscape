@@ -1,0 +1,21 @@
+ServerName __SERVERNAME__
+<VirtualHost *:80>
+  ServerName __SERVERNAME__
+
+  # Note: nginx proxy should be passing to this virtualhost, and it provides https
+
+  Alias /robots.txt /var/www/django/songscape/static/robots.txt
+  Alias /favicon.ico /var/www/django/songscape/static/favicon.ico
+
+  Alias /static/ /var/www/django/songscape/static/
+
+  Options -Indexes
+  XSendFile On
+  XSendFilePath /var/lib/sitedata/songscape/uploaded/
+
+  WSGIScriptAlias / /var/www/django/songscape/trident/wsgi.py
+
+  ErrorLog /var/log/sitelogs/songscape/error.log
+  LogLevel warn
+  CustomLog /var/log/sitelogs/songscape/access.log combined
+</VirtualHost>
