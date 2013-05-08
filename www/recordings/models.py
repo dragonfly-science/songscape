@@ -7,12 +7,45 @@ import datetime
 from contextlib import closing
 from cStringIO import StringIO
 
-from pylab import figure, specgram, savefig, close, gca
+from pylab import figure, specgram, savefig, close, gca, clf
 
 from django.core.files.base import ContentFile
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.template.defaultfilters import slugify
+
+
+
+class SlugMixin(object):
+    """ automatically generate slug when object is initially created """
+    def generate_slug(self):
+        return slugify(self.name)
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            self.code = self.generate_slug()
+
+        super(SlugMixin, self).save(*args, **kwargs)
+
+
+class UniqueSlugMixin(SlugMixin):
+    ''' generate a unique slug '''
+    def is_unique_slug(self, slug):
+        qs = self.__class__.objects.filter(code=slug)
+        return not qs.exists()
+ 
+    def generate_slug(self):
+        original_slug = super(UniqueSlugMixin, self).generate_slug()
+        slug = original_slug
+ 
+        iteration = 1
+        while not self.is_unique_slug(slug):
+            slug = "%s-%d" % (original_slug, iteration)
+            iteration += 1
+ 
+        return slug
+
 
 class Organisation(models.Model):
     code = models.SlugField(max_length=32, unique=True)
@@ -118,12 +151,12 @@ class Recording(models.Model):
         return np.array(struct.unpack_from ("%dh" % (len(frames)/2,), frames))
 
 
-class Tag(models.Model):
+class Tag(UniqueSlugMixin, models.Model):
     code = models.SlugField(max_length=32, unique=True)
-    name = models.CharField(max_length=32)
-    
+    name = models.CharField(max_length=30)
+   
     def __unicode__(self):
-        return '%s' % (self.name)
+        return '%s' % (self.code)
 
 
 class Snippet(models.Model):
@@ -149,6 +182,7 @@ class Snippet(models.Model):
         if not self.sonogram or \
                 replace or \
                 (self.sonogram and not os.path.exists(self.sonogram.path)):
+            clf()
             fig = figure(figsize=(10, 5))
             filename = "%s.png" % (self,)
             specgram(self.get_audio(), 
@@ -212,7 +246,7 @@ class Score(models.Model):
         unique_together = (('snippet', 'detector'),)
     
 
-class Analysis(models.Model):
+class Analysis(SlugMixin, models.Model):
     name = models.CharField(max_length=32)
     code = models.SlugField(max_length=32)
     description = models.TextField(default="")
@@ -223,11 +257,14 @@ class Analysis(models.Model):
     detectors = models.ManyToManyField(Detector)
     organisation = models.ForeignKey(Organisation, related_name="analyses")
     
+    class Meta:
+        unique_together = (('organisation', 'code'),)
+
     def __unicode__(self):
         return '%s' % (self.name)
 
-    class Meta:
-        unique_together = (('organisation', 'code'),)
+    def normal_tags(self):
+        return self.tags.all().exclude(id__exact=self.ubertag.id)
 
 
 class Identification(models.Model):
@@ -235,6 +272,7 @@ class Identification(models.Model):
     analysis = models.ForeignKey(Analysis)
     snippet = models.ForeignKey(Snippet)
     scores = models.ManyToManyField(Score)  # This holds the list of scores that the user saw when they made the identification
-    tags = models.ManyToManyField(Tag)
+    true_tags = models.ManyToManyField(Tag, related_name="true_tags")
+    false_tags = models.ManyToManyField(Tag, related_name="false_tags")
     comment = models.TextField(default="")
 

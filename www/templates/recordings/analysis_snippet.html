@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+
+{% block content %}
+
+<!-- ul class="pager">
+{% if previous_id %}
+  <li class="previous">
+    <a href="{% url 'snippet' previous_id %}">&larr; Previous</a>
+  </li>
+{% endif %}
+{% if next_id %}
+  <li class="next">
+    <a href="{% url 'snippet' next_id %}">Next &rarr;</a>
+  </li>
+{% endif %}
+</ul -->
+
+
+<audio id="audio_player" src="{{ snippet.url_path }}#t={{ snippet.offset }},{{ snippet.end_time }}" type="audio/wav">
+ "Hmm can't play the sound"
+</audio>
+{{ snippet.datetime }}
+<img src="{{ snippet.sonogram.url }}">
+
+{% if id_before %}
+<p>You have indentified this snippet</p>
+<p>It contains: {% for tag in previous_identification.true_tags.all %} {{ tag.name }},{% endfor %}</p>
+<p>It does not contain: {% for tag in previous_identification.false_tags.all %} {{ tag.name }},{% endfor %}</p>
+
+{% else %}
+<form method="post">{% csrf_token %}
+<div class="row">
+<div class="span4">
+<div class="btn-group" id="tag-group" data-toggle="buttons-checkbox">
+{% for tag in analysis.normal_tags %}
+  <input type="hidden" id="{{ tag.code }}_real" name="{{ tag.code }}" value=false>
+  <input type="button" class="btn tag-btn" id="{{ tag.code }}" value="{{ tag.name }}">
+{% endfor %}  
+</div>
+</div>
+<div class="span2">
+
+<input type="submit" class="btn btn-primary" id="uber" value="{{ analysis.ubertag.name }}">
+<input type="hidden" id="uber_real" name="{{ analysis.ubertag.code }}" value=true>
+</div>
+</div>
+</form>
+{% endif %}
+
+<script>
+
+$('.tag-btn').bind('click', function() {
+	$('#uber').attr('value', 'Next');
+	$('#uber_real').val(false);
+	$('#' + $(this).attr('id') + '_real').val(true);
+	// TODO - should probably return uber tag if all tags are unselected
+	// TODO handle unclick ... :)
+});
+
+</script>
+{% endblock content %}

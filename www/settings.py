@@ -94,12 +94,13 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'www.urls'
 
+LOGIN_REDIRECT_URL = '/'
 
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.sites',
+    # 'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
