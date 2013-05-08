@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+<form action="{% url 'analysis_create' %}" method="post">{% csrf_token %}
+	<div class="row">
+		<div class="span3">
+			<div class="control-group">
+				<label class="control-label" for="deployments">Select deployments</label>
+				<select multiple="multiple" size="10" name="deployments" id="deployments" required>
+					<option value="all" selected="true">All deployments</option>
+					{% for deployment in deployments %}
+					<option value="{{ deployment.id }}">
+					{{ deployment }}
+					</option>
+					{% endfor %}
+				</select>
+			</div>
+		</div>
+		<div class="span3">
+			<div class="control-group">
+				<label class="control-label" for="tags">Select detectors</label>
+				<select multiple="multiple" size="10" name="detectors" id="detectors" required>
+					{% for detector in detectors %}
+					<option value="{{ detector.id }}">
+						{{ detector }}
+					</option>
+					{% endfor %}
+		 		</select>
+			</div>
+		</div>
+		<div class="span3">
+			<div class="control-group">
+				<label class="control-label" for="tags">Select tags</label>
+				<select multiple="multiple" size="10" name="tags" id="tags" required>
+					{% for tag in tags %}
+					<option value="{{ tag.id }}">
+						{{ tag }}
+					</option>
+					{% endfor %}
+		 		</select>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="span4">
+			<input type="text" placeholder="Enter a name for your analysis" name="name" required>
+		</div>
+		<div class="span4">
+			<textarea rows="3" placeholder="Optional Description"></textarea>
+		</div>
+	</div>
+	<div class="row">
+		<input type="submit" value="Create new analysis" />
+	</div>
+</form>
+
+{% endblock %}
