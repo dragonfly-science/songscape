@@ -1,0 +1,4 @@
+trident var/www/django/tridentsystems.co.nz
+manage.py var/www/django/tridentsystems.co.nz
+apache.conf.template etc/tridentsystems.co.nz
+requirements.txt etc/tridentsystems.co.nz
