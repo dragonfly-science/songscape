@@ -12,9 +12,10 @@ from pylab import figure, specgram, savefig, close, gca
 from django.core.files.base import ContentFile
 from django.db import models
 from django.conf import settings
+from django.contrib.auth.models import User
 
 class Organisation(models.Model):
-    code = models.SlugField(max_length=20, unique=True)
+    code = models.SlugField(max_length=32, unique=True)
     name = models.TextField()
     description = models.TextField(null=True, blank=True)
     
@@ -22,23 +23,27 @@ class Organisation(models.Model):
         return self.name
 
 class Site(models.Model):
-    code = models.SlugField(max_length=20, unique=True) 
+    code = models.SlugField(max_length=32) 
     name = models.TextField(null=True, blank=True) 
+    organisation = models.ForeignKey(Organisation, related_name='sites')
     description = models.TextField(null=True, blank=True)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
     altitude = models.FloatField(null=True, blank=True)
     
     def __unicode__(self):
-        return self.code
+        return '%s-%s' % (self.organisation.code, self.code)
+
+    class Meta:
+        unique_together = (('code', 'organisation'),)
 
 class Recorder(models.Model):
-    code = models.SlugField(max_length=20)
+    code = models.SlugField(max_length=32)
     organisation = models.ForeignKey(Organisation, related_name='recorders')
     comments = models.TextField(null=True, blank=True)
 
     def __unicode__(self):
-        return self.code
+        return '%s-%s' % (self.organisation.code, self.code)
 
     class Meta:
         unique_together = (('code', 'organisation'),)
@@ -46,12 +51,13 @@ class Recorder(models.Model):
 class Deployment(models.Model):
     site = models.ForeignKey(Site, related_name='deployments')
     recorder = models.ForeignKey(Recorder, related_name='deployments')
+    owner = models.ForeignKey(Organisation, related_name='deployments')
     start = models.DateTimeField()
     end = models.DateTimeField(null=True, blank=True)
     comments = models.TextField(null=True, blank=True)
     
     def __unicode__(self):
-        return '%s %s %s'%(self.site.code, self.recorder.code, self.start)
+        return '%s %s %s'%(self.site, self.recorder, self.start)
     
     class Meta:
         unique_together = (('site', 'recorder', 'start'),)
@@ -111,6 +117,15 @@ class Recording(models.Model):
         frames = self._get_frames(offset, duration)
         return np.array(struct.unpack_from ("%dh" % (len(frames)/2,), frames))
 
+
+class Tag(models.Model):
+    code = models.SlugField(max_length=32, unique=True)
+    name = models.CharField(max_length=32)
+    
+    def __unicode__(self):
+        return '%s' % (self.name)
+
+
 class Snippet(models.Model):
     recording = models.ForeignKey(Recording, related_name='snippets')
     offset = models.FloatField() #seconds
@@ -123,9 +138,8 @@ class Snippet(models.Model):
         unique_together = (('recording', 'offset', 'duration'),)
     
     def __unicode__(self):
-        return '%s-%s-%s'%(self.recording.deployment.site.code, 
-            self.recording.deployment.recorder.code, 
-            datetime.datetime.strftime(self.datetime, '%Y%m%d-%H%M%S')
+        return '%s-%s-%s'%(self.recording.deployment.recorder, 
+            datetime.datetime.strftime(self.datetime, '%Y%m%d-%H%M%S'), self.duration
         )
     
     def get_audio(self):
@@ -152,19 +166,28 @@ class Snippet(models.Model):
             close()
         return self.sonogram
 
+    def url_path(self):
+        full_path = self.recording.path
+        # hack hack
+        return '/media/' + full_path.split('songscape/')[1]
+
+    def end_time(self):
+        return self.offset + self.duration
+
     @property
     def datetime(self):
         return self.recording.datetime + datetime.timedelta(seconds=self.offset)
 
+
 class Signal(models.Model):
-    code = models.SlugField(max_length=20) 
+    code = models.SlugField(max_length=32, unique=True) 
     description = models.TextField(null=True, blank=True)
     
     def __unicode__(self):
         return self.code
 
 class Detector(models.Model):
-    code = models.SlugField(max_length=20) 
+    code = models.SlugField(max_length=32) 
     signal = models.ForeignKey(Signal, related_name='detectors')
     description = models.TextField(null=True, blank=True)
     version = models.TextField()
@@ -188,3 +211,30 @@ class Score(models.Model):
     class Meta:
         unique_together = (('snippet', 'detector'),)
     
+
+class Analysis(models.Model):
+    name = models.CharField(max_length=32)
+    code = models.SlugField(max_length=32)
+    description = models.TextField(default="")
+    datetime = models.DateTimeField(auto_now=True)
+    tags = models.ManyToManyField(Tag)
+    ubertag = models.ForeignKey(Tag, related_name="ubertags", null=True, blank=True)
+    deployments = models.ManyToManyField(Deployment)
+    detectors = models.ManyToManyField(Detector)
+    organisation = models.ForeignKey(Organisation, related_name="analyses")
+    
+    def __unicode__(self):
+        return '%s' % (self.name)
+
+    class Meta:
+        unique_together = (('organisation', 'code'),)
+
+
+class Identification(models.Model):
+    user = models.ForeignKey(User)
+    analysis = models.ForeignKey(Analysis)
+    snippet = models.ForeignKey(Snippet)
+    scores = models.ManyToManyField(Score)  # This holds the list of scores that the user saw when they made the identification
+    tags = models.ManyToManyField(Tag)
+    comment = models.TextField(default="")
+
