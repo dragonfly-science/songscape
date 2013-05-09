@@ -61,11 +61,18 @@ case "$1" in
         db_get songscape/django_secret_key
         set_config SECRET_KEY "'${RET}'" ${LOCAL_SETTINGS}
 
+        # Set up some directories we need
         mkdir -p /var/log/sitelogs/songscape
         chown www-data:www-data /var/log/sitelogs/songscape
+        chmod o-rx /var/log/sitelogs/songscape
 
         mkdir -p /var/www/django/songscape/static
-        chown www-data:www-data  /var/www/django/songscape/static
+        chown www-data:www-data /var/www/django/songscape/static
+        chmod o-rx /var/www/django/songscape/static
+
+        mkdir -p /var/www/.matplotlib
+        chown www-data:www-data /var/www/.matplotlib
+        chmod o-rx /var/www/.matplotlib
 
         # Make a copy of the template apache config to work on, then copy into place
         cp /etc/songscape/apache.conf.template /etc/songscape/apache.conf.working
