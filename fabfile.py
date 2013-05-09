@@ -76,9 +76,9 @@ def apache_restart():
 def test():
     with cd(env.remote_path), lcd(local_dir):
         put('.coveragerc', '.coveragerc', use_sudo=True)
-        sudo('coverage run manage.py test')
-        sudo('coverage html --include=trident\*')
-        sudo('coverage xml --include=trident\*')
+        sudo('coverage run www/manage.py test')
+        sudo('coverage html --include=www\*')
+        sudo('coverage xml --include=www\*')
 
 @task
 def fetch_results():
