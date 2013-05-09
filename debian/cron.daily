@@ -1,0 +1,2 @@
+#!/bin/sh
+django-admin cleanup --settings=www.settings --pythonpath=/var/www/django/songscape/

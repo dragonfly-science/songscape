@@ -1,0 +1,24 @@
+This work was packaged for Debian by:
+
+    Joel Pitt <joel@dragonfly.co.nz> on Wed May 07 15:33:43 NZDT 2013
+
+Upstream Author(s):
+
+    Edward Abraham <ed@dragonfly.co.nz>
+    Chris Knox <chris@dragonfly.co.nz>
+    Joel Pitt <joel@dragonfly.co.nz>
+
+Copyright:
+
+    Copyright (C) 2013 Dragonfly Science
+
+License:
+
+    TBD
+
+The Debian packaging is:
+
+    Copyright (C) 2010 TBD
+
+and is licensed under the TBD,
+see `/usr/share/common-licenses/TBD'.

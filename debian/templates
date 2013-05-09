@@ -1,0 +1,64 @@
+Template: songscape/db_host
+Type: string
+Default:
+Description: Database host:
+ Database host to be used to connect to the site database.
+ You can leave this blank to connect via UNIX sockets
+
+Template: songscape/db_port
+Type: string
+Default:
+Description: Database port:
+ Database port to be used to connect to the site database.
+ You can leave this blank for the default
+
+Template: songscape/db_user
+Type: string
+Default: songscape
+Description: Database username:
+ Username to use to connect to the site database.
+
+Template: songscape/db_pass
+Type: string
+Default:
+Description: Database password:
+ Password to use to connect to the database.  By default, the database will be called
+ songscape, and will be accessed as the database user songscape.
+
+Template: songscape/db_name
+Type: string
+Default: songscape
+Description: Database name:
+ Name of the database to use. By default, the database will be called
+ songscape, and will be accessed as the database user songscape.
+
+Template: songscape/servername
+Type: string
+Default:
+Description: Value for servername:
+ Please enter a value for the servername parameter.
+
+Template: songscape/email_host
+Type: string
+Default:
+Description: Email host:
+ SMTP host to send email to
+
+Template: songscape/server_email
+Type: string
+Default:
+Description: Server email:
+ Email from Django will appear to come from this address.
+
+Template: songscape/django_secret_key
+Type: string
+Default:
+Description: Value for servername:
+ Secret key for Django
+
+Template: songscape/use_snakeoil_certs
+Type: boolean
+Default: false
+Description: Use snakeoil ssl certs:
+ Apart from staging, we can use the snakeoil certs to
+ configure the apache server.
