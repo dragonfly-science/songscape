@@ -1,9 +1,10 @@
-# You need to manually install numpy first
+# You need to manually install numpy and matplotlib due to all their
+# dependencies and weird pip behaviour.
 # numpy==1.7.1
+# matplotlib==1.2.1
 
 Django==1.5.1
 PIL==1.1.7
-matplotlib==1.2.1
 git+https://github.com/ferrouswheel/dragonfab.git
 fabric
 south
