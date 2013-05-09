@@ -54,7 +54,7 @@ def database_push():
 def database_migrate():
     "Run south migrations to upgrade database"
     with cd(env.remote_path):
-        run("./www/manage.py syncdb")
+        run("./www/manage.py syncdb --noinput")
         run("./www/manage.py migrate --list") # Run this to get the state of things first
         run("./www/manage.py migrate")
 
