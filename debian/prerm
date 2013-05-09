@@ -22,6 +22,7 @@ case "$1" in
         a2dissite songscape.conf > /dev/null 2>&1 || true
         rm -f /etc/apache2/sites-available/songscape.conf
         rm -f /var/www/django/songscape/www/settings.py
+        rm -f /var/www/django/songscape/static
     ;;
 
     upgrade)
