@@ -53,14 +53,14 @@ STATICFILES_DIRS = (
     # ... I don't think we want to collect/copy all the recordings data when
     # we run collectstatic
     #RECORDINGS_PATH,
-    os.path.join(GIT_HOME, 'static/'),
+    os.path.join(GIT_HOME, '../static/'),
 )
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    os.path.join(GIT_HOME, "www/templates"),
+    os.path.join(GIT_HOME, "templates"),
 )
 
 # URL prefix for static files.
