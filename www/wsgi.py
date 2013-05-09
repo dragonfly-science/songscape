@@ -9,8 +9,9 @@ this application via the ``WSGI_APPLICATION`` setting.
 import os
 import sys
 sys.path.append('/var/www/django/songscape/')
-# Should we add this too/instead?
-#sys.path.append('/var/www/django/songscape/www')
+# We should standardise to include/exclude the project path (i.e. www/) rather than
+# keep both in the path
+sys.path.append('/var/www/django/songscape/www')
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "www.settings")
 
