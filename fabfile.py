@@ -16,7 +16,7 @@ env.databasedump = ''
 # Set up your ssh config like this to be able to access production
 # ~/.ssh/config
 #Host songscape
-#  ProxyCommand ssh -q hoiho nc -q0 scs.tridentsystems.local 22
+#  ProxyCommand ssh -q hoiho nc -q0 songscape.local 22
 env.use_ssh_config = True
 
 # Package dir specifies where .deb file will go
@@ -54,15 +54,15 @@ def database_push():
 def database_migrate():
     "Run south migrations to upgrade database"
     with cd(env.remote_path):
-        run("./manage.py syncdb")
-        run("./manage.py migrate --list") # Run this to get the state of things first
-        run("./manage.py migrate")
+        run("./www/manage.py syncdb")
+        run("./www/manage.py migrate --list") # Run this to get the state of things first
+        run("./www/manage.py migrate")
 
 @task
 def database_test_setup():
     "Setup database for testing"
     with cd(env.remote_path):
-        run("python manage.py test_setup")
+        run("python www/manage.py test_setup")
 
 @task
 def apache_restart():
