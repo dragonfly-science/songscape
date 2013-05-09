@@ -8,3 +8,4 @@ PIL==1.1.7
 git+https://github.com/ferrouswheel/dragonfab.git
 fabric
 south
+coverage
