@@ -64,8 +64,9 @@ case "$1" in
         mkdir -p /var/log/sitelogs/songscape
         chown www-data:www-data /var/log/sitelogs/songscape
 
-        #mkdir -p /var/www/django/songscape/uploaded
-        #chown www-data:www-data  /var/www/django/songscape/uploaded
+        # createstatic should create these
+        #mkdir -p /var/www/django/songscape/static
+        #chown www-data:www-data  /var/www/django/songscape/static
 
         # Make a copy of the template apache config to work on, then copy into place
         cp /etc/songscape/apache.conf.template /etc/songscape/apache.conf.working

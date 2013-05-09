@@ -8,9 +8,9 @@ ADMINS = (
     ('Joel Pitt', 'joel@dragonfly.co.nz'),
 )
 
-# What is GIT_HOME? Can we create it from the settings file path?
-#from local_settings import GIT_HOME, RECORDINGS_PATH
-GIT_HOME = os.path.dirname(__file__)
+# What is PROJECT_DIR? Can we create it from the settings file path?
+#from local_settings import PROJECT_DIR, RECORDINGS_PATH
+PROJECT_DIR = os.path.dirname(__file__)
 #RECORDINGS_PATH = os.path.dirname(__file__)
 
 MANAGERS = ADMINS
@@ -35,7 +35,7 @@ SITE_ID = 1
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = os.path.join(GIT_HOME, 'media/')
+MEDIA_ROOT = os.path.join(PROJECT_DIR, 'media/')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -50,17 +50,14 @@ STATIC_ROOT = ''
 
 STATICFILES_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
-    # ... I don't think we want to collect/copy all the recordings data when
-    # we run collectstatic
-    #RECORDINGS_PATH,
-    os.path.join(GIT_HOME, '../static/'),
+    os.path.join(PROJECT_DIR, 'static'),
 )
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    os.path.join(GIT_HOME, "templates"),
+    os.path.join(PROJECT_DIR, "templates"),
 )
 
 # URL prefix for static files.
@@ -151,5 +148,3 @@ try:
     from local_settings import *
 except ImportError:
     pass
-
-
