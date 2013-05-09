@@ -7,6 +7,11 @@ import datetime
 from contextlib import closing
 from cStringIO import StringIO
 
+# matplotlib breaks mod_wsgi due to some circular imports, which
+# means the first time it loads cbook isn't found, but it works afterwards!
+# Newer versions of matplotlib probably fix this, but it's easier to
+# rely on the ubuntu python-matplotlib package during deployment.
+import matplotlib.cbook
 from pylab import figure, specgram, savefig, close, gca, clf
 
 from django.core.files.base import ContentFile
