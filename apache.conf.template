@@ -13,7 +13,7 @@ ServerName __SERVERNAME__
   XSendFile On
   XSendFilePath /var/lib/sitedata/songscape/uploaded/
 
-  WSGIScriptAlias / /var/www/django/songscape/trident/wsgi.py
+  WSGIScriptAlias / /var/www/django/songscape/www/wsgi.py
 
   ErrorLog /var/log/sitelogs/songscape/error.log
   LogLevel warn
