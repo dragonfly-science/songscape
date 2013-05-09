@@ -111,7 +111,7 @@ case "$1" in
         pip install -r /etc/songscape/requirements.txt
 
         cd /var/www/django/songscape/
-        python manage.py collectstatic --noinput
+        python www/manage.py collectstatic --noinput
 
         echo ""
         echo "The songscape site is now ready for action. You need to restart apache for any"
