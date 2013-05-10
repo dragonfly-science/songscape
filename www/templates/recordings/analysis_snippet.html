@@ -4,34 +4,53 @@
 
 {% block content %}
 
-<!-- ul class="pager">
-{% if previous_id %}
-  <li class="previous">
-    <a href="{% url 'snippet' previous_id %}">&larr; Previous</a>
-  </li>
-{% endif %}
-{% if next_id %}
-  <li class="next">
-    <a href="{% url 'snippet' next_id %}">Next &rarr;</a>
-  </li>
-{% endif %}
-</ul -->
 
-
-<audio id="audio_player" src="{{ snippet.url_path }}#t={{ snippet.offset }},{{ snippet.end_time }}" type="audio/wav">
+<h2> {{ snippet.recording.deployment.site }}, {{ snippet.datetime }}</h2>
+</div>
+<audio controls>
+<source src="{% url 'play' snippet.id %}" type="audio/wav">
  "Hmm can't play the sound"
 </audio>
-{{ snippet.datetime }}
+{% if snippet.sonogram %}
 <img src="{{ snippet.sonogram.url }}">
+{% else %}
+<p>Sorry no sonogram</p>
+{% endif %}
+
 
 {% if id_before %}
 <p>You have indentified this snippet</p>
-<p>It contains: {% for tag in previous_identification.true_tags.all %} {{ tag.name }},{% endfor %}</p>
-<p>It does not contain: {% for tag in previous_identification.false_tags.all %} {{ tag.name }},{% endfor %}</p>
+<p>It contains: {% for tag in true_tags %} {{ tag.name }},{% endfor %}</p>
+<p>It does not contain: {% for tag in false_tags %} {{ tag.name }},{% endfor %}</p>
+
+<div class="row">
+<div class="row">
+
+<div class="span2">
+{% if previous_id %}
+<span class="btn"><a href="{% url 'analysis_snippet' analysis.code previous_id %}">Previous</a></span>
+{% endif %}
+</div>
+
+<div class="span4">
+</div>
+
+<div class="span2">
+{% if next_id %}
+<span class="btn"><a href="{% url 'analysis_snippet' analysis.code next_id %}">Next</a></span>
+{% endif %}
+</div>
 
 {% else %}
 <form method="post">{% csrf_token %}
 <div class="row">
+
+<div class="span2">
+{% if previous_id %}
+<span class="btn"><a href="{% url 'analysis_snippet' analysis.code previous_id %}">&larr; Previous</a></span>
+{% endif %}
+</div>
+
 <div class="span4">
 <div class="btn-group" id="tag-group" data-toggle="buttons-checkbox">
 {% for tag in analysis.normal_tags %}
@@ -40,11 +59,12 @@
 {% endfor %}  
 </div>
 </div>
-<div class="span2">
 
+<div class="span2">
 <input type="submit" class="btn btn-primary" id="uber" value="{{ analysis.ubertag.name }}">
 <input type="hidden" id="uber_real" name="{{ analysis.ubertag.code }}" value=true>
 </div>
+
 </div>
 </form>
 {% endif %}
