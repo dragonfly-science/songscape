@@ -98,12 +98,16 @@ def scores(request, code, version, default_page=1, per_page=100):
     detector = Detector.objects.get(code=code, version=version)
     queryset = Score.objects.filter(
         detector=detector).select_related().filter(**filters).order_by(*order)
-    request.session['snippets'] = [score.snippet.id for score in queryset]
     scores = _paginate(request,
                        queryset,
                        default_page=default_page,
                        per_page=per_page,
                        )
+    # It takes over 30 seconds to extract the id for 130k snippets/scores!
+    # So for now just extract the snippet id for the current page.
+    # TODO: put the ordering in a method and repopulate it if the user
+    # gets to the edge...
+    request.session['snippets'] = [score.snippet.id for score in queryset]
     return render(request, 'recordings/scores_list.html', {'scores': scores, 'request_parameters': request_parameters})
 
 
