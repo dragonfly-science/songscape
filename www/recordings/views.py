@@ -204,6 +204,11 @@ def analysis_snippet(request, code, snippet_id):
     previous_identification = Identification.objects.filter(snippet_id__exact=snippet_id, user_id__exact=request.user.id)
 
     id_before = previous_identification.count() > 0
+    true_tags = []
+    false_tags = []
+    if id_before:
+        true_tags = previous_identification[0].true_tags.all()
+        false_tags = previous_identification[0].false_tags.all() 
 
     if request.method == "POST":
         true_tags = []
@@ -221,12 +226,17 @@ def analysis_snippet(request, code, snippet_id):
 
         return HttpResponseRedirect('/analysis/%s/%s' % (code, next_id))
 
+    if not snippet.sonogram:
+        return HttpResponseRedirect('/analysis/%s/%s' % (code, next_id))
+
     return render(request, 
                   'recordings/analysis_snippet.html', 
                   {'snippet': snippet,
                    'analysis': analysis,
                    'next_id': next_id, 
                    'id_before': id_before,
+                   'true_tags': true_tags,
+                   'false_tags': false_tags,
                    'previous_id': previous_id})
 
 
