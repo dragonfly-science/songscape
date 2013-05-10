@@ -107,7 +107,7 @@ def scores(request, code, version, default_page=1, per_page=100):
     # So for now just extract the snippet id for the current page.
     # TODO: put the ordering in a method and repopulate it if the user
     # gets to the edge...
-    request.session['snippets'] = [score.snippet.id for score in queryset]
+    request.session['snippets'] = [score.snippet.id for score in scores]
     return render(request, 'recordings/scores_list.html', {'scores': scores, 'request_parameters': request_parameters})
 
 
