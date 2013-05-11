@@ -4,6 +4,8 @@
 *.pyc
 local_settings.py
 static/sonograms/*
+www/media/sonograms/*
+www/static/sonograms/*
 www/birdscape.db
 *.swp
 *~

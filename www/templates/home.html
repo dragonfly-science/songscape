@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block title %}Songscape - homepage{% endblock title %}
+
+{% block content %}
+<!--<h1 style="font-size: 2.4em">Welcome to the paua logger website</h1> -->
+
+<br />
+<header class="jumbotron subhead" id="overview">
+  <div class="container">
+    <h1>Components</h1>
+    <p class="lead">Dozens of reusable components built to provide navigation, alerts, popovers, and more.</p>
+    <div id="carbonads-container"><div class="carbonad"><div id="azcarbon"></div><script type="text/javascript">var z = document.createElement("script"); z.type = "text/javascript"; z.async = true; z.src = "http://engine.carbonads.com/z/32341/azcarbon_2_1_0_HORIZDARK"; var s = document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(z, s);</script></div></div>
+  </div>
+</header>
+
+
+
+ <div class="row-fluid" id="title-row">
+From birdsong to data
+    </div>
+
+ <div class="row-fluid">
+   <div class="span3" style="align: center">
+            
+  <div class="thumbnail">
+<img src="/static/images/logger-units.jpg" alt="Paua logging units" title="White-capped albatross" class="flexible">
+<div class="byline">
+    <a href="http://creativecommons.org/licenses/by/3.0/deed.en">CC-BY</a> Edward Abraham
+</div>
+<p> Boat unit and two turtle loggers.
+</div>
+
+<p><br>
+<p style="text-align: center">
+<a href="/dive/upload-file/" class="btn btn-primary jumbotron btn-large" style="font-size: 20px; font-weight: normal; padding: 14px 24px; margin-right: 10px;">File upload</a>
+<br></p>
+
+        </div><!--/span-->
+
+   <div class="span9">
+<p>Paua are harvested from multiple small reefs and beds. When these are combined, the total area fished 
+in each
+region is no bigger than a kiwifruit or apple orchard. Paua Industry Council chief executive officer Jeremy Cooper explains.</p>
+
+<p> <blockquote style="padding: 0 2em">
+    “In order to be effective, the scale of our information needs to match the
+    scale of our fishing effort. At the moment we use statistical areas to
+    gauge our fishing effort, but those might not be appropriate for paua. In
+    some cases those areas cover 20km or more of coastline, but only contain a
+    few reefs suitable for paua harvest.”
+</blockquote> </p>
+
+
+<p>The paua logger programme started in October 2010. Two different data loggers
+are deployed in the field, a boat unit collecting catch and diver identity
+information, and a turtle unit worn by divers, which collects information on the
+time, location and depth of dives. The data logger units are manufactured by
+<a href="http://www.zebra-tech.co.nz">Zebra-Tech</a> in Nelson.  Zebra-Tech
+specialises in the design, development and manufacture of environmental
+instrumentation and equipment for environmental monitoring and research. Development of
+the paua loggers is partly funded by the New Zealand Government, through 
+<a href="http://www.seafoodinnovations.co.nz/">Seafood Innovations</a>.</p>
+
+<p>Data from the loggers are stored in a secure database developed by
+<a href="http://www.dragonfly.co.nz">Dragonfly Science</a> and 
+<a href="http://www.catalyst.net.nz">Catalyst IT</a> in Wellington. Logger
+files are uploaded into the database via this website.  Summaries of the logger
+data are available to registered users.</p>
+</div><!-- span 7 -->
+</div><!-- row-fluid -->
+<br/> <br/>
+<div class="navbar">
+  <div class="container">
+    <ul class="nav">
+      <li><a href="http://www.seafoodinnovations.co.nz/"><img src="/static/images/si-logo.gif" width="170" /></a></li>
+      <li><a href="http://www.zebra-tech.co.nz/"><img src="/static/images/zebra-tech.gif"  width="150" /></a></li>
+      <li><a href="http://www.dragonfly.co.nz/"><img src="/static/images/damsel_and_text.png" width="150" /></a></li>
+      <li><a href="http://www.catalyst.net.nz/"><img src="/static/images/catalyst_it.png" height="51" width="150" /></a></li>
+    </ul>
+  </div>
+</div>
+{% endblock content %}

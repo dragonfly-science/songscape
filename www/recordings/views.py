@@ -9,23 +9,52 @@ from django.conf import settings
 
 from .forms import TagForm
 
-fields = (
-    'score__lt',
-    'score__gt',
-    'score',
-    'snippet__id',
-    'snippet__recording__datetime__gt',
-    'snippet__recording__datetime__lt',
-    'snippet__sonogram__isnull',
-    'snippet__recording__deployment__site__code',
-    'snippet__recording__deployment__recorder',
-)
+FILTERS = {
+    'score': {
+        'score_maximum': 'score__lt',
+        'score_minimum': 'score__gt',
+        'score': 'score',
+        'snippet': 'snippet__id',
+        'datetime_earliest': 'snippet__recording__datetime__gt',
+        'datetime_latest': 'snippet__recording__datetime__lt',
+        'sonogram_missing': 'snippet__sonogram__isnull',
+        'site': 'snippet__recording__deployment__site__code',
+        'recorder': 'snippet__recording__deployment__recorder',
+        'owner': 'snippet__recording__deployment__owner__code',
+    },
+    'snippet': {
+        'snippet': 'id',
+        'datetime_earliest': 'recording__datetime__gt',
+        'datetime_latest': 'recording__datetime__lt',
+        'sonogram_missing': 'sonogram__isnull',
+        'site': 'recording__deployment__site__code',
+        'recorder': 'recording__deployment__recorder',
+        'owner': 'recording__deployment__owner__code',
+    },
+    'recording': {
+        'recording': 'id',
+        'datetime_earliest': 'datetime__gt',
+        'datetime_latest': 'datetime__lt',
+        'site': 'deployment__site__code',
+        'recorder': 'deployment__recorder',
+        'owner': 'deployment__owner__code',
+    },
+    'deployment': {
+        'deployment': 'id',
+        'datetime_earliest': 'end__gt',
+        'datetime_latest': 'start__lt',
+        'site': 'site__code',
+        'recorder': 'recorder',
+        'owner': 'owner__code',
+    }
+}
 
 
-def _get_filters(request):
+def _get_filters(request, level='score'):
     filters = {}
-    for field in fields:
-        value = request.GET.get(field) or None
+    fields = FILTERS[level]
+    for key, field in fields.items():
+        value = request.GET.get(key) or None
         if value:
             filters[field] = value
     return filters
@@ -72,6 +101,9 @@ def _get_snippets(request, per_page, page=1, **filters):
     return snippets
 
 
+def home(request):
+    return render(request, 'home.html')
+
 def snippet(request, id):
     snippets = request.session.get('snippets', [])
     if int(id) in snippets:
@@ -92,7 +124,7 @@ def snippet(request, id):
 
 
 def scores(request, code, version, default_page=1, per_page=100):
-    filters = _get_filters(request)
+    filters = _get_filters(request, level='score')
     order = _get_order(request)
     request_parameters = _get_parameters(request)
     detector = Detector.objects.get(code=code, version=version)
