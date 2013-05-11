@@ -5,6 +5,7 @@
 local_settings.py
 static/sonograms/*
 www/media/sonograms/*
+www/media/snippets/*
 www/static/sonograms/*
 www/birdscape.db
 *.swp
@@ -12,3 +13,4 @@ www/birdscape.db
 data/*
 media/*
 rfpt/*
+dumps/*
