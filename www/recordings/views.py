@@ -1,4 +1,9 @@
+import datetime
 import wave
+import os
+import urllib
+from contextlib import closing
+from django.core.files import File
 from recordings.models import Snippet, Score, Detector, Tag, Analysis, Deployment, Organisation, Identification
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -143,21 +148,57 @@ def scores(request, code, version, default_page=1, per_page=100):
     return render(request, 'recordings/scores_list.html', {'scores': scores, 'request_parameters': request_parameters})
 
 
-def play_snippet(request, id):
-    snippet = Snippet.objects.get(id=id)
-    wav_file = TemporaryFile()
-    wav_writer = wave.open(wav_file, 'wb')
-    wav_writer.setframerate(snippet.recording.sample_rate)
-    wav_writer.setsampwidth(2)
-    wav_writer.setnchannels(snippet.recording.nchannels)
-    wav_writer.writeframes(snippet.recording._get_frames(
-        snippet.offset, snippet.duration))
-    wav_writer.close()
-    wav_length = wav_file.tell()
-    wav_file.seek(0)
-    response = StreamingHttpResponse(FileWrapper(
-        wav_file), content_type='audio/wav')
-    response['Content-Length'] = wav_length
+#url(r'^play/(?P<organisation>[\w]+)-(?P<site_code>[\w]+)-(?P<datetime>\d+)-(?P<offset>[\d\.]+)-(?P<recorder_code>[\w]+)-(?P<id>\d+).wav', 'www.recordings.views.play_snippet', name='play_name')
+def _get_snippet(id=None, 
+        organisation=None, 
+        site_code=None, 
+        recorder_code=None,
+        date_time=None, 
+        offset=None):
+    if organisation or\
+            datetime or\
+            recorder_code or\
+            site_code:
+        return Snippet.objects.get(
+                recording__datetime=datetime.datetime.strptime(date_time, "%Y%m%d%H%M%S"),
+                recording__deployment__recorder__code=recorder_code,
+                recording__deployment__owner__code=organisation,
+                recording__deployment__site__code=site_code,
+                id=id,
+            )
+    else:
+        return Snippet.objects.get(id=id)
+
+def play_snippet(request, **kwargs):
+    """Play a snippet. Look for it in three places:
+    1. We have it in the cache (in settings.SNIPPET_DIR)
+    2. We have the recording locally
+    3. We get it from the repository
+    """
+    snippet = _get_snippet(**kwargs)
+    snippet_name = os.path.split(request.path)[1]
+    snippet_path = os.path.join(settings.SNIPPET_DIR, snippet_name)
+    if not (snippet.soundfile and \
+            os.path.exists(snippet.soundfile.path)):
+        if os.path.exists(snippet.recording.path):
+            wav_file = TemporaryFile()
+            wav_writer = wave.open(wav_file, 'wb')
+            wav_writer.setframerate(snippet.recording.sample_rate)
+            wav_writer.setsampwidth(2) # We need to save this on the model
+            wav_writer.setnchannels(snippet.recording.nchannels)
+            wav_writer.writeframes(snippet.recording._get_frames(
+                    snippet.offset, snippet.duration))
+            wav_writer.close()
+            wav_file.seek(0)
+            snippet.soundfile.save(snippet_path, File(wav_file), save=True)
+            snippet.save()
+        else:
+            repository = settings.REPOSITORIES[snippet.recording.deployment.owner.code]
+            print '%s%s' %(repository, request.path)
+            urllib.urlretrieve('%s%s' %(repository, request.path), '/tmp/%s' % snippet_name)
+            snippet.soundfile.save(snippet_path, File(open('/tmp/%s' % snippet_name)), save=True)
+    wav_file = open(os.path.join(settings.MEDIA_ROOT, snippet.soundfile.path), 'r')
+    response = StreamingHttpResponse(FileWrapper(wav_file), content_type='audio/wav')
     return response
 
 
