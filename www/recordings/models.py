@@ -15,6 +15,7 @@ import matplotlib.cbook
 from pylab import figure, specgram, savefig, close, gca, clf
 
 from django.core.files.base import ContentFile
+from django.core.files import File
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -95,7 +96,11 @@ class Deployment(models.Model):
     comments = models.TextField(null=True, blank=True)
     
     def __unicode__(self):
-        return '%s %s %s'%(self.site, self.recorder, self.start)
+        return '%s-%s-%s'%(self.site, 
+            datetime.datetime.strftime(self.start, '%Y%m%d-%H%M%S'),
+            datetime.datetime.strftime(self.end, '%Y%m%d-%H%M%S'),
+            self.recorder, 
+        )
     
     class Meta:
         unique_together = (('site', 'recorder', 'start'),)
@@ -110,7 +115,7 @@ class Recording(models.Model):
     path = models.TextField()
     
     def __unicode__(self):
-        return '%s %s %s'%(self.deployment.site.code, self.deployment.recorder.code, self.datetime)
+        return '%s-%s-%s'%(self.deployment.site.code, self.deployment.recorder.code, self.datetime)
     
     class Meta:
         unique_together = (('datetime', 'deployment'),)
@@ -178,14 +183,16 @@ class Snippet(models.Model):
     duration = models.FloatField()
     sonogram = models.ImageField(upload_to=settings.SONOGRAM_DIR, null=True, blank=True) 
     soundcloud = models.IntegerField(null=True, blank=True)
-    soundfile = models.FileField(upload_to=settings.MP3_DIR, null=True, blank=True)
+    soundfile = models.FileField(upload_to=settings.SNIPPET_DIR, null=True, blank=True)
     
     class Meta:
         unique_together = (('recording', 'offset', 'duration'),)
     
     def __unicode__(self):
-        return '%s-%s-%s'%(self.recording.deployment.recorder, 
-            datetime.datetime.strftime(self.datetime, '%Y%m%d-%H%M%S'), self.duration
+        return '%s-%s-%s'%(self.recording.deployment.site,
+            self.recording.deployment.recorder,
+            datetime.datetime.strftime(self.datetime, '%Y%m%d-%H%M%S'), 
+            self.duration
         )
     
     def get_audio(self):

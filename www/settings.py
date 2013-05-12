@@ -8,10 +8,8 @@ ADMINS = (
     ('Joel Pitt', 'joel@dragonfly.co.nz'),
 )
 
-# What is PROJECT_DIR? Can we create it from the settings file path?
-#from local_settings import PROJECT_DIR, RECORDINGS_PATH
+# This directory
 PROJECT_DIR = os.path.dirname(__file__)
-#RECORDINGS_PATH = os.path.dirname(__file__)
 
 MANAGERS = ADMINS
 
@@ -34,15 +32,14 @@ USE_L10N = True
 SITE_ID = 1
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
-# Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = os.path.join('/home/edward/dragonfly/songscape/', 'media/')
+MEDIA_ROOT = os.path.join(PROJECT_DIR, 'media/')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
 MEDIA_URL = '/media/'
 
-STATIC_ROOT = os.path.join(PROJECT_DIR, '../static')
+STATIC_ROOT = os.path.join(PROJECT_DIR, '../static/')
 
 STATICFILES_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
@@ -138,11 +135,15 @@ LOGGING = {
     }
 }
 
-# Is RECORDINGS_PATH the root for the other 3?
-RECORDINGS_PATH = ''
-SONOGRAM_DIR = 'sonograms/'
-MP3_DIR = 'mp3/' # this was joined with RECORDINGS_PATH
-DATA_DIR = 'data/' # this was joined with RECORDINGS_PATH
+RECORDINGS_PATH = '' # Path of the raw recordings
+SONOGRAM_DIR = os.path.join(MEDIA_ROOT, 'sonograms/')
+SNIPPET_DIR = os.path.join(MEDIA_ROOT, 'snippets/')
+
+# organisation repositories. A dictionary with keys
+# being the organisation codes, and values
+# being the URLs of the servers that hold the
+# raw recordings
+REPOSITORIES = {'RFPT': 'http://rfpt.songscape.org'}
 
 try:
     from local_settings import *
