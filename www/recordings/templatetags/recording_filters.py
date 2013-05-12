@@ -5,9 +5,8 @@ from django.core.urlresolvers import reverse
 
 register = template.Library()
 
-
 #url(r'^play/(?P<organisation>[\w]+)-(?P<site_code>[\w]+)-(?P<datetime>\d+)-(?P<offset>[\d\.]+)-(?P<id>\d+).wav', 'www.recordings.views.play_snippet', name='play_name')
-def _snippet_url(snippet):
+def _wav_url(snippet):
     return reverse('play_name',
         kwargs=dict(date_time = datetime.datetime.strftime(snippet.recording.datetime, "%Y%m%d%H%M%S"),
         recorder_code = snippet.recording.deployment.recorder.code,
@@ -19,8 +18,8 @@ def _snippet_url(snippet):
     
 @register.filter
 def wav_url(snippet):
-    return _snippet_url(snippet)
+    return _wav_url(snippet)
 
 @register.filter
 def wav_name(snippet): 
-    return os.path.split(_snippet_url(snippet))[0]
+    return os.path.split(_wav_url(snippet))[0]

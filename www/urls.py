@@ -9,9 +9,11 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 # from django.contrib import admin
 # admin.autodiscover()
 
+snippet_regex = r"(?P<organisation>[\w]+)-(?P<site_code>[\w]+)-(?P<date_time>\d+)-(?P<offset>[\d\.]+)-(?P<recorder_code>[\w]+)-(?P<id>\d+)"
+
 urlpatterns = patterns('',
-    # Examples:
     url(r'^snippet/(?P<id>\d+)/$', 'www.recordings.views.snippet', name='snippet'),
+    url(r'^snippet/%s/$' % snippet_regex, 'www.recordings.views.snippet', name='snippet_name'),
     url(r'^scores/(?P<code>[\w-]+)/(?P<version>[0-9\.]+)/$', 'www.recordings.views.scores', name='scores_list'),
     url(r'^tags$', 'www.recordings.views.tags', name='tags'),
     url(r'^analysis/create$', 'www.recordings.views.analysis_create', name='analysis_create'),
@@ -30,7 +32,7 @@ urlpatterns = patterns('',
     #(r'^accounts/login/$', redirect_to, {'url': '/login/'}),
     url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root':settings.MEDIA_ROOT}),
     url(r'^play/(?P<id>\d+).wav', 'www.recordings.views.play_snippet', name='play'),
-    url(r'^play/(?P<organisation>[\w]+)-(?P<site_code>[\w]+)-(?P<date_time>\d+)-(?P<offset>[\d\.]+)-(?P<recorder_code>[\w]+)-(?P<id>\d+).wav', 'www.recordings.views.play_snippet', name='play_name')
+    url(r'^play/%s.wav' % snippet_regex, 'www.recordings.views.play_snippet', name='play_name')
 )
 urlpatterns += staticfiles_urlpatterns()
     

@@ -224,6 +224,16 @@ class Snippet(models.Model):
     def datetime(self):
         return self.recording.datetime + datetime.timedelta(seconds=self.offset)
 
+    def count_tag(self, tag, **kwargs):
+        identifications = Identification.objects.filter(snippet=self, **kwargs)
+        positive = 0
+        negative = 0
+        for identification in identifications:
+            if tag in identification.true_tags.all():
+                positive += 1
+            if tag in identification.false_tags.all():
+                negative += 1
+        return positive, negative, len(identifications)
 
 class Signal(models.Model):
     code = models.SlugField(max_length=32, unique=True) 
@@ -265,6 +275,7 @@ class Analysis(SlugMixin, models.Model):
     datetime = models.DateTimeField(auto_now=True)
     tags = models.ManyToManyField(Tag)
     ubertag = models.ForeignKey(Tag, related_name="ubertags", null=True, blank=True)
+    # Should be snippets or filters? and not deployments ...
     deployments = models.ManyToManyField(Deployment)
     detectors = models.ManyToManyField(Detector)
     organisation = models.ForeignKey(Organisation, related_name="analyses")
@@ -278,13 +289,12 @@ class Analysis(SlugMixin, models.Model):
     def normal_tags(self):
         return self.tags.all().exclude(id__exact=self.ubertag.id)
 
-
 class Identification(models.Model):
-    user = models.ForeignKey(User)
-    analysis = models.ForeignKey(Analysis)
-    snippet = models.ForeignKey(Snippet)
+    user = models.ForeignKey(User, related_name="identifications")
+    analysis = models.ForeignKey(Analysis, related_name="identifications")
+    snippet = models.ForeignKey(Snippet, related_name="identifications")
     scores = models.ManyToManyField(Score)  # This holds the list of scores that the user saw when they made the identification
-    true_tags = models.ManyToManyField(Tag, related_name="true_tags")
-    false_tags = models.ManyToManyField(Tag, related_name="false_tags")
+    true_tags = models.ManyToManyField(Tag, related_name="identifications")
+    false_tags = models.ManyToManyField(Tag, related_name="negative_identifications")
     comment = models.TextField(default="")
 
