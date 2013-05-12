@@ -19,7 +19,7 @@
 
 {% if snippet.sonogram %}
 <audio controls> 
- <source src="{% url 'play' snippet.id %}" type="audio/wav">
+ <source src="{% url 'play' snippet.id %}" type="audio/mpeg">
  "Hmm can't play the sound"
 </audio>
 {{ snippet.datetime }}

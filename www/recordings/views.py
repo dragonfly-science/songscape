@@ -112,20 +112,29 @@ def scores(request, code, version, default_page=1, per_page=100):
 
 
 def play_snippet(request, id):
-    snippet = Snippet.objects.get(id=id)
-    wav_file = TemporaryFile()
-    wav_writer = wave.open(wav_file, 'wb')
-    wav_writer.setframerate(snippet.recording.sample_rate)
-    wav_writer.setsampwidth(2)
-    wav_writer.setnchannels(snippet.recording.nchannels)
-    wav_writer.writeframes(snippet.recording._get_frames(
-        snippet.offset, snippet.duration))
-    wav_writer.close()
-    wav_length = wav_file.tell()
-    wav_file.seek(0)
-    response = StreamingHttpResponse(FileWrapper(
-        wav_file), content_type='audio/wav')
-    response['Content-Length'] = wav_length
+    snippet = Snippet.objects.select_related('recording').get(id=id)
+    
+    #wav_file = TemporaryFile()
+    #wav_writer = wave.open(wav_file, 'wb')
+    #wav_writer.setframerate(snippet.recording.sample_rate)
+    #wav_writer.setsampwidth(2)
+    #wav_writer.setnchannels(snippet.recording.nchannels)
+    #wav_writer.writeframes(snippet.recording._get_frames(
+        #snippet.offset, snippet.duration))
+    #wav_writer.close()
+    #wav_length = wav_file.tell()
+    #wav_file.seek(0)
+    #response['Content-Length'] = wav_length
+    import os
+    import pdb; pdb.set_trace()
+    # The potential reason that mp3 playing doesn't work is this phrase on a html5
+    # example: "it specifies one MP3 file (for Internet Explorer, Chrome, and
+    # Safari), and one Ogg file (for Firefox and Opera)."
+    # So may need to transcode to Ogg too.
+    temp_mp3_file = snippet.recording._get_mp3(snippet.offset, snippet.duration)
+    response = StreamingHttpResponse(
+            FileWrapper(temp_mp3_file), content_type='audio/mpeg')
+    response['Content-Length'] = os.path.getsize(temp_mp3_file)
     return response
 
 

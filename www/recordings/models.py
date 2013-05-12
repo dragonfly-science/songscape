@@ -140,6 +140,14 @@ class Recording(models.Model):
         self.sha1 = self.get_hash()
         super(Recording, self).save(*args, **kwargs)
 
+    def _get_mp3(self, offset, duration):
+        from pydub import AudioSegment
+        import tempfile
+        temp_mp3 = tempfile.mkstemp(suffix='.mp3')
+        audio = AudioSegment.from_wav(self.path)
+        audio[offset*1000:duration*1000].export(temp_mp3, format="mp3")
+        return temp_mp3
+
     def _get_frames(self, offset, duration):
         with closing(wave.open(self.path, 'r')) as wav:
             wav.rewind()

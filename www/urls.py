@@ -28,6 +28,6 @@ urlpatterns = patterns('',
     # (r'^accounts/profile/$', redirect_to, {'url': '/'}),
     #(r'^accounts/login/$', redirect_to, {'url': '/login/'}),
     url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root':settings.MEDIA_ROOT}),
-    url(r'^play/(?P<id>\d+).wav', 'www.recordings.views.play_snippet', name='play')
+    url(r'^play/(?P<id>\d+).mp3', 'www.recordings.views.play_snippet', name='play')
 )
 urlpatterns += staticfiles_urlpatterns()
