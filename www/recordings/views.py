@@ -109,10 +109,31 @@ def _get_snippets(request, per_page, page=1, **filters):
 def home(request):
     return render(request, 'home.html')
 
-def snippet(request, id):
+def _get_snippet(id=None, 
+        organisation=None, 
+        site_code=None, 
+        recorder_code=None,
+        date_time=None, 
+        offset=None):
+    if organisation or\
+            date_time or\
+            recorder_code or\
+            site_code:
+        return Snippet.objects.get(
+                recording__datetime=datetime.datetime.strptime(date_time, "%Y%m%d%H%M%S"),
+                recording__deployment__recorder__code=recorder_code,
+                recording__deployment__owner__code=organisation,
+                recording__deployment__site__code=site_code,
+                id=id,
+            )
+    else:
+        return Snippet.objects.get(id=id)
+
+def snippet(request, **kwargs):
+    snippet = _get_snippet(**kwargs)
     snippets = request.session.get('snippets', [])
-    if int(id) in snippets:
-        index = snippets.index(int(id))
+    if snippet.id in snippets:
+        index = snippets.index(snippet.id)
         try:
             next_id = snippets[index + 1]
         except IndexError:
@@ -124,7 +145,6 @@ def snippet(request, id):
     else:
         next_id = None
         previous_id = None
-    snippet = Snippet.objects.get(id=id)
     return render(request, 'recordings/snippet.html', {'snippet': snippet, 'next_id': next_id, 'previous_id': previous_id})
 
 
@@ -148,26 +168,6 @@ def scores(request, code, version, default_page=1, per_page=100):
     return render(request, 'recordings/scores_list.html', {'scores': scores, 'request_parameters': request_parameters})
 
 
-#url(r'^play/(?P<organisation>[\w]+)-(?P<site_code>[\w]+)-(?P<datetime>\d+)-(?P<offset>[\d\.]+)-(?P<recorder_code>[\w]+)-(?P<id>\d+).wav', 'www.recordings.views.play_snippet', name='play_name')
-def _get_snippet(id=None, 
-        organisation=None, 
-        site_code=None, 
-        recorder_code=None,
-        date_time=None, 
-        offset=None):
-    if organisation or\
-            datetime or\
-            recorder_code or\
-            site_code:
-        return Snippet.objects.get(
-                recording__datetime=datetime.datetime.strptime(date_time, "%Y%m%d%H%M%S"),
-                recording__deployment__recorder__code=recorder_code,
-                recording__deployment__owner__code=organisation,
-                recording__deployment__site__code=site_code,
-                id=id,
-            )
-    else:
-        return Snippet.objects.get(id=id)
 
 def play_snippet(request, **kwargs):
     """Play a snippet. Look for it in three places:
@@ -319,12 +319,25 @@ def analysis_snippet(request, code, snippet_id):
 
 def analysis(request, code):
     this_analysis = Analysis.objects.get(code=code)
+    tag_summary = {}
+    for tag in this_analysis.tags.all():
+        tag_summary[tag.name] = tag.identifications.filter(analysis=this_analysis).count()
     sort_options = ['score', 'time', 'random']
 
+    identifications = Identification.objects.filter(analysis=analysis).select_related()
+    identification_list = [(x.snippet, x.snippet.recording.deployment.site.code, 
+        datetime.strftime(x.snippet.datetime, "%Y-%m-%d"), 
+        datetime.strftime(x.snippet.datetime, "%H:%M:%S"), 
+        ";".join([t.code for t in x.true_tags.all()]), 
+        "%0.1s%0.1s"%(x.user.first_name, x.user.last_name)) for x in idents]
+
     return render(request,
-                  'recordings/analysis.html',
-                   {'sort_options': sort_options,
-                    'analysis': this_analysis})
+            'recordings/analysis.html',
+            {'sort_options': sort_options,
+                'analysis': this_analysis,
+                'tag_summary': tag_summary,
+            }
+        )
 
 
 def analysis_next(request, code):
