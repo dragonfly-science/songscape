@@ -9,6 +9,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 # from django.contrib import admin
 # admin.autodiscover()
 
+#TODO: ISO 8601 datetime
 snippet_regex = r"(?P<organisation>[\w]+)-(?P<site_code>[\w]+)-(?P<date_time>\d+)-(?P<offset>[\d\.]+)-(?P<duration>[\d\.]+)-(?P<recorder_code>[\w]+)"
 
 urlpatterns = patterns('',

@@ -104,6 +104,8 @@ class Deployment(models.Model):
         )
     
     class Meta:
+        #TODO: Check that recorder codes and site codes are unique ... 
+        #e.g.:  unique_together = (('site__code', 'recorder__code', 'start'),)
         unique_together = (('site', 'recorder', 'start'),)
 
 class Recording(models.Model):
@@ -277,11 +279,11 @@ class Analysis(SlugMixin, models.Model):
     description = models.TextField(default="")
     datetime = models.DateTimeField(auto_now=True)
     tags = models.ManyToManyField(Tag)
-    ubertag = models.ForeignKey(Tag, related_name="ubertags", null=True, blank=True)
+    ubertag = models.ForeignKey(Tag, related_name="ubertags", null=True, blank=True)  #TODO: Rename to default_tag, related_name="analyses_default"
     # Should be snippets or filters? and not deployments ...
-    deployments = models.ManyToManyField(Deployment)
-    detectors = models.ManyToManyField(Detector)
-    organisation = models.ForeignKey(Organisation, related_name="analyses")
+    deployments = models.ManyToManyField(Deployment) #TODO Replace with filter
+    detectors = models.ManyToManyField(Detector) #TODO Replace with filter
+    organisation = models.ForeignKey(Organisation, related_name="analyses") #Replace with user
     
     class Meta:
         unique_together = (('organisation', 'code'),)
@@ -295,6 +297,7 @@ class Analysis(SlugMixin, models.Model):
 class Identification(models.Model):
     user = models.ForeignKey(User, related_name="identifications")
     analysis = models.ForeignKey(Analysis, related_name="identifications")
+    #datetime = models.DateTimeField(auto_now=True) #TODO Add datetime
     snippet = models.ForeignKey(Snippet, related_name="identifications")
     scores = models.ManyToManyField(Score)  # This holds the list of scores that the user saw when they made the identification
     true_tags = models.ManyToManyField(Tag, related_name="identifications")
