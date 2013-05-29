@@ -174,11 +174,13 @@ def scores(request, code, version, default_page=1, per_page=100):
 def play_snippet(request, **kwargs):
     """Play a snippet. Look for it in three places:
     1. We have it in the cache (in settings.SNIPPET_DIR)
-    2. We have the recording locally
-    3. We get it from the repository
+    2. We have the recording locally, and we generate the snippet from that
+    3. We get the snippet from the repository
     """
+    # TODO: Use X-Sendfile rather than writing to the HTTPresponse. Will this work for streaming?
+    # TODO: Avoid the use of '/tmp'
     snippet = _get_snippet(**kwargs)
-    snippet_name = os.path.split(request.path)[1]
+    snippet_name = snippet.get_soundfile_name()
     snippet_path = os.path.join(settings.SNIPPET_DIR, snippet_name)
     if not (snippet.soundfile and \
             os.path.exists(snippet.soundfile.path)):
@@ -201,6 +203,30 @@ def play_snippet(request, **kwargs):
             snippet.soundfile.save(snippet_path, File(open('/tmp/%s' % snippet_name)), save=True)
     wav_file = open(os.path.join(settings.MEDIA_ROOT, snippet.soundfile.path), 'r')
     response = StreamingHttpResponse(FileWrapper(wav_file), content_type='audio/wav')
+    return response
+
+def get_sonogram(request, **kwargs):
+    """return a sonogram. Look for it in three places:
+    1. We have the sonogram in the cache (in settings.SONOGRAMS_DIR)
+    2. We have the snippet locally, so make it from that (TODO)
+    3. We have the recording locally, so make it from that
+    4. We get it from the repository
+    """
+    # TODO: Use X-Sendfile rather than writing to the HTTPresponse
+    # TODO: Avoid the use of '/tmp'
+    snippet = _get_snippet(**kwargs)
+    name = snippet.get_sonogram_name()
+    sonogram_path = os.path.join(settings.SONOGRAM_DIR, name)
+    if not (snippet.sonogram and \
+            os.path.exists(snippet.sonogram.path)):
+        if os.path.exists(snippet.recording.path):
+            snippet.save_sonogram(replace=True)
+        else:
+            repository = settings.REPOSITORIES[snippet.recording.deployment.owner.code]
+            urllib.urlretrieve('%s/sonogram/%s' % (repository, name), '/tmp/%s' % name)
+            snippet.sonogram.save(sonogram_path, File(open('/tmp/%s' % name)), save=True)
+    sonogram = open(os.path.join(settings.MEDIA_ROOT, snippet.sonogram.path), 'r')
+    response = HttpResponse(FileWrapper(sonogram), content_type='image/png')
     return response
 
 def tags(request):

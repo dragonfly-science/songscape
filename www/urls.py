@@ -30,6 +30,8 @@ urlpatterns = patterns('',
     url(r'^$', 'www.recordings.views.home', name='home'),
     # (r'^accounts/profile/$', redirect_to, {'url': '/'}),
     #(r'^accounts/login/$', redirect_to, {'url': '/login/'}),
+    url(r'^sonogram/(?P<id>\d+).png', 'www.recordings.views.get_sonogram', name='sonogram_id'),
+    url(r'^sonogram/%s.png' % snippet_regex, 'www.recordings.views.get_sonogram', name='sonogram'),
     url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root':settings.MEDIA_ROOT}),
     url(r'^play/(?P<id>\d+).wav', 'www.recordings.views.play_snippet', name='play'),
     url(r'^play/%s.wav' % snippet_regex, 'www.recordings.views.play_snippet', name='play_name')
