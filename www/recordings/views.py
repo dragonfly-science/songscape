@@ -105,7 +105,6 @@ def _get_snippets(request, per_page, page=1, **filters):
         snippets = paginator.page(paginator.num_pages)
     return snippets
 
-
 def home(request):
     return render(request, 'home.html')
 
@@ -114,17 +113,21 @@ def _get_snippet(id=None,
         site_code=None, 
         recorder_code=None,
         date_time=None, 
-        offset=None):
+        offset=None,
+        duration=None):
     if organisation or\
             date_time or\
             recorder_code or\
-            site_code:
+            site_code or\
+            duration or\
+            offset:
         return Snippet.objects.get(
                 recording__datetime=datetime.datetime.strptime(date_time, "%Y%m%d%H%M%S"),
                 recording__deployment__recorder__code=recorder_code,
                 recording__deployment__owner__code=organisation,
                 recording__deployment__site__code=site_code,
-                id=id,
+                duration=duration,
+                offset=offset,
             )
     else:
         return Snippet.objects.get(id=id)
@@ -168,7 +171,6 @@ def scores(request, code, version, default_page=1, per_page=100):
     return render(request, 'recordings/scores_list.html', {'scores': scores, 'request_parameters': request_parameters})
 
 
-
 def play_snippet(request, **kwargs):
     """Play a snippet. Look for it in three places:
     1. We have it in the cache (in settings.SNIPPET_DIR)
@@ -200,7 +202,6 @@ def play_snippet(request, **kwargs):
     wav_file = open(os.path.join(settings.MEDIA_ROOT, snippet.soundfile.path), 'r')
     response = StreamingHttpResponse(FileWrapper(wav_file), content_type='audio/wav')
     return response
-
 
 def tags(request):
     # TODO: Login required!
