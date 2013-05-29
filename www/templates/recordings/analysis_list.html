@@ -7,7 +7,7 @@
 
 <ul>
 {% for analysis in analyses %}
-	<li>{{ analysis }}</li>
+	<li><a href="{% url 'analysis' analysis.code %}">{{ analysis }}</a></li>
 {% endfor %}
 </ul>
 
