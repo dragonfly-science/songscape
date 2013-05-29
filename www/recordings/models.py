@@ -21,6 +21,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.template.defaultfilters import slugify
 
+from recordings.templatetags.recording_filters import wav_name, sonogram_name, snippet_name
 
 
 class SlugMixin(object):
@@ -181,12 +182,8 @@ class Snippet(models.Model):
         unique_together = (('recording', 'offset', 'duration'),)
     
     def __unicode__(self):
-        return '%s-%s-%s'%(self.recording.deployment.site,
-            self.recording.deployment.recorder,
-            datetime.datetime.strftime(self.datetime, '%Y%m%d-%H%M%S'), 
-            self.duration
-        )
-    
+        return snippet_name(self)
+
     def get_audio(self):
         return self.recording.get_audio(self.offset, self.duration)
 
@@ -219,6 +216,12 @@ class Snippet(models.Model):
 
     def end_time(self):
         return self.offset + self.duration
+
+    def get_sonogram_name(self):
+        return sonogram_name(self)
+
+    def get_soundfile_name(self):
+        return wav_name(self)
 
     @property
     def datetime(self):
