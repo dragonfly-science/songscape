@@ -201,9 +201,10 @@ def play_snippet(request, **kwargs):
             print '%s%s' %(repository, request.path)
             urllib.urlretrieve('%s%s' %(repository, request.path), '/tmp/%s' % snippet_name)
             snippet.soundfile.save(snippet_path, File(open('/tmp/%s' % snippet_name)), save=True)
-    wav_file = open(os.path.join(settings.MEDIA_ROOT, snippet.soundfile.path), 'r')
-    response = StreamingHttpResponse(FileWrapper(wav_file), content_type='audio/wav')
-    return response
+    return HttpResponseRedirect(os.path.join('/media/snippets', snippet_name)) #TODO: This should be dry
+#    wav_file = open(os.path.join(settings.MEDIA_ROOT, snippet.soundfile.path), 'r')
+#    response = StreamingHttpResponse(FileWrapper(wav_file), content_type='audio/wav')
+#    return response
 
 def get_sonogram(request, **kwargs):
     """return a sonogram. Look for it in three places:
@@ -212,7 +213,6 @@ def get_sonogram(request, **kwargs):
     3. We have the recording locally, so make it from that
     4. We get it from the repository
     """
-    # TODO: Use X-Sendfile rather than writing to the HTTPresponse
     # TODO: Avoid the use of '/tmp'
     snippet = _get_snippet(**kwargs)
     name = snippet.get_sonogram_name()
@@ -225,9 +225,7 @@ def get_sonogram(request, **kwargs):
             repository = settings.REPOSITORIES[snippet.recording.deployment.owner.code]
             urllib.urlretrieve('%s/sonogram/%s' % (repository, name), '/tmp/%s' % name)
             snippet.sonogram.save(sonogram_path, File(open('/tmp/%s' % name)), save=True)
-    sonogram = open(os.path.join(settings.MEDIA_ROOT, snippet.sonogram.path), 'r')
-    response = HttpResponse(FileWrapper(sonogram), content_type='image/png')
-    return response
+    return HttpResponseRedirect(os.path.join('/media/sonograms', name)) #TODO: This should be dry
 
 def tags(request):
     # TODO: Login required!
