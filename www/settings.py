@@ -80,7 +80,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+#    'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
 ROOT_URLCONF = 'www.urls'
@@ -157,4 +157,4 @@ if 'test' in sys.argv or 'migrationcheck' in sys.argv:
         from test_settings import *
     except ImportError:
         pass
-
+DEBUG_TOOLBAR_CONFIG = {'INTERCEPT_REDIRECT': False}
