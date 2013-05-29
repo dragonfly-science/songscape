@@ -105,14 +105,38 @@ def _get_snippets(request, per_page, page=1, **filters):
         snippets = paginator.page(paginator.num_pages)
     return snippets
 
-
 def home(request):
     return render(request, 'home.html')
 
-def snippet(request, id):
+def _get_snippet(id=None, 
+        organisation=None, 
+        site_code=None, 
+        recorder_code=None,
+        date_time=None, 
+        offset=None,
+        duration=None):
+    if organisation or\
+            date_time or\
+            recorder_code or\
+            site_code or\
+            duration or\
+            offset:
+        return Snippet.objects.get(
+                recording__datetime=datetime.datetime.strptime(date_time, "%Y%m%d%H%M%S"),
+                recording__deployment__recorder__code=recorder_code,
+                recording__deployment__owner__code=organisation,
+                recording__deployment__site__code=site_code,
+                duration=duration,
+                offset=offset,
+            )
+    else:
+        return Snippet.objects.get(id=id)
+
+def snippet(request, **kwargs):
+    snippet = _get_snippet(**kwargs)
     snippets = request.session.get('snippets', [])
-    if int(id) in snippets:
-        index = snippets.index(int(id))
+    if snippet.id in snippets:
+        index = snippets.index(snippet.id)
         try:
             next_id = snippets[index + 1]
         except IndexError:
@@ -124,7 +148,6 @@ def snippet(request, id):
     else:
         next_id = None
         previous_id = None
-    snippet = Snippet.objects.get(id=id)
     return render(request, 'recordings/snippet.html', {'snippet': snippet, 'next_id': next_id, 'previous_id': previous_id})
 
 
@@ -148,35 +171,16 @@ def scores(request, code, version, default_page=1, per_page=100):
     return render(request, 'recordings/scores_list.html', {'scores': scores, 'request_parameters': request_parameters})
 
 
-#url(r'^play/(?P<organisation>[\w]+)-(?P<site_code>[\w]+)-(?P<datetime>\d+)-(?P<offset>[\d\.]+)-(?P<recorder_code>[\w]+)-(?P<id>\d+).wav', 'www.recordings.views.play_snippet', name='play_name')
-def _get_snippet(id=None, 
-        organisation=None, 
-        site_code=None, 
-        recorder_code=None,
-        date_time=None, 
-        offset=None):
-    if organisation or\
-            datetime or\
-            recorder_code or\
-            site_code:
-        return Snippet.objects.get(
-                recording__datetime=datetime.datetime.strptime(date_time, "%Y%m%d%H%M%S"),
-                recording__deployment__recorder__code=recorder_code,
-                recording__deployment__owner__code=organisation,
-                recording__deployment__site__code=site_code,
-                id=id,
-            )
-    else:
-        return Snippet.objects.get(id=id)
-
 def play_snippet(request, **kwargs):
     """Play a snippet. Look for it in three places:
     1. We have it in the cache (in settings.SNIPPET_DIR)
-    2. We have the recording locally
-    3. We get it from the repository
+    2. We have the recording locally, and we generate the snippet from that
+    3. We get the snippet from the repository
     """
+    # TODO: Use X-Sendfile rather than writing to the HTTPresponse. Will this work for streaming?
+    # TODO: Avoid the use of '/tmp'
     snippet = _get_snippet(**kwargs)
-    snippet_name = os.path.split(request.path)[1]
+    snippet_name = snippet.get_soundfile_name()
     snippet_path = os.path.join(settings.SNIPPET_DIR, snippet_name)
     if not (snippet.soundfile and \
             os.path.exists(snippet.soundfile.path)):
@@ -197,10 +201,31 @@ def play_snippet(request, **kwargs):
             print '%s%s' %(repository, request.path)
             urllib.urlretrieve('%s%s' %(repository, request.path), '/tmp/%s' % snippet_name)
             snippet.soundfile.save(snippet_path, File(open('/tmp/%s' % snippet_name)), save=True)
-    wav_file = open(os.path.join(settings.MEDIA_ROOT, snippet.soundfile.path), 'r')
-    response = StreamingHttpResponse(FileWrapper(wav_file), content_type='audio/wav')
-    return response
+    return HttpResponseRedirect(os.path.join('/media/snippets', snippet_name)) #TODO: This should be dry
+#    wav_file = open(os.path.join(settings.MEDIA_ROOT, snippet.soundfile.path), 'r')
+#    response = StreamingHttpResponse(FileWrapper(wav_file), content_type='audio/wav')
+#    return response
 
+def get_sonogram(request, **kwargs):
+    """return a sonogram. Look for it in three places:
+    1. We have the sonogram in the cache (in settings.SONOGRAMS_DIR)
+    2. We have the snippet locally, so make it from that (TODO)
+    3. We have the recording locally, so make it from that
+    4. We get it from the repository
+    """
+    # TODO: Avoid the use of '/tmp'
+    snippet = _get_snippet(**kwargs)
+    name = snippet.get_sonogram_name()
+    sonogram_path = os.path.join(settings.SONOGRAM_DIR, name)
+    if not (snippet.sonogram and \
+            os.path.exists(snippet.sonogram.path)):
+        if os.path.exists(snippet.recording.path):
+            snippet.save_sonogram(replace=True)
+        else:
+            repository = settings.REPOSITORIES[snippet.recording.deployment.owner.code]
+            urllib.urlretrieve('%s/sonogram/%s' % (repository, name), '/tmp/%s' % name)
+            snippet.sonogram.save(sonogram_path, File(open('/tmp/%s' % name)), save=True)
+    return HttpResponseRedirect(os.path.join('/media/sonograms', name)) #TODO: This should be dry
 
 def tags(request):
     # TODO: Login required!
@@ -319,12 +344,25 @@ def analysis_snippet(request, code, snippet_id):
 
 def analysis(request, code):
     this_analysis = Analysis.objects.get(code=code)
+    tag_summary = {}
+    for tag in this_analysis.tags.all():
+        tag_summary[tag.name] = tag.identifications.filter(analysis=this_analysis).count()
     sort_options = ['score', 'time', 'random']
 
+    identifications = Identification.objects.filter(analysis=analysis).select_related()
+    identification_list = [(x.snippet, x.snippet.recording.deployment.site.code, 
+        datetime.strftime(x.snippet.datetime, "%Y-%m-%d"), 
+        datetime.strftime(x.snippet.datetime, "%H:%M:%S"), 
+        ";".join([t.code for t in x.true_tags.all()]), 
+        "%0.1s%0.1s"%(x.user.first_name, x.user.last_name)) for x in idents]
+
     return render(request,
-                  'recordings/analysis.html',
-                   {'sort_options': sort_options,
-                    'analysis': this_analysis})
+            'recordings/analysis.html',
+            {'sort_options': sort_options,
+                'analysis': this_analysis,
+                'tag_summary': tag_summary,
+            }
+        )
 
 
 def analysis_next(request, code):
