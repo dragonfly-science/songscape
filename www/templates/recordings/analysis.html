@@ -3,13 +3,17 @@
 
 {% block content %}
 
-
+<div class="row">
+<div class="span10">
 <h2> {{ analysis.name }} </h2>
-<p> {{ analysis.organisation.name }}
+<p> {{ analysis.organisation.name }} </p>
 
 {% if analysis.description %}
 <p>{{ analysis.description }}</p>
 {% endif %}
+</div>
+<a class="btn pull-right" href="{% url 'analysis_next' analysis.code %}">Continue</a>
+</div>
 
 <table class="table">
 <thead><th>Tag</th><th>Identifications</th></thead>
