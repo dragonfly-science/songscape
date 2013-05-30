@@ -143,7 +143,8 @@ SNIPPET_DIR = os.path.join(MEDIA_ROOT, 'snippets/')
 # being the organisation codes, and values
 # being the URLs of the servers that hold the
 # raw recordings
-REPOSITORIES = {'RFPT': 'http://rfpt.songscape.org'}
+#REPOSITORIES = {'RFPT': 'http://rfpt.songscape.org'}
+REPOSITORIES = {'RFPT': 'http://192.168.0.123:8888'}
 
 try:
     from local_settings import *
