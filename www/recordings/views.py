@@ -360,10 +360,7 @@ def analysis_snippet(request, code, snippet_id):
         iden.true_tags.add(*true_tags)
         iden.false_tags.add(*false_tags)
 
-        return HttpResponseRedirect('/analysis/%s/%s' % (code, next_id))
-
-    if not snippet.sonogram:
-        return HttpResponseRedirect('/analysis/%s/%s' % (code, next_id))
+        return redirect('analysis_snippet', code=code, snippet_id=analysis.next())
 
     return render(request,
                   'recordings/analysis_snippet.html',
