@@ -10,6 +10,9 @@
     <a href="{% url 'snippet' previous_id %}">&larr; Previous</a>
   </li>
 {% endif %}
+  <li>
+  <span>{{ snippet.recording.deployment.site }}, {{ snippet.datetime }}</span>
+  <li>
 {% if next_id %}
   <li class="next">
     <a href="{% url 'snippet' next_id %}">Next &rarr;</a>
@@ -26,14 +29,14 @@
   </div>
   <div class="span6">
     <ul class="inline">
-        <!-- li class="outlined outline-inverse">{{ snippet.datetime }}</li -->
         {% for tag, c in tags.items %}
         <li class="outlined">{{ tag }} <span class="badge">{{ c }}</span></li>
         {% endfor %}
     </ul>
   </div>
 </div>
-<img src="{{ snippet|sonogram_url }}">
+<img id="sonogram" src="{{ snippet|sonogram_url }}">
 {% endblock content %}
+
 
 

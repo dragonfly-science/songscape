@@ -5,7 +5,7 @@
 {% block content %}
 
 
-<h2> {{ snippet.recording.deployment.site }}, {{ snippet.datetime }}</h2>
+<h3> {{ snippet.recording.deployment.site }}, {{ snippet.datetime }}</h3>
 
 {% if id_before %}
 <p>You have indentified this snippet</p>
@@ -20,13 +20,13 @@
 {% endif %}
 </div>
 
-<div class="span4">
+<div class="span6">
+  <span class="btn">{{ snippet.recording.deployment.site }}, {{ snippet.datetime }}</span>
 </div>
 
+
 <div class="span2">
-{% if next_id %}
-<span class="btn"><a href="{% url 'analysis_snippet' analysis.code next_id %}">Next</a></span>
-{% endif %}
+<span class="btn"><a href="{% url 'analysis_next' analysis.code %}">Next</a></span>
 </div>
 
 {% else %}
