@@ -154,10 +154,12 @@ def snippet(request, **kwargs):
     return render(request, 'recordings/snippet.html', {'snippet': snippet, 'next_id': next_id, 'previous_id': previous_id})
 
 
-def scores(request, code, version, default_page=1, per_page=100):
+def snippets(request, default_page=1, per_page=100):
     filters = _get_filters(request, level='score')
     order = _get_order(request)
     request_parameters = _get_parameters(request)
+    code = 'simple-kiwi'
+    version = '0.1.1'
     detector = Detector.objects.get(code=code, version=version)
     queryset = Score.objects.filter(
         detector=detector).select_related().filter(**filters).order_by(*order)
@@ -171,7 +173,7 @@ def scores(request, code, version, default_page=1, per_page=100):
     # TODO: put the ordering in a method and repopulate it if the user
     # gets to the edge...
     request.session['snippets'] = [score.snippet.id for score in scores]
-    return render(request, 'recordings/scores_list.html', {'scores': scores, 'request_parameters': request_parameters})
+    return render(request, 'recordings/snippets_list.html', {'scores': scores, 'request_parameters': request_parameters})
 
 
 def play_snippet(request, **kwargs):

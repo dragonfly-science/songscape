@@ -37,3 +37,9 @@ h1 {
     margin-left: 3em;
     margin-right: 3em;
 }
+
+.center {
+     float: none;
+     margin-left: auto;
+     margin-right: auto;
+}
