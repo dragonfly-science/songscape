@@ -6,13 +6,14 @@ from collections import Counter
 from contextlib import closing
 from django.core.files import File
 from recordings.models import Snippet, Score, Detector, Tag, Analysis, Deployment, Organisation, Identification
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import StreamingHttpResponse, HttpResponse, HttpResponseRedirect
 from tempfile import TemporaryFile
 from django.core.servers.basehttp import FileWrapper
 from django.conf import settings
 from django.db.models import Sum, Count
+from django.contrib.auth.decorators import login_required
 
 from .forms import TagForm
 from .models import Recording, Site
@@ -158,10 +159,10 @@ def snippet(request, **kwargs):
     for iden in idens:
         tags.update(iden.true_tags.all())
 
-    return render(request, 
-                  'recordings/snippet.html', 
-                  {'snippet': snippet, 
-                   'next_id': next_id, 
+    return render(request,
+                  'recordings/snippet.html',
+                  {'snippet': snippet,
+                   'next_id': next_id,
                    'previous_id': previous_id,
                    'tags': dict(tags)})
 
@@ -316,6 +317,7 @@ def analysis_detail(request, code):
                    {'analysis': analysis})
 
 
+@login_required
 def analysis_snippet(request, code, snippet_id):
     snippets = request.session.get('snippets', [])
     if int(snippet_id) in snippets:
@@ -398,8 +400,11 @@ def analysis(request, code):
         )
 
 
+@login_required
 def analysis_next(request, code):
-    pass
+    this_analysis = Analysis.objects.get(code=code)
+    return redirect('analysis_snippet', code=code, snippet_id=this_analysis.next())
+
 
 
 def summary(request):
