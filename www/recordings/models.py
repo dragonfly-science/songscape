@@ -41,16 +41,16 @@ class UniqueSlugMixin(SlugMixin):
     def is_unique_slug(self, slug):
         qs = self.__class__.objects.filter(code=slug)
         return not qs.exists()
- 
+
     def generate_slug(self):
         original_slug = super(UniqueSlugMixin, self).generate_slug()
         slug = original_slug
- 
+
         iteration = 1
         while not self.is_unique_slug(slug):
             slug = "%s-%d" % (original_slug, iteration)
             iteration += 1
- 
+
         return slug
 
 
@@ -58,19 +58,19 @@ class Organisation(models.Model):
     code = models.SlugField(max_length=32, unique=True)
     name = models.TextField()
     description = models.TextField(null=True, blank=True)
-    
+
     def __unicode__(self):
         return self.name
 
 class Site(models.Model):
-    code = models.SlugField(max_length=32) 
-    name = models.TextField(null=True, blank=True) 
+    code = models.SlugField(max_length=32)
+    name = models.TextField(null=True, blank=True)
     organisation = models.ForeignKey(Organisation, related_name='sites')
     description = models.TextField(null=True, blank=True)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
     altitude = models.FloatField(null=True, blank=True)
-    
+
     def __unicode__(self):
         return '%s-%s' % (self.organisation.code, self.code)
 
@@ -95,16 +95,16 @@ class Deployment(models.Model):
     start = models.DateTimeField()
     end = models.DateTimeField(null=True, blank=True)
     comments = models.TextField(null=True, blank=True)
-    
+
     def __unicode__(self):
-        return '%s-%s-%s-%s'%(self.site, 
+        return '%s-%s-%s-%s'%(self.site,
             datetime.datetime.strftime(self.start, '%Y%m%d-%H%M%S'),
             datetime.datetime.strftime(self.end, '%Y%m%d-%H%M%S'),
-            self.recorder, 
+            self.recorder,
         )
-    
+
     class Meta:
-        #TODO: Check that recorder codes and site codes are unique ... 
+        #TODO: Check that recorder codes and site codes are unique ...
         #e.g.:  unique_together = (('site__code', 'recorder__code', 'start'),)
         unique_together = (('site', 'recorder', 'start'),)
 
@@ -116,10 +116,10 @@ class Recording(models.Model):
     duration = models.FloatField()
     nchannels = models.IntegerField()
     path = models.TextField()
-    
+
     def __unicode__(self):
         return '%s-%s-%s'%(self.deployment.site.code, self.deployment.recorder.code, self.datetime)
-    
+
     class Meta:
         unique_together = (('datetime', 'deployment'),)
 
@@ -167,7 +167,7 @@ class Recording(models.Model):
 class Tag(UniqueSlugMixin, models.Model):
     code = models.SlugField(max_length=32, unique=True)
     name = models.CharField(max_length=30)
-   
+
     def __unicode__(self):
         return '%s' % (self.code)
 
@@ -176,13 +176,13 @@ class Snippet(models.Model):
     recording = models.ForeignKey(Recording, related_name='snippets')
     offset = models.FloatField() #seconds
     duration = models.FloatField()
-    sonogram = models.ImageField(upload_to=settings.SONOGRAM_DIR, null=True, blank=True) 
+    sonogram = models.ImageField(upload_to=settings.SONOGRAM_DIR, null=True, blank=True)
     soundcloud = models.IntegerField(null=True, blank=True)
     soundfile = models.FileField(upload_to=settings.SNIPPET_DIR, null=True, blank=True)
-    
+
     class Meta:
         unique_together = (('recording', 'offset', 'duration'),)
-    
+
     def __unicode__(self):
         return snippet_name(self)
 
@@ -196,9 +196,9 @@ class Snippet(models.Model):
             clf()
             fig = figure(figsize=(10, 5))
             filename = "%s.png" % (self,)
-            specgram(self.get_audio(), 
-                NFFT=NFFT, 
-                Fs=self.recording.sample_rate, 
+            specgram(self.get_audio(),
+                NFFT=NFFT,
+                Fs=self.recording.sample_rate,
                 hold=False)
             string_buffer = StringIO()
             gca().set_ylabel('Frequency (Hz)')
@@ -241,21 +241,21 @@ class Snippet(models.Model):
         return positive, negative, len(identifications)
 
 class Signal(models.Model):
-    code = models.SlugField(max_length=32, unique=True) 
+    code = models.SlugField(max_length=32, unique=True)
     description = models.TextField(null=True, blank=True)
-    
+
     def __unicode__(self):
         return self.code
 
 class Detector(models.Model):
-    code = models.SlugField(max_length=32) 
+    code = models.SlugField(max_length=32)
     signal = models.ForeignKey(Signal, related_name='detectors')
     description = models.TextField(null=True, blank=True)
     version = models.TextField()
 
     def __unicode__(self):
         return '%s %s' % (self.code, self.version)
-    
+
     class Meta:
         unique_together = (('code', 'version'),)
 
@@ -268,10 +268,10 @@ class Score(models.Model):
 
     def __unicode__(self):
         return '%s (%s)' % (self.score, self.description)
-    
+
     class Meta:
         unique_together = (('snippet', 'detector'),)
-    
+
 
 class Analysis(SlugMixin, models.Model):
     name = models.CharField(max_length=32)
@@ -284,7 +284,7 @@ class Analysis(SlugMixin, models.Model):
     deployments = models.ManyToManyField(Deployment) #TODO Replace with filter
     detectors = models.ManyToManyField(Detector) #TODO Replace with filter
     organisation = models.ForeignKey(Organisation, related_name="analyses") #Replace with user
-    
+
     class Meta:
         unique_together = (('organisation', 'code'),)
 
@@ -293,6 +293,15 @@ class Analysis(SlugMixin, models.Model):
 
     def normal_tags(self):
         return self.tags.all().exclude(id__exact=self.ubertag.id)
+
+    def next(self):  # todo specify sampling and order
+        # HACK HACK
+        deployments = self.deployments.all()
+        snippets = Snippet.objects.filter(
+            identifications__isnull=True,
+            recording__deployment__in=deployments).filter(scores__detector__exact=3).latest('scores__score')
+        return snippets.id
+
 
 class Identification(models.Model):
     user = models.ForeignKey(User, related_name="identifications")
