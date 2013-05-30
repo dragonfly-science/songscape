@@ -15,7 +15,7 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2', 
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'songscape',
         'USER': 'dba',
         'PASSWORD': '***',
@@ -94,7 +94,7 @@ INSTALLED_APPS = (
     # 'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+
     'django.contrib.admin',
     'django.contrib.admindocs',
 
