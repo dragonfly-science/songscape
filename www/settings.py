@@ -136,8 +136,6 @@ LOGGING = {
 }
 
 RECORDINGS_PATH = '' # Path of the raw recordings
-SONOGRAM_DIR = os.path.join(MEDIA_ROOT, 'sonograms/')
-SNIPPET_DIR = os.path.join(MEDIA_ROOT, 'snippets/')
 
 # organisation repositories. A dictionary with keys
 # being the organisation codes, and values
@@ -150,6 +148,11 @@ try:
     from local_settings import *
 except ImportError:
     pass
+
+# MEDIA_ROOT can be overridden in local_settings
+SONOGRAM_DIR = os.path.join(MEDIA_ROOT, 'sonograms/')
+SNIPPET_DIR = os.path.join(MEDIA_ROOT, 'snippets/')
+
 
 import sys
 #if manage.py test was called, use test settings
