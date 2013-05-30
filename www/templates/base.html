@@ -60,7 +60,12 @@ see http://twitter.github.com/bootstrap/examples/fluid.html -->
             <span class="icon-bar"></span>
           </a>
           <a class="brand" href="/">Songscape</a>
+          
           <div class="nav-collapse">
+            <ul class="nav">
+            <li><a href="/explore/"></a></li>
+            <li><a href="/analyse/"></a></li>
+            </ul>
             {% if user.is_authenticated %}
             <ul class="nav pull-right">
                 <li><a>Welcome &nbsp; {{ user.first_name }} &nbsp; &nbsp;</a></li>
@@ -101,7 +106,19 @@ see http://twitter.github.com/bootstrap/examples/fluid.html -->
       </div><!--/row-->
 {% endblock main %}
 
-
+      <div class="well" id="footer">
+        <div id="logos">
+                <a href="http://www.dragonfly.co.nz"
+                    alt="Dragonfly Science" title="Dragonfly Science">
+                  <span class="logo" id="dfly"><img src="{{STATIC_URL}}images/greyds.png"></span>
+                </a>
+                  <span class="logo" id="cc"><img src="{{ STATIC_URL }}images/cc.logo.large.png" alt="Creative Commons"
+                    title="Creative Commons"></span>
+        </div>
+        <br/>
+        <p> Songscape is a project of <a href="http://www.dragonfly.co.nz">Dragonfly Science</a>. Unless otherwise stated data, recordings, and images on this site are made available under a <a href="http://creativecommons.org/licenses/by/3.0/"> creative commons attribution 3.0 licence</a>.This licence allows the data to be used for any other purpose and republished, provided that
+attribution is given.
+    </div><!-- footer -->
     </div><!-- container-->
     
     <!-- Le javascript
