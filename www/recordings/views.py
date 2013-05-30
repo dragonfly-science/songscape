@@ -369,12 +369,13 @@ def analysis(request, code):
         tag_summary[tag.name] = tag.identifications.filter(analysis=this_analysis).count()
     sort_options = ['score', 'time', 'random']
 
-    identifications = Identification.objects.filter(analysis=analysis).select_related()
+    identifications = Identification.objects.filter(analysis=this_analysis).select_related()
     identification_list = [(x.snippet, x.snippet.recording.deployment.site.code,
-        datetime.strftime(x.snippet.datetime, "%Y-%m-%d"),
-        datetime.strftime(x.snippet.datetime, "%H:%M:%S"),
+        datetime.datetime.strftime(x.snippet.datetime, "%Y-%m-%d"),
+        datetime.datetime.strftime(x.snippet.datetime, "%H:%M:%S"),
         ";".join([t.code for t in x.true_tags.all()]),
-        "%0.1s%0.1s"%(x.user.first_name, x.user.last_name)) for x in idents]
+        "%0.1s%0.1s"%(x.user.first_name, x.user.last_name)) for x in
+                           identifications]
 
     return render(request,
             'recordings/analysis.html',
