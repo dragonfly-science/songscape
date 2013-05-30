@@ -201,7 +201,17 @@ def play_snippet(request, **kwargs):
     # import pdb; pdb.set_trace()
     snippet = _get_snippet(**kwargs)
     name = snippet.get_soundfile_name()
-    if not os.path.exists(os.path.join(settings.MEDIA_ROOT, 'snippets', name)):
+    file_name = os.path.join(settings.MEDIA_ROOT, 'snippets', name)
+    # First check that the file really is a wav file
+    if os.path.exists(file_name):
+        try:
+            wave.open(file_name)
+        except:
+            try:
+                os.remove(file_name)
+            except OSError:
+                pass
+    if not os.path.exists(file_name):
         if os.path.exists(snippet.recording.path):
             wav_file = TemporaryFile()
             wav_writer = wave.open(wav_file, 'wb')
@@ -218,7 +228,11 @@ def play_snippet(request, **kwargs):
             repository = settings.REPOSITORIES[snippet.recording.deployment.owner.code]
             print '%s%s' %(repository, request.path)
             urllib.urlretrieve('%s%s' %(repository, request.path), '/tmp/%s' % name)
-            snippet.soundfile.save('snippets/%s' % name, File(open('/tmp/%s' % name)), save=True)
+            try:
+                wave.open('/tmp/%s' % name)
+                snippet.soundfile.save('snippets/%s' % name, File(open('/tmp/%s' % name)), save=True)
+            except:
+                pass  #Wasn't a wave file so we don't know what to do
     return HttpResponseRedirect(os.path.join('/media/snippets', name)) #TODO: This should be dry
 #    wav_file = open(os.path.join(settings.MEDIA_ROOT, snippet.soundfile.path), 'r')
 #    response = StreamingHttpResponse(FileWrapper(wav_file), content_type='audio/wav')
