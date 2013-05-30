@@ -200,10 +200,8 @@ def play_snippet(request, **kwargs):
     # TODO: Avoid the use of '/tmp'
     # import pdb; pdb.set_trace()
     snippet = _get_snippet(**kwargs)
-    snippet_name = snippet.get_soundfile_name()
-    snippet_path = os.path.join(settings.SNIPPET_DIR, snippet_name)
-    if not (snippet.soundfile and \
-            os.path.exists(snippet.soundfile.path)):
+    name = snippet.get_soundfile_name()
+    if not os.path.exists(os.path.join(settings.MEDIA_ROOT, 'snippets', name)):
         if os.path.exists(snippet.recording.path):
             wav_file = TemporaryFile()
             wav_writer = wave.open(wav_file, 'wb')
@@ -214,14 +212,14 @@ def play_snippet(request, **kwargs):
                     snippet.offset, snippet.duration))
             wav_writer.close()
             wav_file.seek(0)
-            snippet.soundfile.save(snippet_path, File(wav_file), save=True)
+            snippet.soundfile.save('snippets/%s' % name, File(wav_file), save=True)
             snippet.save()
         else:
             repository = settings.REPOSITORIES[snippet.recording.deployment.owner.code]
             print '%s%s' %(repository, request.path)
-            urllib.urlretrieve('%s%s' %(repository, request.path), '/tmp/%s' % snippet_name)
-            snippet.soundfile.save(snippet_path, File(open('/tmp/%s' % snippet_name)), save=True)
-    return HttpResponseRedirect(os.path.join('/media/snippets', snippet_name)) #TODO: This should be dry
+            urllib.urlretrieve('%s%s' %(repository, request.path), '/tmp/%s' % name)
+            snippet.soundfile.save('snippets/%s' % name, File(open('/tmp/%s' % name)), save=True)
+    return HttpResponseRedirect(os.path.join('/media/snippets', name)) #TODO: This should be dry
 #    wav_file = open(os.path.join(settings.MEDIA_ROOT, snippet.soundfile.path), 'r')
 #    response = StreamingHttpResponse(FileWrapper(wav_file), content_type='audio/wav')
 #    return response
@@ -237,14 +235,14 @@ def get_sonogram(request, **kwargs):
     snippet = _get_snippet(**kwargs)
     name = snippet.get_sonogram_name()
     sonogram_path = os.path.join(settings.SONOGRAM_DIR, name)
-    if not (snippet.sonogram and \
-            os.path.exists(snippet.sonogram.path)):
+    if not os.path.exists(os.path.join(settings.MEDIA_ROOT, 'sonograms', name)):
         if os.path.exists(snippet.recording.path):
             snippet.save_sonogram(replace=True)
         else:
             repository = settings.REPOSITORIES[snippet.recording.deployment.owner.code]
             urllib.urlretrieve('%s/sonogram/%s' % (repository, name), '/tmp/%s' % name)
-            snippet.sonogram.save(sonogram_path, File(open('/tmp/%s' % name)), save=True)
+            snippet.sonogram.save('sonograms/%s' % name, File(open('/tmp/%s' % name)), save=True)
+            snippet.save()
     return HttpResponseRedirect(os.path.join('/media/sonograms', name)) #TODO: This should be dry
 
 def tags(request):
