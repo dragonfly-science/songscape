@@ -2,6 +2,7 @@ import datetime
 import wave
 import os
 import urllib
+from collections import Counter
 from contextlib import closing
 from django.core.files import File
 from recordings.models import Snippet, Score, Detector, Tag, Analysis, Deployment, Organisation, Identification
@@ -134,6 +135,7 @@ def _get_snippet(id=None,
     else:
         return Snippet.objects.get(id=id)
 
+
 def snippet(request, **kwargs):
     snippet = _get_snippet(**kwargs)
     snippets = request.session.get('snippets', [])
@@ -151,12 +153,24 @@ def snippet(request, **kwargs):
         next_id = None
         previous_id = None
 
-    return render(request, 'recordings/snippet.html', {'snippet': snippet, 'next_id': next_id, 'previous_id': previous_id})
+    idens = snippet.identifications.all()
+    tags = Counter()
+    for iden in idens:
+        tags.update(iden.true_tags.all())
+
+    return render(request, 
+                  'recordings/snippet.html', 
+                  {'snippet': snippet, 
+                   'next_id': next_id, 
+                   'previous_id': previous_id,
+                   'tags': dict(tags)})
 
 
 def snippets(request, default_page=1, per_page=100):
     filters = _get_filters(request, level='score')
     order = _get_order(request)
+    if len(order) == 0:
+        order = ['-score']
     request_parameters = _get_parameters(request)
     code = 'simple-kiwi'
     version = '0.1.1'

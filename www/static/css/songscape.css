@@ -38,8 +38,12 @@ h1 {
     margin-right: 3em;
 }
 
-.center {
-     float: none;
-     margin-left: auto;
-     margin-right: auto;
-}
+.outlined {
+      display: inline-block;
+        padding: 5px 14px;
+          background-color: #fff;
+            border: 1px solid #ddd;
+              -webkit-border-radius: 15px;
+                   -moz-border-radius: 15px;
+                             border-radius: 15px;
+                         }

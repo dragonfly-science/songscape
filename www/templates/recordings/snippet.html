@@ -18,14 +18,23 @@
 </ul>
 
 <div class="row">
-  <div class="span3">
-    <span class="label label-inverse">{{ snippet.datetime }}</span>
-  </div>
   <div class="span4">
     <audio controls>
      <source src="{{ snippet|wav_url }}" type="audio/wav">
      "Hmm can't play the sound"
     </audio>
+  </div>
+  <div class="span6">
+      <div class="span6">
+        <span class="outlined">{{ snippet.datetime }}</span>
+    </div>
+    <div class="span6">
+    <ul class="inline">
+        {% for tag, c in tags.items %}
+        <li class="outlined">{{ tag }} <span class="badge">{{ c }}</span></li>
+        {% endfor %}
+    </ul>
+</div>
   </div>
 </div>
 <img src="{{ snippet|sonogram_url }}">
