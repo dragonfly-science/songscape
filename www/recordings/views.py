@@ -11,8 +11,10 @@ from django.http import StreamingHttpResponse, HttpResponse, HttpResponseRedirec
 from tempfile import TemporaryFile
 from django.core.servers.basehttp import FileWrapper
 from django.conf import settings
+from django.db.models import Sum, Count
 
 from .forms import TagForm
+from .models import Recording, Site
 
 FILTERS = {
     'score': {
@@ -108,11 +110,11 @@ def _get_snippets(request, per_page, page=1, **filters):
 def home(request):
     return render(request, 'home.html')
 
-def _get_snippet(id=None, 
-        organisation=None, 
-        site_code=None, 
+def _get_snippet(id=None,
+        organisation=None,
+        site_code=None,
         recorder_code=None,
-        date_time=None, 
+        date_time=None,
         offset=None,
         duration=None):
     if organisation or\
@@ -148,6 +150,7 @@ def snippet(request, **kwargs):
     else:
         next_id = None
         previous_id = None
+
     return render(request, 'recordings/snippet.html', {'snippet': snippet, 'next_id': next_id, 'previous_id': previous_id})
 
 
@@ -179,6 +182,7 @@ def play_snippet(request, **kwargs):
     """
     # TODO: Use X-Sendfile rather than writing to the HTTPresponse. Will this work for streaming?
     # TODO: Avoid the use of '/tmp'
+    # import pdb; pdb.set_trace()
     snippet = _get_snippet(**kwargs)
     snippet_name = snippet.get_soundfile_name()
     snippet_path = os.path.join(settings.SNIPPET_DIR, snippet_name)
@@ -310,7 +314,7 @@ def analysis_snippet(request, code, snippet_id):
     false_tags = []
     if id_before:
         true_tags = previous_identification[0].true_tags.all()
-        false_tags = previous_identification[0].false_tags.all() 
+        false_tags = previous_identification[0].false_tags.all()
 
     if request.method == "POST":
         true_tags = []
@@ -331,11 +335,11 @@ def analysis_snippet(request, code, snippet_id):
     if not snippet.sonogram:
         return HttpResponseRedirect('/analysis/%s/%s' % (code, next_id))
 
-    return render(request, 
-                  'recordings/analysis_snippet.html', 
+    return render(request,
+                  'recordings/analysis_snippet.html',
                   {'snippet': snippet,
                    'analysis': analysis,
-                   'next_id': next_id, 
+                   'next_id': next_id,
                    'id_before': id_before,
                    'true_tags': true_tags,
                    'false_tags': false_tags,
@@ -350,10 +354,10 @@ def analysis(request, code):
     sort_options = ['score', 'time', 'random']
 
     identifications = Identification.objects.filter(analysis=analysis).select_related()
-    identification_list = [(x.snippet, x.snippet.recording.deployment.site.code, 
-        datetime.strftime(x.snippet.datetime, "%Y-%m-%d"), 
-        datetime.strftime(x.snippet.datetime, "%H:%M:%S"), 
-        ";".join([t.code for t in x.true_tags.all()]), 
+    identification_list = [(x.snippet, x.snippet.recording.deployment.site.code,
+        datetime.strftime(x.snippet.datetime, "%Y-%m-%d"),
+        datetime.strftime(x.snippet.datetime, "%H:%M:%S"),
+        ";".join([t.code for t in x.true_tags.all()]),
         "%0.1s%0.1s"%(x.user.first_name, x.user.last_name)) for x in idents]
 
     return render(request,
@@ -367,3 +371,26 @@ def analysis(request, code):
 
 def analysis_next(request, code):
     pass
+
+
+def summary(request):
+
+    # get the total duration
+    duration = Recording.objects.all().aggregate(total_duration=Sum('duration'))
+    duration = str(datetime.timedelta(seconds = round(duration['total_duration'], 0)))
+
+    tags = Tag.objects.all().annotate(tag_count=Count('identifications')).order_by('-tag_count')
+
+    return render(request,
+                  'recordings/summary.html',
+                  {
+                    'recording_count': Recording.objects.count(),
+                    'site_count': Site.objects.count(),
+                    'deployment_count': Deployment.objects.count(),
+                    'snippet_count': Snippet.objects.count(),
+                    'duration': duration,
+                    'identification_count': Identification.objects.count(),
+                    'remaining_count': Snippet.objects.filter(identifications__exact=None).count(),
+                    'tags': tags
+                  }
+        )
