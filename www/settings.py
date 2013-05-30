@@ -24,7 +24,7 @@ DATABASES = {
     }
 }
 
-TIME_ZONE = 'Pacific/Auckland'
+#TIME_ZONE = 'Pacific/Auckland'
 LANGUAGE_CODE = 'en-nz'
 USE_I18N = True
 USE_L10N = True
