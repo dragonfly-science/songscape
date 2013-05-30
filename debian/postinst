@@ -74,6 +74,10 @@ case "$1" in
         chown www-data:www-data /var/www/.matplotlib
         chmod o-rx /var/www/.matplotlib
 
+        mkdir -p /var/lib/sitedata/songscape
+        chown www-data:www-data /var/lib/sitedata/songscape
+        chmod o-rx /var/lib/sitedata/songscape
+
         # Make a copy of the template apache config to work on, then copy into place
         cp /etc/songscape/apache.conf.template /etc/songscape/apache.conf.working
 

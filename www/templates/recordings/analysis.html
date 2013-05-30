@@ -3,6 +3,23 @@
 
 {% block content %}
 
+
+<h2> {{ analysis.name }} </h2>
+<p> {{ analysis.organisation.name }}
+
+{% if analysis.description %}
+<p>{{ analysis.description }}</p>
+{% endif %}
+
+<table class="table">
+<thead><th>Tag</th><th>Identifications</th></thead>
+<tbody>
+{% for tag, number in tag_summary.items %}
+<tr><td>{{ tag }}</td><td>{{ number }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+<!--
 <a class="btn" href="{% url 'analysis_next' analysis.code %}">Next unidentified snippet</a>
 
 <hr class="bs-docs-separator">
@@ -14,5 +31,5 @@
 	{% endfor %}
 </select>
 </form>
-
+-->
 {% endblock %}

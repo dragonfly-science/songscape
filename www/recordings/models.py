@@ -21,6 +21,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.template.defaultfilters import slugify
 
+from recordings.templatetags.recording_filters import wav_name, sonogram_name, snippet_name
 
 
 class SlugMixin(object):
@@ -96,13 +97,15 @@ class Deployment(models.Model):
     comments = models.TextField(null=True, blank=True)
     
     def __unicode__(self):
-        return '%s-%s-%s'%(self.site, 
+        return '%s-%s-%s-%s'%(self.site, 
             datetime.datetime.strftime(self.start, '%Y%m%d-%H%M%S'),
             datetime.datetime.strftime(self.end, '%Y%m%d-%H%M%S'),
             self.recorder, 
         )
     
     class Meta:
+        #TODO: Check that recorder codes and site codes are unique ... 
+        #e.g.:  unique_together = (('site__code', 'recorder__code', 'start'),)
         unique_together = (('site', 'recorder', 'start'),)
 
 class Recording(models.Model):
@@ -181,12 +184,8 @@ class Snippet(models.Model):
         unique_together = (('recording', 'offset', 'duration'),)
     
     def __unicode__(self):
-        return '%s-%s-%s'%(self.recording.deployment.site,
-            self.recording.deployment.recorder,
-            datetime.datetime.strftime(self.datetime, '%Y%m%d-%H%M%S'), 
-            self.duration
-        )
-    
+        return snippet_name(self)
+
     def get_audio(self):
         return self.recording.get_audio(self.offset, self.duration)
 
@@ -220,10 +219,26 @@ class Snippet(models.Model):
     def end_time(self):
         return self.offset + self.duration
 
+    def get_sonogram_name(self):
+        return sonogram_name(self)
+
+    def get_soundfile_name(self):
+        return wav_name(self)
+
     @property
     def datetime(self):
         return self.recording.datetime + datetime.timedelta(seconds=self.offset)
 
+    def count_tag(self, tag, **kwargs):
+        identifications = Identification.objects.filter(snippet=self, **kwargs)
+        positive = 0
+        negative = 0
+        for identification in identifications:
+            if tag in identification.true_tags.all():
+                positive += 1
+            if tag in identification.false_tags.all():
+                negative += 1
+        return positive, negative, len(identifications)
 
 class Signal(models.Model):
     code = models.SlugField(max_length=32, unique=True) 
@@ -264,10 +279,11 @@ class Analysis(SlugMixin, models.Model):
     description = models.TextField(default="")
     datetime = models.DateTimeField(auto_now=True)
     tags = models.ManyToManyField(Tag)
-    ubertag = models.ForeignKey(Tag, related_name="ubertags", null=True, blank=True)
-    deployments = models.ManyToManyField(Deployment)
-    detectors = models.ManyToManyField(Detector)
-    organisation = models.ForeignKey(Organisation, related_name="analyses")
+    ubertag = models.ForeignKey(Tag, related_name="ubertags", null=True, blank=True)  #TODO: Rename to default_tag, related_name="analyses_default"
+    # Should be snippets or filters? and not deployments ...
+    deployments = models.ManyToManyField(Deployment) #TODO Replace with filter
+    detectors = models.ManyToManyField(Detector) #TODO Replace with filter
+    organisation = models.ForeignKey(Organisation, related_name="analyses") #Replace with user
     
     class Meta:
         unique_together = (('organisation', 'code'),)
@@ -278,13 +294,13 @@ class Analysis(SlugMixin, models.Model):
     def normal_tags(self):
         return self.tags.all().exclude(id__exact=self.ubertag.id)
 
-
 class Identification(models.Model):
-    user = models.ForeignKey(User)
-    analysis = models.ForeignKey(Analysis)
-    snippet = models.ForeignKey(Snippet)
+    user = models.ForeignKey(User, related_name="identifications")
+    analysis = models.ForeignKey(Analysis, related_name="identifications")
+    #datetime = models.DateTimeField(auto_now=True) #TODO Add datetime
+    snippet = models.ForeignKey(Snippet, related_name="identifications")
     scores = models.ManyToManyField(Score)  # This holds the list of scores that the user saw when they made the identification
-    true_tags = models.ManyToManyField(Tag, related_name="true_tags")
-    false_tags = models.ManyToManyField(Tag, related_name="false_tags")
+    true_tags = models.ManyToManyField(Tag, related_name="identifications")
+    false_tags = models.ManyToManyField(Tag, related_name="negative_identifications")
     comment = models.TextField(default="")
 
