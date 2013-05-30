@@ -30,7 +30,7 @@
 </div>
 <div class="span3">
   <a class="btn btn-inverse btn-large">Explore</a>
-  <a class="btn btn-inverse btn-large">Analyse</a>
+  <a class="btn btn-inverse btn-large" href="{% url 'analysis_list' %}">Analyse</a>
 </div>
 </div>
 
@@ -38,15 +38,15 @@
 
 <div class="row">
 <div class="span6">
-<h4>Analysis Results</h4>
+<h4>Analysis results</h4>
 <div class="well">
 <table class="table">
   <tr>
-    <th>Snippets Analysed</th>
+    <th>Snippets analysed</th>
     <td>{{ identification_count }}</td>
   </tr>
   <tr>
-    <th>Snippets Remaining</th>
+    <th>Snippets remaining</th>
     <td>{{ remaining_count }}</td>
   </tr>
 </table>
