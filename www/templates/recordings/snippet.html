@@ -17,16 +17,23 @@
 {% endif %}
 </ul>
 
-{% if snippet.sonogram %}
-<audio controls> 
- <source src="{{ snippet|wav_url }}" type="audio/wav">
- "Hmm can't play the sound"
-</audio>
-{{ snippet.datetime }}
-<img src="{{ snippet.sonogram.url }}">
-{% else %}
-<h2> Boohoo. Nothing to see here</h2>
-{% endif %}
+<div class="row">
+  <div class="span4">
+    <audio controls>
+     <source src="{{ snippet|wav_url }}" type="audio/wav">
+     "Hmm can't play the sound"
+    </audio>
+  </div>
+  <div class="span6">
+    <ul class="inline">
+        <li class="outlined outline-inverse">{{ snippet.datetime }}</li>
+        {% for tag, c in tags.items %}
+        <li class="outlined">{{ tag }} <span class="badge">{{ c }}</span></li>
+        {% endfor %}
+    </ul>
+  </div>
+</div>
+<img src="{{ snippet|sonogram_url }}">
 {% endblock content %}
 
 

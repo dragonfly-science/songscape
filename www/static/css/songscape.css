@@ -24,3 +24,32 @@ h1 {
     margin-top: 1em;
     line-height:1.2em;
 }
+
+#footer {
+    font-size: 0.9em;
+    color: rgb(70, 70, 70);
+    margin-top: 6em;
+}
+#logos {
+    text-align: center;
+}
+.logo {
+    margin-left: 3em;
+    margin-right: 3em;
+}
+
+.outlined {
+    display: inline-block;
+    padding: 5px 14px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    -webkit-border-radius: 15px;
+    -moz-border-radius: 15px;
+    border-radius: 15px;
+}
+
+.outline-inverse {
+    background-color: #333333;
+    color: rgba(255, 255, 255, 0.75);
+}
+

@@ -5,7 +5,7 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    ('Joel Pitt', 'joel@dragonfly.co.nz'),
+    ('Christopher Knox', 'chris@dragonfly.co.nz'),
 )
 
 # This directory
@@ -15,7 +15,7 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2', 
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'songscape',
         'USER': 'dba',
         'PASSWORD': '***',
@@ -80,7 +80,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+#    'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
 ROOT_URLCONF = 'www.urls'
@@ -94,7 +94,7 @@ INSTALLED_APPS = (
     # 'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+
     'django.contrib.admin',
     'django.contrib.admindocs',
 
@@ -136,19 +136,23 @@ LOGGING = {
 }
 
 RECORDINGS_PATH = '' # Path of the raw recordings
-SONOGRAM_DIR = os.path.join(MEDIA_ROOT, 'sonograms/')
-SNIPPET_DIR = os.path.join(MEDIA_ROOT, 'snippets/')
 
 # organisation repositories. A dictionary with keys
 # being the organisation codes, and values
 # being the URLs of the servers that hold the
 # raw recordings
-REPOSITORIES = {'RFPT': 'http://rfpt.songscape.org'}
+#REPOSITORIES = {'RFPT': 'http://rfpt.songscape.org'}
+REPOSITORIES = {'RFPT': 'http://192.168.0.123:8888'}
 
 try:
     from local_settings import *
 except ImportError:
     pass
+
+# MEDIA_ROOT can be overridden in local_settings
+SONOGRAM_DIR = os.path.join(MEDIA_ROOT, 'sonograms/')
+SNIPPET_DIR = os.path.join(MEDIA_ROOT, 'snippets/')
+
 
 import sys
 #if manage.py test was called, use test settings
@@ -157,4 +161,4 @@ if 'test' in sys.argv or 'migrationcheck' in sys.argv:
         from test_settings import *
     except ImportError:
         pass
-
+DEBUG_TOOLBAR_CONFIG = {'INTERCEPT_REDIRECT': False}
