@@ -97,7 +97,7 @@ class Deployment(models.Model):
     comments = models.TextField(null=True, blank=True)
     
     def __unicode__(self):
-        return '%s-%s-%s'%(self.site, 
+        return '%s-%s-%s-%s'%(self.site, 
             datetime.datetime.strftime(self.start, '%Y%m%d-%H%M%S'),
             datetime.datetime.strftime(self.end, '%Y%m%d-%H%M%S'),
             self.recorder, 
