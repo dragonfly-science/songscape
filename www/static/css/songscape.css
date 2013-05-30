@@ -39,11 +39,17 @@ h1 {
 }
 
 .outlined {
-      display: inline-block;
-        padding: 5px 14px;
-          background-color: #fff;
-            border: 1px solid #ddd;
-              -webkit-border-radius: 15px;
-                   -moz-border-radius: 15px;
-                             border-radius: 15px;
-                         }
+    display: inline-block;
+    padding: 5px 14px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    -webkit-border-radius: 15px;
+    -moz-border-radius: 15px;
+    border-radius: 15px;
+}
+
+.outline-inverse {
+    background-color: #333333;
+    color: rgba(255, 255, 255, 0.75);
+}
+
