@@ -22,7 +22,7 @@
 
 <div class="row">
   <div class="span4">
-    <audio controls>
+    <audio id="snippet">
      <source src="{{ snippet|wav_url }}" type="audio/wav">
      "Hmm can't play the sound"
     </audio>
@@ -38,5 +38,32 @@
 <img id="sonogram" src="{{ snippet|sonogram_url }}">
 {% endblock content %}
 
+{% block script %}
+<script type="text/javascript">
+$(document).ready(function() {
+  $('#sonogram').bind('click', function(d) {
+    // hack hack - for some reason the first time a page is loaded the
+    // media is not seekable - something to do with the redirect
+    if ($('#snippet')[0].seekable.length === 0) {
+      location.reload()
+    }
+
+    // offset = 0.13 is basically the start the sonogram and 0.0 the end.
+    var offset = d.offsetX/ $(this).width();
+    // scale accordingly
+    offset -= 0.13;
+    offset /= (0.9 - 0.13);
+
+    var snippet = document.getElementById('snippet');
+    // Do we want to be able to pause it? Or do we just click
+    // on what we want and then when done move to the next one?
+    snippet.currentTime = offset * snippet.duration
+    snippet.play()
+  });
+});
+
+</script>
+
+{% endblock %}
 
 
