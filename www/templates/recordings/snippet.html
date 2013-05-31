@@ -35,30 +35,67 @@
     </ul>
   </div>
 </div>
-<img id="sonogram" src="{{ snippet|sonogram_url }}">
+<canvas id="canvas" width="1000" height="500"></canvas>
+<!-- TODO: just draw the image and pop up controls if no canvas
+img id="sonogram" src="{{ snippet|sonogram_url }}" -->
 {% endblock content %}
 
 {% block script %}
 <script type="text/javascript">
 $(document).ready(function() {
-  $('#sonogram').bind('click', function(d) {
+  var canvas = document.getElementById("canvas");
+  var context = document.getElementById('canvas').getContext('2d');
+  var snippet = document.getElementById('snippet');
+
+  var sonogram = new Image();
+  sonogram.onload = function() {
+    context.drawImage(this, 0, 0);
+  }
+  sonogram.src = '{{ snippet|sonogram_url }}';
+
+  function draw_playback(canvas_offset) {
+    // SVG might be more efficient oh well.
+    // And it could be animated cleanly - oh well you have to start somewhere
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(sonogram, 0, 0);
+    context.beginPath();
+    context.moveTo(canvas_offset, 0);
+    context.lineTo(canvas_offset, canvas.height);
+    context.stroke();
+    context.closePath();
+  }
+
+  $('#canvas').bind('click', function(d) {
     // hack hack - for some reason the first time a page is loaded the
     // media is not seekable - something to do with the redirect
-    if ($('#snippet')[0].seekable.length === 0) {
+    if (snippet.seekable.length === 0) {
       location.reload()
     }
 
-    // offset = 0.13 is basically the start the sonogram and 0.0 the end.
-    var offset = d.offsetX/ $(this).width();
-    // scale accordingly
-    offset -= 0.13;
-    offset /= (0.9 - 0.13);
-
-    var snippet = document.getElementById('snippet');
     // Do we want to be able to pause it? Or do we just click
     // on what we want and then when done move to the next one?
+    // offset = 0.13 is basically the start the sonogram and 0.9 the end.
+    var sonogram_start = 0.13;
+    var sonogram_end = 0.9;
+    var sonogram_range = 0.9 - 0.13;
+    var offset = d.offsetX / $(this).width();
+    // scale accordingly
+    offset -= sonogram_start;
+    offset /= sonogram_range;
     snippet.currentTime = offset * snippet.duration
+
+    draw_playback(d.offsetX);
+
     snippet.play()
+
+    $('#snippet').bind('timeupdate', function(e) {
+        var offset = snippet.currentTime / snippet.duration;
+        offset *= sonogram_range;
+        offset += sonogram_start;
+        offset *= canvas.width
+        draw_playback(offset);
+    });
+
   });
 });
 
