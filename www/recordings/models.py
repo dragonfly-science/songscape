@@ -111,7 +111,7 @@ class Deployment(models.Model):
 class Recording(models.Model):
     datetime = models.DateTimeField()
     deployment = models.ForeignKey(Deployment, related_name='recordings')
-    sha1 = models.TextField()
+    md5 = models.TextField()
     sample_rate = models.IntegerField()
     duration = models.FloatField()
     nchannels = models.IntegerField()
@@ -124,16 +124,16 @@ class Recording(models.Model):
         unique_together = (('datetime', 'deployment'),)
 
     def get_hash(self):
-        hasher = hashlib.sha1()
-        hasher.update(open(self.path).read(2000))
+        hasher = hashlib.md5()
+        hasher.update(open(self.path).read())
         return hasher.hexdigest()
 
     def verify_hash(self):
-        return self.sha1 == self.get_hash()
+        return self.md5 == self.get_hash()
 
     def already_exists(self):
         try:
-            Recording.objects.get(sha1=self.get_hash())
+            Recording.objects.get(md5=self.get_hash())
             return True
         except Recording.DoesNotExistError:
             return False
@@ -145,7 +145,7 @@ class Recording(models.Model):
         self.sample_rate = framerate
         self.duration = nframes/float(framerate)
         self.nchannels = nchannels
-        self.sha1 = self.get_hash()
+        self.md5 = self.get_hash()
         super(Recording, self).save(*args, **kwargs)
 
     def _get_frames(self, offset, duration):

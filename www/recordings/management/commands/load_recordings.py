@@ -33,7 +33,7 @@ class Command(BaseCommand):
                         except Recording.DoesNotExist:
                             recording = Recording(datetime=starttime, deployment=deployment, path=path)
                             try:
-                                recording = Recording.objects.get(sha1=recording.get_hash())
+                                recording = Recording.objects.get(md5=recording.get_hash())
                             except Recording.DoesNotExist:
                                 recording.save()
                             except KeyboardInterrupt:
