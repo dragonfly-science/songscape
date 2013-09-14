@@ -1,3 +1,16 @@
+#! /usr/bin/python
+'''
+This script is used for storing files in a MongoDB GridFS store. The files are expected to be
+read only, and are identified by their MD5 sum. The idea is that they may be transferred from
+standard file systems, or portable drives, into the GridFS store, where they are available
+to users over the network.
+
+Example usage:
+python file_indexer.py /myfiles -d audiofiles -f "*.wav"
+
+
+'''
+
 import argparse
 import fnmatch
 import hashlib
