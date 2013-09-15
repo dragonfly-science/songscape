@@ -145,7 +145,7 @@ class Recording(models.Model):
         self.sample_rate = framerate
         self.duration = nframes/float(framerate)
         self.nchannels = nchannels
-        self.md5 = self.get_hash()
+        self.md5 = kwargs.get('md5', self.get_hash())
         super(Recording, self).save(*args, **kwargs)
 
     def _get_frames(self, offset, duration):
