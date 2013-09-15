@@ -17,7 +17,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'songscape',
-        'USER': 'dba',
+        'USER': 'songscape',
         'PASSWORD': '***',
         'HOST': 'localhost',
         'PORT': '',
