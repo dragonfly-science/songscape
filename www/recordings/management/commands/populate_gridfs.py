@@ -14,12 +14,11 @@ class Command(BaseCommand):
         mongo = MongoClient()
         fs = GridFS(mongo.songscape, collection='recordings')
         for r in recordings:
-            if fs.exists(sha1=r.sha1):
+            if fs.exists(md5=r.md5):
                 print "skipping", r.path
                 continue
             _, filename = os.path.split(r.path)    
             gridfile = fs.new_file(filename=filename, 
-                                   sha1=r.sha1,
                                    site=str(r.deployment.site),
                                    recorder=str(r.deployment.recorder),
                                    owner=str(r.deployment.owner),
