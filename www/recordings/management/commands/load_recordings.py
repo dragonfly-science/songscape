@@ -23,6 +23,8 @@ logging.basicConfig(
     level=logging.INFO,
     filename='songscape-load-recordings.log')
 
+class RecorderSiteError(Exception):
+    pass
 
 def get_starttime(filename, count=0):
     """returns the start time, by parsing the filename of a WAV file from the DOC recorders"""
@@ -73,10 +75,10 @@ def save_canonical(recording):
 
 def get_recorder_site(path):
     # check for Susan's new paths
-    m = re.match(".*/data_by_location/(?P<recorder>KR[A-Z1-9]+)_.*", path)
+    m = re.match(".*/data_by_location/(?P<recorder>KR[A-Z0-9]+)_.*", path)
     if m:
         return m.groups()[0], None
-    m = re.match(".*/data_by_location/(?P<site>[A-Z1-9]+)_.*", path)
+    m = re.match(".*/data_by_location/(?P<site>[A-Z0-9]+)_.*", path)
     if m:
         return None, m.groups()[0]
     # First check for an Innes style path
@@ -87,7 +89,7 @@ def get_recorder_site(path):
     m = re.match(".*/(?P<recorder>kr\d+)[ab]/.*wav", path)
     if m:
         return m.groups()[0].upper(), None
-
+    raise RecorderSiteError
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
@@ -113,7 +115,7 @@ class Command(BaseCommand):
                     try:
                         starttime = get_starttime(f)
                     except ValueError:
-                        logging.error('filename not in expected format: %s', path)
+                        logging.error('unable to extract date and time from filename: %s', path)
                     try:
                         recorder_code, site_code = get_recorder_site(path)
                         logging.debug('recorder %s and site %s: %s', recorder_code, site_code, path)
@@ -173,8 +175,12 @@ class Command(BaseCommand):
                         logging.error('multiple matching deployment found: %s', path)
                     except IntegrityError:
                         logging.error('integrity error when trying to save file: %s', path)
+                    except wave.Error:
+                        logging.error("doesn't seem to be a WAV file: %s", path)
+                    except RecorderSiteError:
+                        logging.error('unable to extract recorder or site from path: %s', path)
                     except KeyboardInterrupt:
                         break
-                    except:
-                        logging.error('Hmmm. Something weird happened with this file: %s', path)
+                    #except:
+                    #    logging.error('Hmmm. Something weird happened with this file: %s', path)
                                 
