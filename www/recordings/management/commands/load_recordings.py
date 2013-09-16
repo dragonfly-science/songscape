@@ -77,16 +77,16 @@ def get_recorder_site(path):
     # check for Susan's new paths
     m = re.match(".*/data_by_location/(?P<recorder>KR[A-Z0-9]+)_.*", path)
     if m:
-        return m.groups()[0], None
-    m = re.match(".*/data_by_location/(?P<site>[A-Z0-9]+)_.*", path)
+        return m.groups()[0].upper(), None
+    m = re.match(".*/data_by_location/(?P<site>[a-zA-Z0-9]+)_.*", path)
     if m:
-        return None, m.groups()[0]
+        return None, m.groups()[0].upper()
     # First check for an Innes style path
     m = re.match(".*/MIC_(?P<recorder>KR\w+).*/LOCATION_\d*_(?P<site>\w+)/.*", path)
     if m:
-        return m.groups()
+        return [x.upper() for x in m.groups()]
     # check for recorder only paths
-    m = re.match(".*/(?P<recorder>kr\d+)[ab]/.*wav", path)
+    m = re.match(".*/(?P<recorder>kr\d+)[abAB]?/.*wav", path)
     if m:
         return m.groups()[0].upper(), None
     raise RecorderSiteError
