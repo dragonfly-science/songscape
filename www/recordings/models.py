@@ -55,7 +55,7 @@ class UniqueSlugMixin(SlugMixin):
 
 
 class Organisation(models.Model):
-    code = models.SlugField(max_length=32, unique=True)
+    code = models.SlugField(max_length=64, unique=True)
     name = models.TextField()
     description = models.TextField(null=True, blank=True)
 
@@ -63,7 +63,7 @@ class Organisation(models.Model):
         return self.name
 
 class Site(models.Model):
-    code = models.SlugField(max_length=32)
+    code = models.SlugField(max_length=64)
     name = models.TextField(null=True, blank=True)
     organisation = models.ForeignKey(Organisation, related_name='sites')
     description = models.TextField(null=True, blank=True)
@@ -78,7 +78,7 @@ class Site(models.Model):
         unique_together = (('code', 'organisation'),)
 
 class Recorder(models.Model):
-    code = models.SlugField(max_length=32)
+    code = models.SlugField(max_length=64)
     organisation = models.ForeignKey(Organisation, related_name='recorders')
     comments = models.TextField(null=True, blank=True)
 
@@ -165,8 +165,8 @@ class Recording(models.Model):
 
 
 class Tag(UniqueSlugMixin, models.Model):
-    code = models.SlugField(max_length=32, unique=True)
-    name = models.CharField(max_length=30)
+    code = models.SlugField(max_length=64, unique=True)
+    name = models.TextField()
 
     def __unicode__(self):
         return '%s' % (self.code)
@@ -241,14 +241,14 @@ class Snippet(models.Model):
         return positive, negative, len(identifications)
 
 class Signal(models.Model):
-    code = models.SlugField(max_length=32, unique=True)
+    code = models.SlugField(max_length=64, unique=True)
     description = models.TextField(null=True, blank=True)
 
     def __unicode__(self):
         return self.code
 
 class Detector(models.Model):
-    code = models.SlugField(max_length=32)
+    code = models.SlugField(max_length=64)
     signal = models.ForeignKey(Signal, related_name='detectors')
     description = models.TextField(null=True, blank=True)
     version = models.TextField()
@@ -274,8 +274,8 @@ class Score(models.Model):
 
 
 class Analysis(SlugMixin, models.Model):
-    name = models.CharField(max_length=32)
-    code = models.SlugField(max_length=32)
+    name = models.TextField()
+    code = models.SlugField(max_length=64)
     description = models.TextField(default="")
     datetime = models.DateTimeField(auto_now=True)
     tags = models.ManyToManyField(Tag)
