@@ -10,3 +10,4 @@ fabric
 south
 coverage
 django-debug-toolbar
+django-browserid

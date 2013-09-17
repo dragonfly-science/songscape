@@ -74,6 +74,16 @@ TEMPLATE_LOADERS = (
 #     'django.template.loaders.eggs.Loader',
 )
 
+TEMPLATE_CONTEXT_PROCESSORS = (
+   'django.contrib.auth.context_processors.auth',
+   'django_browserid.context_processors.browserid',
+   'django.core.context_processors.request',
+   'django.core.context_processors.media',
+   'django.core.context_processors.debug',
+   'django.contrib.messages.context_processors.messages',
+   'django.core.context_processors.request',
+)
+
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -89,9 +99,10 @@ LOGIN_REDIRECT_URL = '/'
 
 INSTALLED_APPS = (
     'django.contrib.auth',
+    'django_browserid',  # Load after auth
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    # 'django.contrib.sites',
+     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
@@ -100,7 +111,7 @@ INSTALLED_APPS = (
 
     'recordings',
     'south',
-    'debug_toolbar',
+    #'debug_toolbar',
 )
 
 INTERNAL_IPS = ('127.0.0.1',)
@@ -123,7 +134,11 @@ LOGGING = {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler',
-        }
+        },
+        'console':{
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
     },
     'loggers': {
         'django.request': {
@@ -131,6 +146,10 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
             'filters': ['require_debug_false'],
+        },
+        'django_browserid': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
         },
     }
 }
@@ -162,3 +181,29 @@ if 'test' in sys.argv or 'migrationcheck' in sys.argv:
     except ImportError:
         pass
 DEBUG_TOOLBAR_CONFIG = {'INTERCEPT_REDIRECT': False}
+
+
+# Add the django_browserid authentication backend.
+AUTHENTICATION_BACKENDS = (
+   'django.contrib.auth.backends.ModelBackend', # required for admin
+   'django_browserid.auth.BrowserIDBackend',
+)
+
+# Set your site url for security
+SITE_URL = 'http://localhost:8000/'
+
+# Path to redirect to on successful login.
+LOGIN_REDIRECT_URL = '/'
+
+# Path to redirect to on unsuccessful login attempt.
+LOGIN_REDIRECT_URL_FAILURE = '/'
+
+# Path to redirect to on logout.
+LOGOUT_REDIRECT_URL = '/'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake'
+    }
+}
