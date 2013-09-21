@@ -105,7 +105,6 @@ INSTALLED_APPS = (
      'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
     'django.contrib.admin',
     'django.contrib.admindocs',
 
@@ -189,8 +188,10 @@ AUTHENTICATION_BACKENDS = (
    'django_browserid.auth.BrowserIDBackend',
 )
 
+#SESSION_COOKIE_SECURE = False
+
 # Set your site url for security
-SITE_URL = 'http://localhost:8000/'
+SITE_URL = 'http://localhost:8000'
 
 # Path to redirect to on successful login.
 LOGIN_REDIRECT_URL = '/'
