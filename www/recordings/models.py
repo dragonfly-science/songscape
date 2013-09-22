@@ -206,7 +206,10 @@ class Snippet(models.Model):
             savefig(string_buffer, format='png')
             imagefile = ContentFile(string_buffer.getvalue())
             if self.sonogram:
-                self.sonogram.delete()
+                try:
+                    self.sonogram.delete()
+                except:
+                    pass
             self.sonogram.save(filename, imagefile, save=True)
             close()
         return self.sonogram
@@ -240,16 +243,8 @@ class Snippet(models.Model):
                 negative += 1
         return positive, negative, len(identifications)
 
-class Signal(models.Model):
-    code = models.SlugField(max_length=64, unique=True)
-    description = models.TextField(null=True, blank=True)
-
-    def __unicode__(self):
-        return self.code
-
 class Detector(models.Model):
     code = models.SlugField(max_length=64)
-    signal = models.ForeignKey(Signal, related_name='detectors')
     description = models.TextField(null=True, blank=True)
     version = models.TextField()
 

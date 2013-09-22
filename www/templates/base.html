@@ -70,7 +70,7 @@ see http://twitter.github.com/bootstrap/examples/fluid.html -->
             </ul>
             {% if user.is_authenticated %}
             <ul class="nav pull-right">
-                <li><a>Welcome &nbsp; {{ user.first_name }} &nbsp; &nbsp;</a></li>
+                <li><a>Welcome &nbsp; {{ user.email }} &nbsp; &nbsp;</a></li>
                 {% if user.is_staff %}
                 <li><a href="/admin/" >Admin</a></li>
                 {% endif %}
