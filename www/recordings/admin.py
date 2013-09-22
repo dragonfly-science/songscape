@@ -26,7 +26,7 @@ admin.site.register(Deployment, DeploymentAdmin)
 
 class DetectorAdmin(admin.ModelAdmin):
     list_display = ('code', 'description', 'version',)
-    list_filter = ('code', 'signal',)
+    list_filter = ('code',)
 admin.site.register(Detector, DetectorAdmin)
 
 
