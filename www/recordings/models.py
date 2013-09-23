@@ -148,19 +148,24 @@ class Recording(models.Model):
         self.md5 = kwargs.get('md5', self.get_hash())
         super(Recording, self).save(*args, **kwargs)
 
-    def _get_frames(self, offset, duration):
-        with closing(wave.open(self.path, 'r')) as wav:
+    def _get_frames(self, offset, duration, file_handle=None):
+        fid = file_handle or open(self.path, 'rb')
+        try:    
+            wav = wave.open(fid)
             wav.rewind()
             if offset:
                 wav.readframes(int(offset*self.sample_rate*self.nchannels)) #Read to the offset in seconds
             if not duration:
                 duration = self.duration - offset
             frames = wav.readframes(int(duration*self.sample_rate*self.nchannels))
+        finally:
+            if not file_handle:
+                fid.close()
         return frames
 
-    def get_audio(self, offset=0, duration=0):
+    def get_audio(self, offset=0, duration=0, file_handle=None):
         """Returns the audio associated with a snippet"""
-        frames = self._get_frames(offset, duration)
+        frames = self._get_frames(offset, duration, file_handle)
         return np.array(struct.unpack_from ("%dh" % (len(frames)/2,), frames))
 
 
@@ -186,8 +191,8 @@ class Snippet(models.Model):
     def __unicode__(self):
         return snippet_name(self)
 
-    def get_audio(self):
-        return self.recording.get_audio(self.offset, self.duration)
+    def get_audio(self, file_handle=None):
+        return self.recording.get_audio(self.offset, self.duration, file_handle=None)
 
     def save_sonogram(self, replace=False, NFFT=512):
         if not self.sonogram or \
