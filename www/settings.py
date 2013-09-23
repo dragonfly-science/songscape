@@ -162,6 +162,9 @@ RECORDINGS_PATH = '' # Path of the raw recordings
 #REPOSITORIES = {'RFPT': 'http://rfpt.songscape.org'}
 REPOSITORIES = {'RFPT': 'http://192.168.0.123:8888'}
 
+# Set your site url for security
+SITE_URL = 'http://localhost:8000'
+
 try:
     from local_settings import *
 except ImportError:
@@ -189,9 +192,6 @@ AUTHENTICATION_BACKENDS = (
 )
 
 #SESSION_COOKIE_SECURE = False
-
-# Set your site url for security
-SITE_URL = 'http://localhost:8000'
 
 # Path to redirect to on successful login.
 LOGIN_REDIRECT_URL = '/'
