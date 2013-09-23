@@ -1,6 +1,6 @@
 import sys
 import time
-from io import BufferedReader
+import io
 from contextlib import closing
 
 from django.core.management.base import BaseCommand, CommandError
@@ -31,7 +31,7 @@ class Command(BaseCommand):
         for recording in recordings:
             snippets = Snippet.objects.filter(recording=recording).exclude(scores__detector=kiwi_detector).order_by('offset')
             if len(snippets):
-                fid = BufferedReader(open(recording.path, 'rb'), buffer_size=BUFFER_SIZE)
+                fid = io.open(recording.path, 'rb', buffering=BUFFER_SIZE)
                 fid.peek(BUFFER_SIZE)
                 with closing(fid):
                     for snippet in snippets:
