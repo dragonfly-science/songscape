@@ -105,14 +105,12 @@ see http://twitter.github.com/bootstrap/examples/fluid.html -->
 {% endblock main %}
 <div class="container">
       <div class="well" id="footer">
-        {{ user }}
-        {{ user.is_authenticated }}
         <div id="logos">
                 <a href="http://www.dragonfly.co.nz"
                     alt="Dragonfly Science" title="Dragonfly Science">
-                  <span class="logo" id="dfly"><img src="{{STATIC_URL}}images/greyds.png"></span>
+                  <span class="logo" id="dfly"><img src="/static/images/greyds.png"></span>
                 </a>
-                  <span class="logo" id="cc"><img src="{{ STATIC_URL }}images/cc.logo.large.png" alt="Creative Commons"
+                  <span class="logo" id="cc"><img src="/static/images/cc.logo.large.png" alt="Creative Commons"
                     title="Creative Commons"></span>
         </div>
         <br/>
