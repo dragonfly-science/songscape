@@ -167,7 +167,7 @@ class Recording(models.Model):
 
     def get_audio(self, offset=0, duration=0, file_handle=None):
         """Returns the audio associated with a snippet"""
-        frames = self._get_frames(offset, duration, file_handle)
+        frames = self._get_frames(offset, duration, file_handle=file_handle)
         return np.array(struct.unpack_from ("%dh" % (len(frames)/2,), frames))
 
 
