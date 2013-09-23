@@ -1,10 +1,6 @@
-{% extends 'base.html' %}
-{% load staticfiles %}
-{% load recording_filters %}
+{% extends 'recordings/snippet.html' %}
 
-{% block content %}
-
-
+{% block toprow %}
 <h3> {{ snippet.recording.deployment.site }}, {{ snippet.datetime }}</h3>
 
 {% if id_before %}
@@ -57,19 +53,10 @@
 </form>
 {% endif %}
 
-<div class="row">
-  <div class="span4">
-    <audio controls>
-     <source src="{{ snippet|wav_url }}" type="audio/wav">
-     "Hmm can't play the sound"
-    </audio>
-  </div>
-  <img src="{{ snippet|sonogram_url }}">
-  </div>
-  </div>
+{% endblock toprow %}
 
-<script>
 
+{% block extrascript %}
 $('.tag-btn').bind('click', function() {
 	$('#uber').attr('value', 'Next');
 	$('#uber_real').val(false);
@@ -78,5 +65,4 @@ $('.tag-btn').bind('click', function() {
 	// TODO handle unclick ... :)
 });
 
-</script>
-{% endblock content %}
+{% endblock extrascript %}

@@ -11,8 +11,10 @@ from cStringIO import StringIO
 # means the first time it loads cbook isn't found, but it works afterwards!
 # Newer versions of matplotlib probably fix this, but it's easier to
 # rely on the ubuntu python-matplotlib package during deployment.
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.cbook
-from pylab import figure, specgram, savefig, close, gca, clf
+from pylab import figure, specgram, savefig, close, gca, clf, cm
 
 from django.core.files.base import ContentFile
 from django.core.files import File
@@ -200,11 +202,12 @@ class Snippet(models.Model):
                 (self.sonogram and not os.path.exists(self.sonogram.path)):
             clf()
             fig = figure(figsize=(10, 5))
-            filename = "%s.png" % (self,)
+            filename = self.get_sonogram_name()
             specgram(self.get_audio(),
                 NFFT=NFFT,
                 Fs=self.recording.sample_rate,
-                hold=False)
+                hold=False,
+                cmap=cm.gray)
             string_buffer = StringIO()
             gca().set_ylabel('Frequency (Hz)')
             gca().set_xlabel('Time (s)')
@@ -281,8 +284,6 @@ class Analysis(SlugMixin, models.Model):
     tags = models.ManyToManyField(Tag)
     ubertag = models.ForeignKey(Tag, related_name="ubertags", null=True, blank=True)  #TODO: Rename to default_tag, related_name="analyses_default"
     # Should be snippets or filters? and not deployments ...
-    deployments = models.ManyToManyField(Deployment) #TODO Replace with filter
-    detectors = models.ManyToManyField(Detector) #TODO Replace with filter
     organisation = models.ForeignKey(Organisation, related_name="analyses") #Replace with user
 
     class Meta:

@@ -14,6 +14,7 @@ from django.core.servers.basehttp import FileWrapper
 from django.conf import settings
 from django.db.models import Sum, Count
 from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
 
 from .forms import TagForm
 from .models import Recording, Site
@@ -173,8 +174,8 @@ def snippets(request, default_page=1, per_page=100):
     if len(order) == 0:
         order = ['-score']
     request_parameters = _get_parameters(request)
-    code = 'simple-kiwi'
-    version = '0.1.1'
+    code = 'simple-north-island-brown-kiwi'
+    version = '0.1.2'
     detector = Detector.objects.get(code=code, version=version)
     queryset = Score.objects.filter(
         detector=detector).select_related().filter(**filters).order_by(*order)
@@ -247,10 +248,10 @@ def get_sonogram(request, **kwargs):
     4. We get it from the repository
     """
     # TODO: Avoid the use of '/tmp'
+    #import pdb; pdb.set_trace()
     snippet = _get_snippet(**kwargs)
     name = snippet.get_sonogram_name()
-    sonogram_path = os.path.join(settings.SONOGRAM_DIR, name)
-    if not os.path.exists(os.path.join(settings.MEDIA_ROOT, 'sonograms', name)):
+    if not os.path.exists(os.path.join(settings.SONOGRAM_DIR, name)):
         if os.path.exists(snippet.recording.path):
             snippet.save_sonogram(replace=True)
         else:
@@ -258,7 +259,7 @@ def get_sonogram(request, **kwargs):
             urllib.urlretrieve('%s/sonogram/%s' % (repository, name), '/tmp/%s' % name)
             snippet.sonogram.save('sonograms/%s' % name, File(open('/tmp/%s' % name)), save=True)
             snippet.save()
-    return HttpResponseRedirect(os.path.join('/media/sonograms', name)) #TODO: This should be dry
+    return HttpResponseRedirect(reverse('sonogram-media', kwargs=dict(path=name)))
 
 def tags(request):
     # TODO: Login required!
@@ -335,6 +336,7 @@ def analysis_snippet(request, code, snippet_id):
         previous_id = None
 
     analysis = Analysis.objects.get(code=code)
+    next_id = analysis.next()
     snippet = Snippet.objects.get(id=snippet_id)
 
     previous_identification = Identification.objects.filter(snippet_id__exact=snippet_id, user_id__exact=request.user.id)

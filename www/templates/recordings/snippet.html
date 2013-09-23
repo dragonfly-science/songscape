@@ -4,6 +4,7 @@
 
 {% block content %}
 
+{% block toprow %}
 <ul class="pager">
 {% if previous_id %}
   <li class="previous">
@@ -19,6 +20,7 @@
   </li>
 {% endif %}
 </ul>
+{% endblock toprow %}
 
 <div class="row">
   <div class="span4">
@@ -44,6 +46,8 @@ img id="sonogram" src="{{ snippet|sonogram_url }}" -->
 
 {% block script %}
 <script type="text/javascript">
+{% block extrascript %}
+{% endblock extrascript %}
 $(document).ready(function() {
   var canvas = document.getElementById("canvas");
   var context = document.getElementById('canvas').getContext('2d');
@@ -99,6 +103,11 @@ $(document).ready(function() {
     });
 
   });
+
+});
+$(window).load(function() {
+  var next_image = new Image();
+  next_image.src = "{% url 'sonogram_id' next_id %}"
 });
 
 </script>
