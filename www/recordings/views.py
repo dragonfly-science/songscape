@@ -176,9 +176,12 @@ def snippets(request, default_page=1, per_page=100):
     request_parameters = _get_parameters(request)
     code = 'simple-north-island-brown-kiwi'
     version = '0.1.2'
+    clipping = Detector.objects.get(code='amplitude')
+    unclipped_scores = Score.objects.filter(detector=clipping, score__lt=32000)
+    unclipped_snippets = Snippet.objects.filter(scores__in=unclipped_scores)
     detector = Detector.objects.get(code=code, version=version)
     queryset = Score.objects.filter(
-        detector=detector).select_related().filter(**filters).order_by(*order)
+        detector=detector, snippet__in=unclipped_snippets).select_related().filter(**filters).order_by(*order)
     scores = _paginate(request,
                        queryset,
                        default_page=default_page,
