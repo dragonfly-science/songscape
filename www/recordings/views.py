@@ -14,6 +14,8 @@ from django.db.models import Sum, Count
 from django.core.files import File
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
+from django.core.exceptions import SuspiciousOperation
+
 
 from www.recordings.models import (Snippet, Score, Detector, Tag, Analysis, 
     Deployment, Organisation, Identification, AnalysisSet)
@@ -200,15 +202,27 @@ def snippets(request, default_page=1, per_page=100):
 def play_snippet(request, **kwargs):
     """Play a snippet. If we cant find it, generate it from the recording"""
     snippet = _get_snippet(**kwargs)
-    if not (snippet.soundfile and os.path.exists(snippet.soundfile.path)):
+    try:
+        if not os.path.exists(snippet.soundfile.path):
+            raise ValueError
+    except (ValueError, SuspiciousOperation, AttributeError):
         snippet.save_soundfile(replace=True)
+    if snippet.soundfile and snippet.soundfile.name.startswith("/"): #name should not be absolute
+        snippet.soundfile.name = os.path.join(settings.SNIPPET_DIR, snippet.get_soundfile_name())
+        snippet.save()
     return HttpResponseRedirect(os.path.join(settings.MEDIA_URL, snippet.soundfile.name)) 
 
 def get_sonogram(request, **kwargs):
     """Play a snippet. If we cant find it, generate it from the snippet"""
     snippet = _get_snippet(**kwargs)
-    if not (snippet.sonogram and os.path.exists(snippet.sonogram.path)):
+    try:
+        if not os.path.exists(snippet.sonogram.path):
+            raise ValueError
+    except (ValueError, SuspiciousOperation, AttributeError):
         snippet.save_sonogram(replace=True)
+    if snippet.sonogram and snippet.sonogram.name.startswith("/"): #name should not be absolute
+        snippet.sonogram.name = os.path.join(settings.SNIPPET_DIR, snippet.get_sonogram_name())
+        snippet.save()
     return HttpResponseRedirect(os.path.join(settings.MEDIA_URL, snippet.sonogram.name)) 
 
 def tags(request):
