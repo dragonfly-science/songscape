@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 
 
-from recordings.models import Organisation, Site, Recorder, Deployment
+from www.recordings.models import Organisation, Site, Recorder, Deployment
 
 DIR = 'fixtures'
 
