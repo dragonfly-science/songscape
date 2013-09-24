@@ -13,7 +13,7 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.db import IntegrityError
 
-from recordings.models import Deployment, Recording, Snippet
+from www.recordings.models import Deployment, Recording, Snippet
 
 BASE_PATH = '/kiwi/recordings'
 MIN_FILE_SIZE = 1000
