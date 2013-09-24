@@ -278,12 +278,12 @@ class Score(models.Model):
 
 class Analysis(SlugMixin, models.Model):
     name = models.TextField()
-    code = models.SlugField(max_length=64)
+    code = models.SlugField(max_length=64, unique=True)
     description = models.TextField(default="")
     datetime = models.DateTimeField(auto_now=True)
     tags = models.ManyToManyField(Tag)
     ubertag = models.ForeignKey(Tag, related_name="ubertags", null=True, blank=True)  #TODO: Rename to default_tag, related_name="analyses_default"
-    # Should be snippets or filters? and not deployments ...
+    snippets = models.ManyToManyField(Snippet, through='AnalysisSet')
     organisation = models.ForeignKey(Organisation, related_name="analyses") #Replace with user
 
     class Meta:
@@ -303,11 +303,16 @@ class Analysis(SlugMixin, models.Model):
             recording__deployment__in=deployments).filter(scores__detector__exact=3).latest('scores__score')
         return snippets.id
 
+class AnalysisSet(models.Model):
+    analysis = models.ForeignKey(Analysis, related_name="set")
+    snippet = models.ForeignKey(Snippet, related_name="set")
+    selection_method = models.TextField(default="")
+
 
 class Identification(models.Model):
     user = models.ForeignKey(User, related_name="identifications")
     analysis = models.ForeignKey(Analysis, related_name="identifications")
-    #datetime = models.DateTimeField(auto_now=True) #TODO Add datetime
+    datetime = models.DateTimeField(auto_now=True)
     snippet = models.ForeignKey(Snippet, related_name="identifications")
     scores = models.ManyToManyField(Score)  # This holds the list of scores that the user saw when they made the identification
     true_tags = models.ManyToManyField(Tag, related_name="identifications")
