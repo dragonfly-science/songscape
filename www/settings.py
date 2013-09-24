@@ -108,7 +108,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.admindocs',
 
-    'recordings',
+    'www.recordings',
     'south',
     #'debug_toolbar',
 )
@@ -165,25 +165,7 @@ REPOSITORIES = {'RFPT': 'http://192.168.0.123:8888'}
 # Set your site url for security
 SITE_URL = 'http://localhost:8000'
 
-try:
-    from local_settings import *
-except ImportError:
-    pass
-
-# MEDIA_ROOT can be overridden in local_settings
-SONOGRAM_DIR = os.path.join(MEDIA_ROOT, 'sonograms/')
-SNIPPET_DIR = os.path.join(MEDIA_ROOT, 'snippets/')
-
-
-import sys
-#if manage.py test was called, use test settings
-if 'test' in sys.argv or 'migrationcheck' in sys.argv:
-    try:
-        from test_settings import *
-    except ImportError:
-        pass
 DEBUG_TOOLBAR_CONFIG = {'INTERCEPT_REDIRECT': False}
-
 
 # Add the django_browserid authentication backend.
 AUTHENTICATION_BACKENDS = (
@@ -208,3 +190,21 @@ CACHES = {
         'LOCATION': 'unique-snowflake'
     }
 }
+
+try:
+    from local_settings import *
+except ImportError:
+    pass
+
+# MEDIA_ROOT can be overridden in local_settings
+SONOGRAM_DIR = os.path.join(MEDIA_ROOT, 'sonograms/')
+SNIPPET_DIR = os.path.join(MEDIA_ROOT, 'snippets/')
+
+
+import sys
+#if manage.py test was called, use test settings
+if 'test' in sys.argv or 'migrationcheck' in sys.argv:
+    try:
+        from test_settings import *
+    except ImportError:
+        pass

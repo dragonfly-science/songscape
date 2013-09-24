@@ -2,19 +2,21 @@ import datetime
 import wave
 import os
 import urllib
+from tempfile import TemporaryFile
 from collections import Counter
-from contextlib import closing
-from django.core.files import File
-from recordings.models import Snippet, Score, Detector, Tag, Analysis, Deployment, Organisation, Identification
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import StreamingHttpResponse, HttpResponse, HttpResponseRedirect
-from tempfile import TemporaryFile
 from django.core.servers.basehttp import FileWrapper
 from django.conf import settings
 from django.db.models import Sum, Count
+from django.core.files import File
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
+
+from www.recordings.models import (Snippet, Score, Detector, Tag, Analysis, 
+    Deployment, Organisation, Identification)
 
 from .forms import TagForm
 from .models import Recording, Site
