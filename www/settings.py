@@ -209,6 +209,7 @@ import sys
 #if manage.py test was called, use test settings
 if 'test' in sys.argv or 'migrationcheck' in sys.argv:
     try:
-        from test_settings import *
+        from .test_settings import *
     except ImportError:
-        pass
+        print "Can't find test_settings.py"
+
