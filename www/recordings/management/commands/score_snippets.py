@@ -3,15 +3,17 @@ import time
 import io
 from contextlib import closing
 
-from django.core.management.base import BaseCommand, CommandError
-from django.conf import settings
+from django.core.management.base import BaseCommand
+
 from kokako.score import Audio
 from kokako.detectors.kiwi import SimpleKiwi
 from kokako.detectors.intensity import Energy, LowEnergy, Amplitude
 
-from recordings.models import Score, Recording, Snippet, Detector
+from www.recordings.models import Score, Recording, Snippet, Detector
+
 
 BUFFER_SIZE = 1024*1024
+
 class Command(BaseCommand):
     def handle(self, *args, **options):
         detectors = [SimpleKiwi(), Energy(), LowEnergy(), Amplitude()]

@@ -2,8 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-
-from recordings.models import Recording
+from www.recordings.models import Recording
 
 
 class Command(BaseCommand):
