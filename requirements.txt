@@ -13,3 +13,6 @@ django-debug-toolbar
 django-browserid
 git+https://github.com/dragonfly-science/kokako.git
 pymongo
+
+django-nose==1.1
+nose-cov
