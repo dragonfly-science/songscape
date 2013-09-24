@@ -2,7 +2,7 @@ import random
 
 from django.core.management.base import BaseCommand, CommandError
 
-from recordings.models import Snippet, Analysis, AnalysisSet, Detector, Score
+from www.recordings.models import Snippet, Analysis, AnalysisSet, Detector, Score
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
