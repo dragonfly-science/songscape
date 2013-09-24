@@ -1,7 +1,7 @@
 {% extends 'recordings/snippet.html' %}
 
 {% block toprow %}
-<h3> {{ snippet.recording.deployment.site }}, {{ snippet.datetime }}</h3>
+<h4> {{ snippet.recording.deployment.site }}, {{ snippet.datetime }} ({{ index }} of {{ n_snippets }})</h4>
 
 {% if id_before %}
 <div class="row">
