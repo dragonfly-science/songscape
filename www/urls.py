@@ -1,3 +1,4 @@
+import os
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 admin.autodiscover()
@@ -36,7 +37,7 @@ urlpatterns = patterns(
     #(r'^accounts/login/$', redirect_to, {'url': '/login/'}),
     url(r'^sonogram/(?P<id>\d+).png', 'www.recordings.views.get_sonogram', name='sonogram_id'),
     url(r'^sonogram/%s.png' % snippet_regex, 'www.recordings.views.get_sonogram', name='sonogram'),
-    url(r'^media/sonograms/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.SONOGRAM_DIR}, name='sonogram-media'),
+    url(r'^media/sonograms/(?P<path>.*)$', 'django.views.static.serve', {'document_root': os.path.join(settings.MEDIA_ROOT, settings.SONOGRAM_DIR)}, name='sonogram-media'),
     url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
     url(r'^play/(?P<id>\d+).wav', 'www.recordings.views.play_snippet', name='play'),
     url(r'^play/%s.wav' % snippet_regex, 'www.recordings.views.play_snippet', name='play_name')

@@ -40,7 +40,7 @@ class Command(BaseCommand):
                         count = 0
                         for detector, db_detector in detectors:
                             try:
-                                audio = Audio(snippet.get_audio(fid), snippet.recording.sample_rate)
+                                audio = Audio(snippet.get_audio(fid), snippet.recording.framerate)
                                 score = detector.score(audio)
                                 if not count:   
                                     print '%s %0.1f %0.1f' % (snippet, time.time() - now, score)

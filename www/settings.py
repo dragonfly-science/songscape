@@ -202,8 +202,8 @@ except ImportError:
     pass
 
 # MEDIA_ROOT can be overridden in local_settings
-SONOGRAM_DIR = os.path.join(MEDIA_ROOT, 'sonograms/')
-SNIPPET_DIR = os.path.join(MEDIA_ROOT, 'snippets/')
+SONOGRAM_DIR = 'sonograms/'
+SNIPPET_DIR = 'snippets/'
 
 
 import sys

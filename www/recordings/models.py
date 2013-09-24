@@ -5,6 +5,7 @@ import numpy as np
 import struct
 import datetime
 from cStringIO import StringIO
+from tempfile import TemporaryFile
 
 # matplotlib breaks mod_wsgi due to some circular imports, which
 # means the first time it loads cbook isn't found, but it works afterwards!
@@ -23,6 +24,7 @@ from django.contrib.auth.models import User
 from django.template.defaultfilters import slugify
 
 from www.recordings.templatetags.recording_filters import wav_name, sonogram_name, snippet_name
+import wavy
 
 
 class SlugMixin(object):
@@ -113,7 +115,8 @@ class Recording(models.Model):
     datetime = models.DateTimeField()
     deployment = models.ForeignKey(Deployment, related_name='recordings')
     md5 = models.TextField()
-    sample_rate = models.IntegerField()
+    framerate = models.IntegerField()
+    sampwidth = models.IntegerField()
     duration = models.FloatField()
     nchannels = models.IntegerField()
     path = models.TextField()
@@ -143,32 +146,17 @@ class Recording(models.Model):
         "Given a path, datetime, and a deployment, saves the recording and populates the other data"
         wav = wave.open(self.path)
         (nchannels, sampwidth, framerate, nframes, comptype, compname) = wav.getparams()
-        self.sample_rate = framerate
-        self.duration = nframes/float(framerate)
+        self.framerate = framerate
+        self.sampwidth = sampwidth
+        self.duration = nframes/float(framerate*nchannels)
         self.nchannels = nchannels
         self.md5 = kwargs.get('md5', self.get_hash())
         super(Recording, self).save(*args, **kwargs)
 
-    def _get_frames(self, offset, duration, file_handle=None):
-        fid = file_handle or open(self.path, 'rb')
-        try:    
-            wav = wave.open(fid)
-            wav.rewind()
-            if offset:
-                wav.readframes(int(offset*self.sample_rate*self.nchannels)) #Read to the offset in seconds
-            if not duration:
-                duration = self.duration - offset
-            frames = wav.readframes(int(duration*self.sample_rate*self.nchannels))
-        finally:
-            if not file_handle:
-                fid.close()
-        return frames
 
-    def get_audio(self, offset=0, duration=0, file_handle=None):
-        """Returns the audio associated with a snippet"""
-        frames = self._get_frames(offset, duration, file_handle=file_handle)
-        return np.array(struct.unpack_from ("%dh" % (len(frames)/2,), frames))
-
+    def get_audio(self, offset=0, duration=0):
+        audio, framerate = wavy.get_audio(self.path, offset=offset, duration=duration)
+        return audio
 
 class Tag(UniqueSlugMixin, models.Model):
     code = models.SlugField(max_length=64, unique=True)
@@ -182,9 +170,9 @@ class Snippet(models.Model):
     recording = models.ForeignKey(Recording, related_name='snippets')
     offset = models.FloatField() #seconds
     duration = models.FloatField()
-    sonogram = models.ImageField(upload_to=settings.SONOGRAM_DIR, null=True, blank=True)
+    sonogram = models.ImageField(upload_to=os.path.join(settings.MEDIA_ROOT, settings.SONOGRAM_DIR), null=True, blank=True)
     soundcloud = models.IntegerField(null=True, blank=True)
-    soundfile = models.FileField(upload_to=settings.SNIPPET_DIR, null=True, blank=True)
+    soundfile = models.FileField(upload_to=os.path.join(settings.MEDIA_ROOT, settings.SNIPPET_DIR), null=True, blank=True)
 
     class Meta:
         unique_together = (('recording', 'offset', 'duration'),)
@@ -192,8 +180,12 @@ class Snippet(models.Model):
     def __unicode__(self):
         return snippet_name(self)
 
-    def get_audio(self, file_handle=None):
-        return self.recording.get_audio(self.offset, self.duration, file_handle=None)
+    def get_audio(self):
+        if self.soundfile and os.path.exists(self.soundfile.path):
+            audio, framerate = wavy.get_audio(self.soundfile.path)
+            return audio
+        else:
+            return self.recording.get_audio(self.offset, self.duration)
 
     def save_sonogram(self, replace=False, NFFT=512):
         if not self.sonogram or \
@@ -204,7 +196,7 @@ class Snippet(models.Model):
             filename = self.get_sonogram_name()
             specgram(self.get_audio(),
                 NFFT=NFFT,
-                Fs=self.recording.sample_rate,
+                Fs=self.recording.framerate,
                 hold=False,
                 cmap=cm.gray)
             string_buffer = StringIO()
@@ -217,9 +209,21 @@ class Snippet(models.Model):
                     self.sonogram.delete()
                 except:
                     pass
-            self.sonogram.save(filename, imagefile, save=True)
+            self.sonogram.save(filename, imagefile, save=False)
+            self.sonogram.name = os.path.join(settings.SONOGRAM_DIR, filename)
             close()
-        return self.sonogram
+
+    def save_soundfile(self, replace=False):
+        if not self.soundfile or \
+                replace or \
+                (self.soundfile and not os.path.exists(self.soundfile.path)):
+            filename = self.get_soundfile_name()
+            wav_file = TemporaryFile()
+            wavy.slice_wave(self.recording.path, wav_file, self.offset, self.duration)
+            wav_file.seek(0)
+            self.soundfile.save(filename, File(wav_file, name=filename), save=False)
+            self.soundfile.name = os.path.join(settings.SNIPPET_DIR, filename)
+            self.save()
 
     def url_path(self):
         full_path = self.recording.path
