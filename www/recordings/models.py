@@ -283,7 +283,7 @@ class Analysis(SlugMixin, models.Model):
     datetime = models.DateTimeField(auto_now=True)
     tags = models.ManyToManyField(Tag)
     ubertag = models.ForeignKey(Tag, related_name="ubertags", null=True, blank=True)  #TODO: Rename to default_tag, related_name="analyses_default"
-    snippets = models.ManyToManyField(Snippet, through='AnalysisSet')
+    snippets = models.ManyToManyField(Snippet, through='AnalysisSet', related_name="analyses")
     organisation = models.ForeignKey(Organisation, related_name="analyses") #Replace with user
 
     class Meta:
@@ -294,14 +294,6 @@ class Analysis(SlugMixin, models.Model):
 
     def normal_tags(self):
         return self.tags.all().exclude(id__exact=self.ubertag.id)
-
-    def next(self):  # todo specify sampling and order
-        # HACK HACK
-        deployments = self.deployments.all()
-        snippets = Snippet.objects.filter(
-            identifications__isnull=True,
-            recording__deployment__in=deployments).filter(scores__detector__exact=3).latest('scores__score')
-        return snippets.id
 
 class AnalysisSet(models.Model):
     analysis = models.ForeignKey(Analysis, related_name="set")

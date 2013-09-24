@@ -5,7 +5,7 @@ import urllib
 from collections import Counter
 from contextlib import closing
 from django.core.files import File
-from recordings.models import Snippet, Score, Detector, Tag, Analysis, Deployment, Organisation, Identification
+from recordings.models import Snippet, Score, Detector, Tag, Analysis, Deployment, Organisation, Identification, AnalysisSet
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import StreamingHttpResponse, HttpResponse, HttpResponseRedirect
@@ -322,9 +322,14 @@ def analysis_detail(request, code):
 
 
 @login_required
-def analysis_snippet(request, code, snippet_id):
+def analysis_snippet(request, code, snippet_id=None):
+    analysis = Analysis.objects.get(code=code)
     snippets = request.session.get('snippets', [])
-    if int(snippet_id) in snippets:
+    if not snippets:
+        snippets = [a.snippet.id for a in AnalysisSet.objects.filter(analysis=analysis).order_by('?')]
+    previous = Identification.objects.filter(analysis=analysis)
+    request.session['snippets'] = snippets
+    if snippet_id and int(snippet_id) in snippets:
         index = snippets.index(int(snippet_id))
         try:
             next_id = snippets[index + 1]
@@ -335,11 +340,11 @@ def analysis_snippet(request, code, snippet_id):
         except IndexError:
             previous_id = None
     else:
-        next_id = None
+        index = 0
+        snippet_id = snippets[0]
+        next_id = snippets[1]
         previous_id = None
 
-    analysis = Analysis.objects.get(code=code)
-    next_id = analysis.next()
     snippet = Snippet.objects.get(id=snippet_id)
 
     previous_identification = Identification.objects.filter(snippet_id__exact=snippet_id, user_id__exact=request.user.id)
@@ -365,7 +370,7 @@ def analysis_snippet(request, code, snippet_id):
         iden.true_tags.add(*true_tags)
         iden.false_tags.add(*false_tags)
 
-        return redirect('analysis_snippet', code=code, snippet_id=analysis.next())
+        return redirect('analysis_snippet', code=code, snippet_id=next_id)
 
     return render(request,
                   'recordings/analysis_snippet.html',
@@ -375,7 +380,9 @@ def analysis_snippet(request, code, snippet_id):
                    'id_before': id_before,
                    'true_tags': true_tags,
                    'false_tags': false_tags,
-                   'previous_id': previous_id})
+                   'previous_id': previous_id,
+                   'index': index,
+                   'n_snippets': len(snippets)})
 
 
 def analysis(request, code):
@@ -405,7 +412,7 @@ def analysis(request, code):
 @login_required
 def analysis_next(request, code):
     this_analysis = Analysis.objects.get(code=code)
-    return redirect('analysis_snippet', code=code, snippet_id=this_analysis.next())
+    return redirect('analysis_snippet', code=code, snippet_id=0)
 
 
 
