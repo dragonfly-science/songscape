@@ -27,11 +27,11 @@ set_config () {
     perl -i -e '$field=shift;$value=shift if (scalar(@ARGV)>1);$value||="";while (<>) { s/^(\s*$field\s*=\s*).*/$1$value/; print; }' $1 $2 $3;
 }
 
-LOCAL_SETTINGS=/var/www/django/songscape/www/local_settings.py
+LOCAL_SETTINGS=/var/www/django/songscape/local_settings.py
 
 case "$1" in
     configure)
-        cp /var/www/django/songscape/www/local_settings.py.TEMPLATE ${LOCAL_SETTINGS}
+        cp /etc/songscape/local_settings.py.TEMPLATE ${LOCAL_SETTINGS}
 
         # Add config entries to $LOCAL_SETTINGS based on answers to debconf questions
         db_get songscape/db_host
@@ -122,7 +122,7 @@ case "$1" in
         pip install -r /etc/songscape/requirements.txt
 
         cd /var/www/django/songscape/
-        python www/manage.py collectstatic --noinput
+        python manage.py collectstatic --noinput
 
         echo ""
         echo "The songscape site is now ready for action. You need to restart apache for any"

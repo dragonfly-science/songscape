@@ -1,14 +1,15 @@
 import csv
-from datetime import datetime
 import os
 
-from django.core.management.base import BaseCommand, CommandError
-from django.conf import settings
+from datetime import datetime
 
+from django.core.management.base import BaseCommand
 
-from recordings.models import Organisation, Site, Recorder, Deployment
+from www.recordings.models import Organisation, Site, Recorder, Deployment
+
 
 DIR = 'fixtures'
+
 
 class Command(BaseCommand):
     def handle(self, **options):
@@ -49,4 +50,3 @@ class Command(BaseCommand):
                 end = None
             o = Deployment(site=site, recorder=recorder, start=start, end=end, comments=row['Comments'], owner=rfpt_org)
             o.save()
-

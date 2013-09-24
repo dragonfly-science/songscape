@@ -1,3 +1,6 @@
 www var/www/django/songscape
+manage.py var/www/django/songscape
+
 apache.conf.template etc/songscape
+local_settings.py.TEMPLATE etc/songscape
 requirements.txt etc/songscape

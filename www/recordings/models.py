@@ -4,7 +4,6 @@ import wave
 import numpy as np
 import struct
 import datetime
-from contextlib import closing
 from cStringIO import StringIO
 
 # matplotlib breaks mod_wsgi due to some circular imports, which
@@ -23,7 +22,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.template.defaultfilters import slugify
 
-from recordings.templatetags.recording_filters import wav_name, sonogram_name, snippet_name
+from www.recordings.templatetags.recording_filters import wav_name, sonogram_name, snippet_name
 
 
 class SlugMixin(object):
