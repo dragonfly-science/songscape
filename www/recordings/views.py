@@ -198,73 +198,18 @@ def snippets(request, default_page=1, per_page=100):
 
 
 def play_snippet(request, **kwargs):
-    """Play a snippet. Look for it in three places:
-    1. We have it in the cache (in settings.SNIPPET_DIR)
-    2. We have the recording locally, and we generate the snippet from that
-    3. We get the snippet from the repository
-    """
-    # TODO: Use X-Sendfile rather than writing to the HTTPresponse. Will this work for streaming?
-    # TODO: Avoid the use of '/tmp'
-    # import pdb; pdb.set_trace()
+    """Play a snippet. If we cant find it, generate it from the recording"""
     snippet = _get_snippet(**kwargs)
-    name = snippet.get_soundfile_name()
-    file_name = os.path.join(settings.MEDIA_ROOT, 'snippets', name)
-    # First check that the file really is a wav file
-    if os.path.exists(file_name):
-        try:
-            wave.open(file_name)
-        except:
-            try:
-                os.remove(file_name)
-            except OSError:
-                pass
-    if not os.path.exists(file_name):
-        if os.path.exists(snippet.recording.path):
-            wav_file = TemporaryFile()
-            wav_writer = wave.open(wav_file, 'wb')
-            wav_writer.setframerate(snippet.recording.sample_rate)
-            wav_writer.setsampwidth(2) # We need to save this on the model
-            wav_writer.setnchannels(snippet.recording.nchannels)
-            wav_writer.writeframes(snippet.recording._get_frames(
-                    snippet.offset, snippet.duration))
-            wav_writer.close()
-            wav_file.seek(0)
-            snippet.soundfile.save('snippets/%s' % name, File(wav_file), save=True)
-            snippet.save()
-        else:
-            repository = settings.REPOSITORIES[snippet.recording.deployment.owner.code]
-            print '%s%s' %(repository, request.path)
-            urllib.urlretrieve('%s%s' %(repository, request.path), '/tmp/%s' % name)
-            try:
-                wave.open('/tmp/%s' % name)
-                snippet.soundfile.save('snippets/%s' % name, File(open('/tmp/%s' % name)), save=True)
-            except:
-                pass  #Wasn't a wave file so we don't know what to do
-    return HttpResponseRedirect(os.path.join('/media/snippets', name)) #TODO: This should be dry
-#    wav_file = open(os.path.join(settings.MEDIA_ROOT, snippet.soundfile.path), 'r')
-#    response = StreamingHttpResponse(FileWrapper(wav_file), content_type='audio/wav')
-#    return response
+    if not (snippet.soundfile and os.path.exists(snippet.soundfile.path)):
+        snippet.save_soundfile(replace=True)
+    return HttpResponseRedirect(os.path.join(settings.MEDIA_URL, snippet.soundfile.name)) 
 
 def get_sonogram(request, **kwargs):
-    """return a sonogram. Look for it in three places:
-    1. We have the sonogram in the cache (in settings.SONOGRAMS_DIR)
-    2. We have the snippet locally, so make it from that (TODO)
-    3. We have the recording locally, so make it from that
-    4. We get it from the repository
-    """
-    # TODO: Avoid the use of '/tmp'
-    #import pdb; pdb.set_trace()
+    """Play a snippet. If we cant find it, generate it from the snippet"""
     snippet = _get_snippet(**kwargs)
-    name = snippet.get_sonogram_name()
-    if not os.path.exists(os.path.join(settings.SONOGRAM_DIR, name)):
-        if os.path.exists(snippet.recording.path):
-            snippet.save_sonogram(replace=True)
-        else:
-            repository = settings.REPOSITORIES[snippet.recording.deployment.owner.code]
-            urllib.urlretrieve('%s/sonogram/%s' % (repository, name), '/tmp/%s' % name)
-            snippet.sonogram.save('sonograms/%s' % name, File(open('/tmp/%s' % name)), save=True)
-            snippet.save()
-    return HttpResponseRedirect(reverse('sonogram-media', kwargs=dict(path=name)))
+    if not (snippet.sonogram and os.path.exists(snippet.sonogram.path)):
+        snippet.save_sonogram(replace=True)
+    return HttpResponseRedirect(os.path.join(settings.MEDIA_URL, snippet.sonogram.name)) 
 
 def tags(request):
     # TODO: Login required!
