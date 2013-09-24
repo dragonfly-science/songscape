@@ -198,12 +198,12 @@ CACHES = {
 try:
     from local_settings import *
 except ImportError:
+    print "Error loading local settings"
     pass
 
 # MEDIA_ROOT can be overridden in local_settings
-SONOGRAM_DIR = os.path.join(MEDIA_ROOT, 'sonograms/')
-SNIPPET_DIR = os.path.join(MEDIA_ROOT, 'snippets/')
-
+SONOGRAM_DIR = os.path.join(MEDIA_ROOT, 'sonograms')
+SNIPPET_DIR = os.path.join(MEDIA_ROOT, 'snippets')
 
 import sys
 #if manage.py test was called, use test settings
