@@ -31,7 +31,7 @@ LOCAL_SETTINGS=/var/www/django/songscape/local_settings.py
 
 case "$1" in
     configure)
-        cp /var/www/django/songscape/local_settings.py.TEMPLATE ${LOCAL_SETTINGS}
+        cp /etc/songscape/local_settings.py.TEMPLATE ${LOCAL_SETTINGS}
 
         # Add config entries to $LOCAL_SETTINGS based on answers to debconf questions
         db_get songscape/db_host
