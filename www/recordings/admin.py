@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from recordings.models import Organisation, Site, Recorder, Deployment, Score, Detector, Analysis
+from www.recordings.models import Organisation, Site, Recorder, Deployment, Score, Detector, Analysis
 
 
 class OrganisationAdmin(admin.ModelAdmin):

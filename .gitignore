@@ -9,6 +9,7 @@ www/media/snippets/*
 www/static/sonograms/*
 www/birdscape.db
 *.swp
+*.swo
 *~
 data/*
 media/*

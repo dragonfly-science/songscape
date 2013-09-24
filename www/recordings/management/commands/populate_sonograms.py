@@ -1,13 +1,12 @@
-
 from django.core.management.base import BaseCommand
-from django.conf import settings
 
 from pymongo import MongoClient
 from gridfs import GridFS
 
 import os
 
-from recordings.models import Snippet
+from www.recordings.models import Snippet
+
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
