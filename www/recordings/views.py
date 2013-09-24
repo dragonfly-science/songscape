@@ -4,9 +4,6 @@ import os
 import urllib
 from tempfile import TemporaryFile
 from collections import Counter
-from contextlib import closing
-from django.core.files import File
-from recordings.models import Snippet, Score, Detector, Tag, Analysis, Deployment, Organisation, Identification, AnalysisSet
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -19,7 +16,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 
 from www.recordings.models import (Snippet, Score, Detector, Tag, Analysis, 
-    Deployment, Organisation, Identification)
+    Deployment, Organisation, Identification, AnalysisSet)
 
 from .forms import TagForm
 from .models import Recording, Site
@@ -329,11 +326,12 @@ def analysis_detail(request, code):
 @login_required
 def analysis_snippet(request, code, snippet_id=None):
     analysis = Analysis.objects.get(code=code)
-    snippets = request.session.get('snippets', [])
+    snippets = request.session.get('analysis_set', [])
+    snippets = None
     if not snippets:
         snippets = [a.snippet.id for a in AnalysisSet.objects.filter(analysis=analysis).order_by('?')]
+        request.session['analysis_set'] = snippets
     previous = Identification.objects.filter(analysis=analysis)
-    request.session['snippets'] = snippets
     if snippet_id and int(snippet_id) in snippets:
         index = snippets.index(int(snippet_id))
         try:
