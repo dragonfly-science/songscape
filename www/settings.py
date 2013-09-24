@@ -110,8 +110,12 @@ INSTALLED_APPS = (
 
     'www.recordings',
     'south',
+    'django_nose',
     #'debug_toolbar',
 )
+
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+NOSE_ARGS = [ '--with-xunit', '--with-doctest', ]
 
 INTERNAL_IPS = ('127.0.0.1',)
 
