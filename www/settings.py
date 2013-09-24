@@ -202,8 +202,9 @@ except ImportError:
     pass
 
 # MEDIA_ROOT can be overridden in local_settings
-SONOGRAM_DIR = os.path.join(MEDIA_ROOT, 'sonograms')
-SNIPPET_DIR = os.path.join(MEDIA_ROOT, 'snippets')
+SONOGRAM_DIR = os.path.join(MEDIA_ROOT, 'sonograms/')
+SNIPPET_DIR = os.path.join(MEDIA_ROOT, 'snippets/')
+
 
 import sys
 #if manage.py test was called, use test settings
