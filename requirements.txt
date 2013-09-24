@@ -11,4 +11,4 @@ south
 coverage
 django-debug-toolbar
 django-browserid
-git+https://github.com/dragofly-science/kokako.git
+git+https://github.com/dragonfly-science/kokako.git
