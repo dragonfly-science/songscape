@@ -4,28 +4,23 @@
 <h3> {{ snippet.recording.deployment.site }}, {{ snippet.datetime }}</h3>
 
 {% if id_before %}
-<p>You have indentified this snippet</p>
-<p>It contains: {% for tag in true_tags %} {{ tag.name }},{% endfor %}</p>
-<p>It does not contain: {% for tag in false_tags %} {{ tag.name }},{% endfor %}</p>
-
 <div class="row">
+  <div class="span6">
+    <ul class="inline">
+        {% for tag in true_tags %}
+        <li class="outlined">{{ tag.name }} </li>
+        {% endfor %}
+    </ul>
+  </div>
+
+
 
 <div class="span2">
-{% if previous_id %}
-<span class="btn"><a href="{% url 'analysis_snippet' analysis.code previous_id %}">Previous</a></span>
+<span class="btn"><a href="{% url 'analysis_snippet' analysis.code next_id  %}">Skip</a></span>
+</div>
+</div>
+
 {% endif %}
-</div>
-
-<div class="span6">
-  <span class="btn">{{ snippet.recording.deployment.site }}, {{ snippet.datetime }}</span>
-</div>
-
-
-<div class="span2">
-<span class="btn"><a href="{% url 'analysis_next' analysis.code %}">Next</a></span>
-</div>
-
-{% else %}
 <form method="post">{% csrf_token %}
 <div class="row">
 
@@ -51,14 +46,13 @@
 
 </div>
 </form>
-{% endif %}
 
 {% endblock toprow %}
 
 
 {% block extrascript %}
 $('.tag-btn').bind('click', function() {
-	$('#uber').attr('value', 'Next');
+	$('#uber').attr('value', 'Save');
 	$('#uber_real').val(false);
 	$('#' + $(this).attr('id') + '_real').val(true);
 	// TODO - should probably return uber tag if all tags are unselected
