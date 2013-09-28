@@ -189,9 +189,12 @@ class Snippet(models.Model):
             return self.recording.get_audio(self.offset, self.duration)
 
     def save_sonogram(self, replace=False, NFFT=512):
-        if not self.sonogram or \
-                replace or \
-                (self.sonogram and not os.path.exists(self.sonogram.path)):
+        try:
+            if not os.path.exists(self.sonogram.path):
+                replace = True
+        except (ValueError, SuspiciousOperation, AttributeError):
+            replace = True
+        if replace:
             clf()
             fig = figure(figsize=(10, 5))
             filename = self.get_sonogram_name()
@@ -215,9 +218,12 @@ class Snippet(models.Model):
             close()
 
     def save_soundfile(self, replace=False):
-        if not self.soundfile or \
-                replace or \
-                (self.soundfile and not os.path.exists(self.soundfile.path)):
+        try:
+            if not os.path.exists(self.soundfile.path):
+                replace = True
+        except (ValueError, SuspiciousOperation, AttributeError):
+            replace = True
+        if replace:
             filename = self.get_soundfile_name()
             wav_file = TemporaryFile()
             wavy.slice_wave(self.recording.path, wav_file, self.offset, self.duration)
