@@ -8,6 +8,8 @@ from django.core.management.base import BaseCommand
 from kokako.score import Audio
 from kokako.detectors.kiwi import SimpleKiwi
 from kokako.detectors.intensity import Energy, LowEnergy, Amplitude
+from wavy import get_audio
+from wave import Error as WaveError
 
 from www.recordings.models import Score, Recording, Snippet, Detector
 
@@ -37,10 +39,10 @@ class Command(BaseCommand):
                 fid.peek(BUFFER_SIZE)
                 with closing(fid):
                     for snippet in snippets:
-                        count = 0
-                        for detector, db_detector in detectors:
-                            try:
-                                audio = Audio(snippet.get_audio(fid), snippet.recording.framerate)
+                        try:
+                            audio = Audio(*get_audio(recording.path, snippet.offset, snippet.duration))
+                            count = 0
+                            for detector, db_detector in detectors:
                                 score = detector.score(audio)
                                 if not count:   
                                     print '%s %0.1f %0.1f' % (snippet, time.time() - now, score)
@@ -53,8 +55,11 @@ class Command(BaseCommand):
                                 s = Score(detector=db_detector, snippet=snippet,
                                     score=score)
                                 s.save()
-                            except KeyboardInterrupt:
-                                raise
-                            except:
-                                print detector, snippet, 'Scoring failed', sys.exc_info()[0]
-                            count += 1
+                                count += 1
+                        except KeyboardInterrupt:
+                            raise
+                        except WaveError:
+                            print recording.path, 'scoring failed because of a WAV error'
+                            break
+                        except:
+                            print detector, snippet, 'Scoring failed', sys.exc_info()[0]
