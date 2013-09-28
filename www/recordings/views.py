@@ -290,9 +290,25 @@ def analysis_detail(request, code):
 
 @login_required
 def analysis_snippet(request, code, snippet_id=None):
+    snippet = Snippet.objects.get(id=snippet_id)
     analysis = Analysis.objects.get(code=code)
+    if request.method == "POST":
+        true_tags = []
+        false_tags = []
+        for tag in analysis.tags.all():
+            if request.POST[tag.code] == 'true':
+                true_tags.append(tag)
+            else:
+                false_tags.append(tag)
+
+        iden = Identification(user = request.user, analysis=analysis, snippet=snippet, comment="")
+        iden.save()
+        iden.true_tags.add(*true_tags)
+        iden.false_tags.add(*false_tags)
+
+        return redirect('analysis_snippet', code=code, snippet_id=request.POST["next_id"])
+
     snippets = request.session.get('analysis_set', [])
-    snippets = None
     if not snippets:
         snippets = [a.snippet.id for a in AnalysisSet.objects.filter(analysis=analysis).order_by('?')]
         request.session['analysis_set'] = snippets
@@ -313,8 +329,6 @@ def analysis_snippet(request, code, snippet_id=None):
         next_id = snippets[1]
         previous_id = None
 
-    snippet = Snippet.objects.get(id=snippet_id)
-
     previous_identification = Identification.objects.filter(snippet_id__exact=snippet_id, user_id__exact=request.user.id)
 
     id_before = previous_identification.count() > 0
@@ -324,21 +338,6 @@ def analysis_snippet(request, code, snippet_id=None):
         true_tags = previous_identification[0].true_tags.all()
         false_tags = previous_identification[0].false_tags.all()
 
-    if request.method == "POST":
-        true_tags = []
-        false_tags = []
-        for tag in analysis.tags.all():
-            if request.POST[tag.code] == 'true':
-                true_tags.append(tag)
-            else:
-                false_tags.append(tag)
-
-        iden = Identification(user = request.user, analysis=analysis, snippet=snippet, comment="")
-        iden.save()
-        iden.true_tags.add(*true_tags)
-        iden.false_tags.add(*false_tags)
-
-        return redirect('analysis_snippet', code=code, snippet_id=next_id)
 
     return render(request,
                   'recordings/analysis_snippet.html',
