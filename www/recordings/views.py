@@ -211,13 +211,12 @@ def play_snippet(request, **kwargs):
     if snippet.soundfile and snippet.soundfile.name.startswith("/"): #name should not be absolute
         snippet.soundfile.name = os.path.join(settings.SNIPPET_DIR, snippet.get_soundfile_name())
         snippet.save()
-    response = HttpResponse(FileWrapper(open(snippet.soundfile.path, 'rb')), 
-        content_type=mimetypes.guess_type(snippet.soundfile.path)[0])
-    response['Content-Length'] = os.path.getsize(snippet.soundfile.path)
-    response['X-Content-Duration'] = snippet.duration
-        response['Content-Duration'] = snippet.duration
-    return response
-    #return HttpResponseRedirect(os.path.join(settings.MEDIA_URL, snippet.soundfile.name)) 
+#    response = HttpResponse(FileWrapper(open(snippet.soundfile.path, 'rb')), 
+#        content_type=mimetypes.guess_type(snippet.soundfile.path)[0])
+#    response['Content-Length'] = os.path.getsize(snippet.soundfile.path)
+#    response['X-Content-Duration'] = snippet.duration
+#    return response
+    return HttpResponseRedirect(os.path.join(settings.MEDIA_URL, snippet.soundfile.name)) 
 
 def get_sonogram(request, **kwargs):
     """Play a snippet. If we cant find it, generate it from the snippet"""

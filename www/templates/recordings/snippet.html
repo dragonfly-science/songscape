@@ -71,14 +71,20 @@ $(document).ready(function() {
     context.closePath();
   }
 
+  /*snippet.addEventListener('canplaythrough', function(){
+    console.log('Can play through');
+    console.log(snippet.src);
+    console.log(snippet.networkState);
+    if (snippet.seekable.length === 0) {
+      console.log('Reload');
+      snippet.load();
+    }; 
+  }, false);;*/
+
+  snippet.preload = "auto";
   $('#canvas').bind('click', function(d) {
     // hack hack - for some reason the first time a page is loaded the
     // media is not seekable - something to do with the redirect
-    //if (snippet.seekable.length === 0) {
-    //  console.log('RELOAD');
-    //  location.reload();
-    //}
-
     // Do we want to be able to pause it? Or do we just click
     // on what we want and then when done move to the next one?
     // offset = 0.13 is basically the start the sonogram and 0.9 the end.
@@ -106,11 +112,12 @@ $(document).ready(function() {
   });
 
 });
+{% if next_id %}
 $(window).load(function() {
   var next_image = new Image();
   next_image.src = "{% url 'sonogram_id' next_id %}"
 });
-
+{% endif %}
 </script>
 
 {% endblock %}

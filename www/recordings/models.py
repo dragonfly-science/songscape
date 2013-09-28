@@ -22,6 +22,7 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.template.defaultfilters import slugify
+from django.core.exceptions import SuspiciousOperation
 
 from www.recordings.templatetags.recording_filters import wav_name, sonogram_name, snippet_name
 import wavy
@@ -181,10 +182,10 @@ class Snippet(models.Model):
         return snippet_name(self)
 
     def get_audio(self):
-        if self.soundfile and os.path.exists(self.soundfile.path):
+        try:
             audio, framerate = wavy.get_audio(self.soundfile.path)
             return audio
-        else:
+        except (ValueError, SuspiciousOperation, AttributeError):
             return self.recording.get_audio(self.offset, self.duration)
 
     def save_sonogram(self, replace=False, NFFT=512):
