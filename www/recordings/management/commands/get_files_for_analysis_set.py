@@ -10,6 +10,7 @@ class Command(BaseCommand):
         snippets = [x.snippet for x in AnalysisSet.objects.filter(analysis=analysis)]
         count = 0
         for snippet in snippets:
+            count += 1
             print len(snippets), count
             snippet.save_sonogram()
             snippet.save_soundfile()
