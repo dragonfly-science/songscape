@@ -185,7 +185,7 @@ class Snippet(models.Model):
         try:
             audio, framerate = wavy.get_audio(self.soundfile.path)
             return audio
-        except (ValueError, SuspiciousOperation, AttributeError):
+        except (ValueError, SuspiciousOperation, AttributeError, IOError):
             return self.recording.get_audio(self.offset, self.duration)
 
     def save_sonogram(self, replace=False, NFFT=512):
@@ -215,6 +215,7 @@ class Snippet(models.Model):
                     pass
             self.sonogram.save(filename, imagefile, save=False)
             self.sonogram.name = os.path.join(settings.SONOGRAM_DIR, filename)
+            self.save()
             close()
 
     def save_soundfile(self, replace=False):
