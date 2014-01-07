@@ -16,6 +16,7 @@ For the best results use nginx to serve the media files during development. To d
 
 - run
 ```
+    wget -qO - http://nginx.org/keys/nginx_signing.key | sudo apt-key add -
     apt-get update
     apt-get install nginx
 ```    
@@ -24,15 +25,23 @@ For the best results use nginx to serve the media files during development. To d
 ```
     server {
         listen   80;  # or say 9000 if you want to run apache
-        server_name tui.dragonfly.co.nz;
+        server_name foo.dragonfly.co.nz;
         # no security problem here, since / is alway passed to upstream
         # serve directly - analogous for static/staticfiles
+	    location /media/sonograms/ {
+	        alias /kiwi/sonograms/;
+	        expires 30d;
+	    }
+	    location /media/snippets/ {
+	        alias /kiwi/snippets/;
+	        expires 30d;
+	    }
         location /media/ {
-    	    alias /home/risto/dragonfly/songscape/;
+    	    alias /home/foo/dragonfly/songscape/media/;
     	    expires 30d;
         }
         location /static/ {
-    	    alias /home/risto/dragonfly/songscape/;
+    	    alias /home/foo/dragonfly/songscape/static/;
     	    expires 30d;
         }
         location / {
