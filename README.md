@@ -28,11 +28,11 @@ For the best results use nginx to serve the media files during development. To d
         # no security problem here, since / is alway passed to upstream
         # serve directly - analogous for static/staticfiles
         location /media/ {
-    	    alias /home/risto/dragonfly/songscape/media/;
+    	    alias /home/risto/dragonfly/songscape/;
     	    expires 30d;
         }
         location /static/ {
-    	    alias /home/risto/dragonfly/songscape/static/;
+    	    alias /home/risto/dragonfly/songscape/;
     	    expires 30d;
         }
         location / {
