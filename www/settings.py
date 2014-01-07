@@ -202,8 +202,8 @@ except ImportError:
     pass
 
 # MEDIA_ROOT can be overridden in local_settings
-SONOGRAM_DIR = 'sonograms/'
-SNIPPET_DIR = 'snippets/'
+SONOGRAM_DIR = '/kiwi/sonograms/'
+SNIPPET_DIR = '/kiwi/snippets/'
 
 
 import sys
