@@ -9,18 +9,19 @@ Application for displaying kiwi calls
 For the best results use nginx to serve the media files during development. To do this on ubuntu 12.04
 
 - install the latest nginx, add the following to `/etc/apt/sources.list.d/nginx.list`
-  
+```  
     deb http://nginx.org/packages/ubuntu/ precise nginx
     deb-src http://nginx.org/packages/ubuntu/ precise nginx
+```
 
 - run
-
+```
     apt-get update
     apt-get install nginx
-    
+```    
 
 - something similar to /etc/nginx/conf.d/default.conf
-
+```
     server {
         listen   80;  # or say 9000 if you want to run apache
         server_name tui.dragonfly.co.nz;
@@ -47,3 +48,4 @@ For the best results use nginx to serve the media files during development. To d
         # what to serve if upstream is not available or crashes
         error_page 500 502 503 504 /media/50x.html;
     }
+```
