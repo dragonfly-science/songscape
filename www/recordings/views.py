@@ -208,14 +208,9 @@ def play_snippet(request, **kwargs):
             raise ValueError
     except (ValueError, SuspiciousOperation, AttributeError):
         snippet.save_soundfile(replace=True)
-    if snippet.soundfile and snippet.soundfile.name.startswith("/"): #name should not be absolute
+    if snippet.soundfile and not snippet.soundfile.name.startswith(settings.SNIPPET_DIR): #name should not be absolute
         snippet.soundfile.name = os.path.join(settings.SNIPPET_DIR, snippet.get_soundfile_name())
         snippet.save()
-#    response = HttpResponse(FileWrapper(open(snippet.soundfile.path, 'rb')), 
-#        content_type=mimetypes.guess_type(snippet.soundfile.path)[0])
-#    response['Content-Length'] = os.path.getsize(snippet.soundfile.path)
-#    response['X-Content-Duration'] = snippet.duration
-#    return response
     return HttpResponseRedirect(os.path.join(settings.MEDIA_URL, snippet.soundfile.name)) 
 
 def get_sonogram(request, **kwargs):
@@ -226,8 +221,8 @@ def get_sonogram(request, **kwargs):
             raise ValueError
     except (ValueError, SuspiciousOperation, AttributeError):
         snippet.save_sonogram(replace=True)
-    if snippet.sonogram and snippet.sonogram.name.startswith("/"): #name should not be absolute
-        snippet.sonogram.name = os.path.join(settings.SNIPPET_DIR, snippet.get_sonogram_name())
+    if snippet.sonogram and not snippet.sonogram.name.startswith(settings.SONOGRAM_DIR): #name should not be absolute
+        snippet.sonogram.name = os.path.join(settings.SONOGRAM_DIR, snippet.get_sonogram_name())
         snippet.save()
     return HttpResponseRedirect(os.path.join(settings.MEDIA_URL, snippet.sonogram.name)) 
 
