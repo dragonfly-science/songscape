@@ -32,7 +32,7 @@ USE_L10N = True
 SITE_ID = 1
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
-MEDIA_ROOT = os.path.join(PROJECT_DIR, '/kiwi')
+MEDIA_ROOT = '/kiwi'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
