@@ -5,7 +5,7 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    ('Christopher Knox', 'chris@dragonfly.co.nz'),
+    ('Edward Abraham', 'edward@dragonfly.co.nz'),
 )
 
 # This directory
