@@ -205,13 +205,12 @@ def get_sonogram(request, **kwargs):
         if not os.path.exists(snippet.sonogram.path):
             raise ValueError
     except (ValueError, SuspiciousOperation, AttributeError):
-        print 'Saving sonogram ...'
         snippet.save_sonogram(replace=True)
     if snippet.sonogram and not snippet.sonogram.name.startswith(settings.SONOGRAM_DIR): #name should not be absolute
-        print 'Renaming sonogram ...'
         snippet.sonogram.name = os.path.join(settings.SONOGRAM_DIR, snippet.get_sonogram_name())
         snippet.save()
-    return HttpResponseRedirect(os.path.join(settings.MEDIA_URL, snippet.sonogram.name)) 
+    return HttpResponseRedirect(reverse('sonogram-media', 
+        args=(snippet.sonogram.name,))) 
 
 def tags(request):
     # TODO: Login required!
