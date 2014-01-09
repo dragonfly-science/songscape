@@ -80,15 +80,16 @@ def _get_order(request):
 
 
 def _get_parameters(request):
-    """Get the request parameters, apart from page"""
+    """Get the request parameters, apart from page and index"""
     parameters = request.GET.copy()
     while 'page' in parameters:
         del parameters['page']
+    while 'index' in parameters:
+        del parameters['index']
     return parameters.urlencode()
 
 
-def _paginate(request, queryset, per_page=500, default_page=1):
-    page = request.GET.get('page') or default_page
+def _paginate(request, queryset, per_page=500, page=1):
     paginator = Paginator(queryset, per_page)
     try:
         results = paginator.page(page)
@@ -98,22 +99,6 @@ def _paginate(request, queryset, per_page=500, default_page=1):
         results = paginator.page(paginator.num_pages)
     return results
 
-
-def _get_snippets(request, per_page, page=1, **filters):
-    page = request.GET.get('page') or page
-    for field in fields:
-        value = request.GET.get(field) or None
-        if value:
-            filters[field] = value
-    snippets_list = Snippet.objects.select_related().filter(**filters)
-    paginator = Paginator(snippets_list, per_page)
-    try:
-        snippets = paginator.page(page)
-    except PageNotAnInteger:
-        snippets = paginator.page(1)
-    except EmptyPage:
-        snippets = paginator.page(paginator.num_pages)
-    return snippets
 
 def home(request):
     return render(request, 'home.html')
@@ -172,13 +157,7 @@ def snippet(request, **kwargs):
                    'previous_id': previous_id,
                    'tags': dict(tags)})
 
-
-def snippets(request, default_page=1, per_page=100):
-    filters = _get_filters(request, level='score')
-    order = _get_order(request)
-    if len(order) == 0:
-        order = ['-score']
-    request_parameters = _get_parameters(request)
+def _get_snippets(order, filters, page, per_page):
     code = 'simple-north-island-brown-kiwi'
     version = '0.1.2'
     clipping = Detector.objects.get(code='amplitude')
@@ -192,13 +171,23 @@ def snippets(request, default_page=1, per_page=100):
                        default_page=default_page,
                        per_page=per_page,
                        )
-    # It takes over 30 seconds to extract the id for 130k snippets/scores!
-    # So for now just extract the snippet id for the current page.
-    # TODO: put the ordering in a method and repopulate it if the user
-    # gets to the edge...
-    request.session['snippets'] = [score.snippet.id for score in scores]
-    return render(request, 'recordings/snippets_list.html', {'scores': scores, 'request_parameters': request_parameters})
+    return scores
 
+def _update_session(scores, page, per_page):
+    request.session['snippets'] = [score.snippet.id for score in scores]
+    request.session['page'] = page
+    request.session['per_page'] = per_page
+
+def snippets(request, default_page=1, per_page=100):
+    filters = _get_filters(request, level='score')
+    order = _get_order(request)
+    page = request.GET.get(page) or page 
+    if len(order) == 0:
+        order = ['-score']
+    scores = _get_snippets(order, page, per_page)
+    request_parameters = _get_parameters(request)
+    _update_session(scores, page, per_page)
+    return render(request, 'recordings/snippets_list.html', {'scores': scores, 'request_parameters': request_parameters})
 
 def play_snippet(request, **kwargs):
     """Play a snippet. If we cant find it, generate it from the recording"""
@@ -214,14 +203,16 @@ def play_snippet(request, **kwargs):
     return HttpResponseRedirect(os.path.join(settings.MEDIA_URL, snippet.soundfile.name)) 
 
 def get_sonogram(request, **kwargs):
-    """Play a snippet. If we cant find it, generate it from the snippet"""
+    """Get a sonogram. If we cant find it, generate it from the snippet"""
     snippet = _get_snippet(**kwargs)
     try:
         if not os.path.exists(snippet.sonogram.path):
             raise ValueError
     except (ValueError, SuspiciousOperation, AttributeError):
+        print 'Saving sonogram ...'
         snippet.save_sonogram(replace=True)
     if snippet.sonogram and not snippet.sonogram.name.startswith(settings.SONOGRAM_DIR): #name should not be absolute
+        print 'Renaming sonogram ...'
         snippet.sonogram.name = os.path.join(settings.SONOGRAM_DIR, snippet.get_sonogram_name())
         snippet.save()
     return HttpResponseRedirect(os.path.join(settings.MEDIA_URL, snippet.sonogram.name)) 

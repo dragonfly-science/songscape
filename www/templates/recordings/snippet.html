@@ -37,7 +37,7 @@
     </ul>
   </div>
 </div>
-<canvas id="canvas" width="1000" height="500"></canvas>
+<canvas id="canvas" width="1000" height="360"></canvas>
 <a class="btn btn-small" href="{{ snippet|wav_url }}"><i class="icon-volume-up"></i> Download sound file</a>
 
 <!-- TODO: just draw the image and pop up controls if no canvas
@@ -88,9 +88,9 @@ $(document).ready(function() {
     // Do we want to be able to pause it? Or do we just click
     // on what we want and then when done move to the next one?
     // offset = 0.13 is basically the start the sonogram and 0.9 the end.
-    var sonogram_start = 0.13;
-    var sonogram_end = 0.9;
-    var sonogram_range = 0.9 - 0.13;
+    var sonogram_start = 0.1266;
+    var sonogram_end = 0.90;
+    var sonogram_range = sonogram_end - sonogram_start;
     var offset = d.offsetX / $(this).width();
     // scale accordingly
     offset -= sonogram_start;
