@@ -196,7 +196,7 @@ def play_snippet(request, **kwargs):
     if snippet.soundfile and not snippet.soundfile.name.startswith(settings.SNIPPET_DIR):
         snippet.soundfile.name = os.path.join(settings.SNIPPET_DIR, snippet.get_soundfile_name())
         snippet.save()
-    return HttpResponseRedirect(os.path.join(settings.MEDIA_URL, snippet.soundfile.name)) 
+    return HttpResponseRedirect(reverse('media', args=(snippet.soundfile.name,))) 
 
 def get_sonogram(request, **kwargs):
     """Get a sonogram. If we cant find it, generate it from the snippet"""
@@ -209,7 +209,7 @@ def get_sonogram(request, **kwargs):
     if snippet.sonogram and not snippet.sonogram.name.startswith(settings.SONOGRAM_DIR): #name should not be absolute
         snippet.sonogram.name = os.path.join(settings.SONOGRAM_DIR, snippet.get_sonogram_name())
         snippet.save()
-    return HttpResponseRedirect(reverse('sonogram-media', 
+    return HttpResponseRedirect(reverse('media', 
         args=(snippet.sonogram.name,))) 
 
 def tags(request):
