@@ -1,3 +1,9 @@
+songscape (20140110-1) precise; urgency=low
+
+  * Change the dependencies
+
+ -- Edward Abraham <edward@dragonfly.co.nz>  Fri, 10 Jan 2014 17:22:04 +1200
+
 songscape (20130508-1) precise; urgency=low
 
   * Initial version
