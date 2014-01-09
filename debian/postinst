@@ -119,6 +119,9 @@ case "$1" in
         fi
 
         # Install some handy python library
+        pip install --upgrade pip
+        pip install Pillow
+        pip install matplotlib
         pip install -r /etc/songscape/requirements.txt
 
         cd /var/www/django/songscape/
