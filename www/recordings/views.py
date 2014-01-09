@@ -24,6 +24,7 @@ from www.recordings.models import (Snippet, Score, Detector, Tag, Analysis,
 from .forms import TagForm
 from .models import Recording, Site
 
+PER_PAGE = 100
 FILTERS = {
     'score': {
         'score_maximum': 'score__lt',
@@ -89,8 +90,8 @@ def _get_parameters(request):
     return parameters.urlencode()
 
 
-def _paginate(request, queryset, per_page=500, page=1):
-    paginator = Paginator(queryset, per_page)
+def _paginate(queryset, page=1):
+    paginator = Paginator(queryset, PER_PAGE)
     try:
         results = paginator.page(page)
     except PageNotAnInteger:
@@ -157,7 +158,7 @@ def snippet(request, **kwargs):
                    'previous_id': previous_id,
                    'tags': dict(tags)})
 
-def _get_snippets(order, filters, page, per_page):
+def _get_snippets(order, filters):
     code = 'simple-north-island-brown-kiwi'
     version = '0.1.2'
     clipping = Detector.objects.get(code='amplitude')
@@ -166,27 +167,22 @@ def _get_snippets(order, filters, page, per_page):
     detector = Detector.objects.get(code=code, version=version)
     queryset = Score.objects.filter(
         detector=detector, snippet__in=unclipped_snippets).select_related().filter(**filters).order_by(*order)
-    scores = _paginate(request,
-                       queryset,
-                       default_page=default_page,
-                       per_page=per_page,
-                       )
+    scores = _paginate(queryset)
     return scores
 
-def _update_session(scores, page, per_page):
+def _update_session(request, scores, page):
     request.session['snippets'] = [score.snippet.id for score in scores]
     request.session['page'] = page
-    request.session['per_page'] = per_page
 
-def snippets(request, default_page=1, per_page=100):
+def snippets(request, default_page=1):
     filters = _get_filters(request, level='score')
     order = _get_order(request)
-    page = request.GET.get(page) or page 
+    page = request.GET.get('page') or default_page 
     if len(order) == 0:
         order = ['-score']
-    scores = _get_snippets(order, page, per_page)
+    scores = _get_snippets(order, filters)
     request_parameters = _get_parameters(request)
-    _update_session(scores, page, per_page)
+    _update_session(request, scores, page)
     return render(request, 'recordings/snippets_list.html', {'scores': scores, 'request_parameters': request_parameters})
 
 def play_snippet(request, **kwargs):
@@ -197,7 +193,7 @@ def play_snippet(request, **kwargs):
             raise ValueError
     except (ValueError, SuspiciousOperation, AttributeError):
         snippet.save_soundfile(replace=True)
-    if snippet.soundfile and not snippet.soundfile.name.startswith(settings.SNIPPET_DIR): #name should not be absolute
+    if snippet.soundfile and not snippet.soundfile.name.startswith(settings.SNIPPET_DIR):
         snippet.soundfile.name = os.path.join(settings.SNIPPET_DIR, snippet.get_soundfile_name())
         snippet.save()
     return HttpResponseRedirect(os.path.join(settings.MEDIA_URL, snippet.soundfile.name)) 

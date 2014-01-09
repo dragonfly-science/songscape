@@ -158,8 +158,7 @@ class Recording(models.Model):
 
 
     def get_audio(self, offset=0, duration=0, max_framerate=settings.MAX_FRAMERATE):
-        audio, framerate = wavy.get_audio(self.path, offset=offset, duration=duration, max_framerate=max_framerate)
-        return audio
+        return wavy.get_audio(self.path, offset=offset, duration=duration, max_framerate=max_framerate)
 
 class Tag(UniqueSlugMixin, models.Model):
     code = models.SlugField(max_length=64, unique=True)
@@ -185,8 +184,7 @@ class Snippet(models.Model):
 
     def get_audio(self, max_framerate=settings.MAX_FRAMERATE):
         try:
-            audio, framerate = wavy.get_audio(self.soundfile.path, max_framerate=max_framerate)
-            return audio
+            return wavy.get_audio(self.soundfile.path, max_framerate=max_framerate)
         except (ValueError, SuspiciousOperation, AttributeError, IOError):
             return self.recording.get_audio(self.offset, self.duration, max_framerate=max_framerate)
 
@@ -200,10 +198,11 @@ class Snippet(models.Model):
         except (ValueError, SuspiciousOperation, AttributeError):
             replace = True
         if replace:
+            audio, framerate =  self.get_audio(max_framerate=max_framerate)
             Pxx, freqs, bins, im  = specgram(
-                self.get_audio(max_framerate=max_framerate), 
+                audio,
                 NFFT=n_fft, 
-                Fs=self.recording.framerate
+                Fs=framerate
             )
             f = where(logical_and(freqs > min_freq, freqs <= max_freq))[0]
             Pxx[where(Pxx > percentile(Pxx[f].flatten(), 99.99))] =  percentile(Pxx[f].flatten(), 99.99)
