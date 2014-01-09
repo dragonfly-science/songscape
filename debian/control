@@ -4,13 +4,13 @@ Priority: extra
 Maintainer: Joel Pitt <joel@dragonfly.co.nz>
 Build-Depends: debhelper (>=9), python
 X-Python-Version: >= 2.7
-Standards-Version: 3.9.4
+Standards-Version: 3.9.3
 Homepage: https://songscape.dragonfly.co.nz
 Vcs-Git: git@github.com:dragonfly-science/songscape.git
 
 Package: songscape
 Architecture: all
-Depends: ${misc:Depends}, apache2, libapache2-mod-wsgi, python-psycopg2, python, postgresql-client, python-pip, libxml2-dev, libxslt-dev, git, build-essential, python-dev, libapache2-mod-xsendfile, python-numpy, libjpeg8-dev
+Depends: ${misc:Depends}, apache2, libapache2-mod-wsgi, python-psycopg2, python, postgresql-client, python-pip, libxml2-dev, libxslt-dev, git, build-essential, python-dev, libapache2-mod-xsendfile, python-numpy, libjpeg8-dev, libfreetype6-dev, libpng-dev, zlib1g-dev
 Description: Songscape for Kiwi Calls
  .
  Developed by Dragonfly Science
