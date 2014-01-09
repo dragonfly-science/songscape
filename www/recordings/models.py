@@ -14,7 +14,8 @@ from tempfile import TemporaryFile
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.cbook
-from pylab import figure, specgram, savefig, close, gca, clf, cm
+from pylab import figure, specgram, savefig, close, gca, clf, cm,\
+    where, logical_and, percentile, imshow, log10, flipud, rcParams
 
 from django.core.files.base import ContentFile
 from django.core.files import File
@@ -27,6 +28,7 @@ from django.core.exceptions import SuspiciousOperation
 from www.recordings.templatetags.recording_filters import wav_name, sonogram_name, snippet_name
 import wavy
 
+rcParams['font.size'] = 10
 
 class SlugMixin(object):
     """ automatically generate slug when object is initially created """
@@ -155,8 +157,8 @@ class Recording(models.Model):
         super(Recording, self).save(*args, **kwargs)
 
 
-    def get_audio(self, offset=0, duration=0):
-        audio, framerate = wavy.get_audio(self.path, offset=offset, duration=duration)
+    def get_audio(self, offset=0, duration=0, max_framerate=settings.MAX_FRAMERATE):
+        audio, framerate = wavy.get_audio(self.path, offset=offset, duration=duration, max_framerate=max_framerate)
         return audio
 
 class Tag(UniqueSlugMixin, models.Model):
@@ -181,38 +183,48 @@ class Snippet(models.Model):
     def __unicode__(self):
         return snippet_name(self)
 
-    def get_audio(self):
+    def get_audio(self, max_framerate=settings.MAX_FRAMERATE):
         try:
-            audio, framerate = wavy.get_audio(self.soundfile.path)
+            audio, framerate = wavy.get_audio(self.soundfile.path, max_framerate=max_framerate)
             return audio
         except (ValueError, SuspiciousOperation, AttributeError, IOError):
-            return self.recording.get_audio(self.offset, self.duration)
+            return self.recording.get_audio(self.offset, self.duration, max_framerate=max_framerate)
 
-    def save_sonogram(self, replace=False, NFFT=512):
+    def save_sonogram(self, replace=False, n_fft=settings.N_FFT, \
+        min_freq=settings.MIN_FREQ, \
+        max_freq=settings.MAX_FREQ, \
+        max_framerate=settings.MAX_FRAMERATE):
         try:
             if not os.path.exists(self.sonogram.path):
                 replace = True
         except (ValueError, SuspiciousOperation, AttributeError):
             replace = True
         if replace:
+            Pxx, freqs, bins, im  = specgram(
+                self.get_audio(max_framerate=max_framerate), 
+                NFFT=n_fft, 
+                Fs=self.recording.framerate
+            )
+            f = where(logical_and(freqs > min_freq, freqs <= max_freq))[0]
+            Pxx[where(Pxx > percentile(Pxx[f].flatten(), 99.99))] =  percentile(Pxx[f].flatten(), 99.99)
+            Pxx[where(Pxx < percentile(Pxx[f].flatten(), 0.01))] =  percentile(Pxx[f].flatten(), 0.01)
             clf()
-            fig = figure(figsize=(10, 5))
-            filename = self.get_sonogram_name()
-            specgram(self.get_audio(),
-                NFFT=NFFT,
-                Fs=self.recording.framerate,
-                hold=False,
-                cmap=cm.gray)
+            fig = figure(figsize=(10, 3.5))
+            imshow(flipud(10*log10(Pxx[f,])), 
+                extent=(bins[0], bins[-1], freqs[f][0], freqs[f][-1]), 
+                aspect='auto', 
+                cmap=cm.gray )
             string_buffer = StringIO()
             gca().set_ylabel('Frequency (Hz)')
             gca().set_xlabel('Time (s)')
-            savefig(string_buffer, format='png')
+            savefig(string_buffer, format='jpg')
             imagefile = ContentFile(string_buffer.getvalue())
             if self.sonogram:
                 try:
                     self.sonogram.delete()
                 except:
                     pass
+            filename = self.get_sonogram_name()
             self.sonogram.save(filename, imagefile, save=False)
             self.sonogram.name = os.path.join(settings.SONOGRAM_DIR, filename)
             self.save()

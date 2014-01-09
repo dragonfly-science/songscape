@@ -195,6 +195,14 @@ CACHES = {
     }
 }
 
+
+
+# Audio and sonogram quality settings
+MAX_FRAMERATE = 8000
+MIN_FREQ=500
+MAX_FREQ=4000
+N_FFT=512
+
 try:
     from local_settings import *
 except ImportError:
@@ -204,6 +212,8 @@ except ImportError:
 # MEDIA_ROOT can be overridden in local_settings
 SONOGRAM_DIR = 'sonograms/'
 SNIPPET_DIR = 'snippets/'
+
+
 
 
 import sys
