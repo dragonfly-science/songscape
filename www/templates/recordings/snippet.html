@@ -89,17 +89,25 @@ $(document).ready(function() {
     // on what we want and then when done move to the next one?
     // offset = 0.13 is basically the start the sonogram and 0.9 the end.
     var sonogram_start = 0.1266;
-    var sonogram_end = 0.90;
+    var sonogram_end = 0.905;
     var sonogram_range = sonogram_end - sonogram_start;
     var offset = d.offsetX / $(this).width();
     // scale accordingly
     offset -= sonogram_start;
     offset /= sonogram_range;
-    snippet.currentTime = offset * snippet.duration
-
-    draw_playback(d.offsetX);
-
-    snippet.play()
+    if (offset > 1.0){
+        snippet.currentTime = snippet.duration;
+        draw_playback(canvas.width*sonogram_end);
+    } 
+    else if (offset < 0){
+        snippet.currentTime = 0.0;
+        snippet.play();
+    }
+    else {
+        snippet.currentTime = offset * snippet.duration
+        draw_playback(d.offsetX);
+        snippet.play();
+    };
 
     $('#snippet').bind('timeupdate', function(e) {
         var offset = snippet.currentTime / snippet.duration;
