@@ -5,15 +5,15 @@
 {% block content %}
 
 <ul class="pager">
-{% if scores.has_previous %}
+{% if snippets.has_previous %}
   <li class="previous">
-    <a href="?page={{ scores.previous_page_number }}{% if request_parameters %}&{{ request_parameters }}{% endif %}">&larr; Previous</a>
+    <a href="?page={{ snippets.previous_page_number }}{% if request_parameters %}&{{ request_parameters }}{% endif %}">&larr; Previous</a>
   </li>
 {% endif %}
-    <li class="disabled"><a>Showing {{ scores.start_index }}&ndash;{{ scores.end_index }} of {{ scores.paginator.count }} records</a></li>
-{% if scores.has_next %}
+    <li class="disabled"><a>Showing {{ snippets.start_index }}&ndash;{{ snippets.end_index }} of {{ snippets.paginator.count }} records</a></li>
+{% if snippets.has_next %}
   <li class="next">
-    <a href="?page={{ scores.next_page_number }}{% if request_parameters %}&{{ request_parameters }}{% endif %}">Next &rarr;</a>
+    <a href="?page={{ snippets.next_page_number }}{% if request_parameters %}&{{ request_parameters }}{% endif %}">Next &rarr;</a>
   </li>
 {% endif %}
 </ul>
@@ -28,12 +28,12 @@
     <th>Score</th>
 </thead>
 <tbody>
-{% for s in scores %}
+{% for s in snippets %}
     <tr>
-    <td><a href="{% url 'snippet' s.snippet.id %}">{{ s.snippet.id }}</a></td>
-    <td>{{ s.snippet.recording.deployment.site }}</td>
-    <td>{{ s.snippet.datetime }}</td>
-    <td>{{ s.score }}</td>
+    <td><a href="{% url 'snippet' s.id %}">{{ s.id }}</a></td>
+    <td>{{ s.recording.deployment.site }}</td>
+    <td>{{ s.datetime }}</td>
+    <td>{{ s.scores.score.0 }}</td>
     </tr>
 {% endfor %}
 </tbody>

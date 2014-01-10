@@ -4,11 +4,12 @@ import os
 import urllib
 from tempfile import TemporaryFile
 from collections import Counter
+import math
 import mimetypes
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import StreamingHttpResponse, HttpResponse, HttpResponseRedirect
+from django.http import StreamingHttpResponse, HttpResponse, HttpResponseRedirect, Http404
 from django.core.servers.basehttp import FileWrapper
 from django.conf import settings
 from django.db.models import Sum, Count
@@ -16,7 +17,6 @@ from django.core.files import File
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.core.exceptions import SuspiciousOperation
-
 
 from www.recordings.models import (Snippet, Score, Detector, Tag, Analysis, 
     Deployment, Organisation, Identification, AnalysisSet)
@@ -66,7 +66,7 @@ FILTERS = {
 }
 
 
-def _get_filters(request, level='score'):
+def _get_filters(request, level='snippet'):
     filters = {}
     fields = FILTERS[level]
     for key, field in fields.items():
@@ -90,7 +90,7 @@ def _get_parameters(request):
     return parameters.urlencode()
 
 
-def _paginate(queryset, page=1):
+def _paginate(queryset, page):
     paginator = Paginator(queryset, PER_PAGE)
     try:
         results = paginator.page(page)
@@ -158,32 +158,50 @@ def snippet(request, **kwargs):
                    'previous_id': previous_id,
                    'tags': dict(tags)})
 
-def _get_snippets(order, filters):
+def _get_snippets(order, filters, page):
     code = 'simple-north-island-brown-kiwi'
     version = '0.1.2'
-    clipping = Detector.objects.get(code='amplitude')
-    unclipped_scores = Score.objects.filter(detector=clipping, score__lt=32000)
-    unclipped_snippets = Snippet.objects.filter(scores__in=unclipped_scores)
     detector = Detector.objects.get(code=code, version=version)
-    queryset = Score.objects.filter(
-        detector=detector, snippet__in=unclipped_snippets).select_related().filter(**filters).order_by(*order)
-    scores = _paginate(queryset)
-    return scores
+    return _paginate(Snippet.objects.\
+        filter(scores__detector = detector, scores__score__lt = 1e10).\
+        filter(scores__detector = Detector.objects.get(code='amplitude'), scores__score__lt=32000).\
+        order_by(order).\
+        filter(**filters), page)
 
-def _update_session(request, scores, page):
-    request.session['snippets'] = [score.snippet.id for score in scores]
+def _update_session(request, snippets, page, order, filters):
+    request.session['snippets'] = [snippet.id for snippet in snippets]
     request.session['page'] = page
+    request.session['order'] = order
+    request.session['filters'] = filters
 
-def snippets(request, default_page=1):
-    filters = _get_filters(request, level='score')
-    order = _get_order(request)
-    page = request.GET.get('page') or default_page 
-    if len(order) == 0:
-        order = ['-score']
-    scores = _get_snippets(order, filters)
+def _same_page(request, page, order, filters):
+    return page == request.session.get(page) and \
+        order == request.session.get(order) and \
+        filters == request.session.get(filters)
+
+def snippets(request):
+    filters = _get_filters(request, level='snippet')
+    order = _get_order(request) or '-scores__score'
+    try:
+        page = int(request.GET.get('page') or 1)
+        index = request.GET.get('index', None)
+        if index:
+            index = int(index)
+    except ValueError:
+        raise Http404
+    if page < 0 or index >= PER_PAGE or index < 0:
+        raise Http404 
+    if _same_page(request, page, order, filters) and index:
+        print 'same page', page
+        return snippet(request, id=request.session.get('snippets')[index])
+    else:
+        print 'get snippets'
+        snippets = _get_snippets(order, filters, page)
+    if index >= 0:
+        return snippet(request, id=snippets[index].id)
     request_parameters = _get_parameters(request)
-    _update_session(request, scores, page)
-    return render(request, 'recordings/snippets_list.html', {'scores': scores, 'request_parameters': request_parameters})
+    _update_session(request, snippets, page, order, filters)
+    return render(request, 'recordings/snippets_list.html', {'snippets': snippets, 'request_parameters': request_parameters})
 
 def play_snippet(request, **kwargs):
     """Play a snippet. If we cant find it, generate it from the recording"""
