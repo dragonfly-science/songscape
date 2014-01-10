@@ -50,7 +50,7 @@ case "$1" in
         set_dbconfig PASSWORD "'${RET}'" ${LOCAL_SETTINGS}
 
         db_get songscape/servername
-        set_config SITE_URL "'https://${RET}'" ${LOCAL_SETTINGS}
+        set_config SITE_URL "'http://${RET}'" ${LOCAL_SETTINGS}
 
         db_get songscape/email_host
         set_config EMAIL_HOST "'${RET}'" ${LOCAL_SETTINGS}
