@@ -90,17 +90,6 @@ def _get_parameters(request):
     return parameters.urlencode()
 
 
-def _paginate(queryset, page):
-    paginator = Paginator(queryset, PER_PAGE)
-    try:
-        results = paginator.page(page)
-    except PageNotAnInteger:
-        results = paginator.page(1)
-    except EmptyPage:
-        results = paginator.page(paginator.num_pages)
-    return results
-
-
 def home(request):
     return render(request, 'home.html')
 
@@ -110,7 +99,8 @@ def _get_snippet(id=None,
         recorder_code=None,
         date_time=None,
         offset=None,
-        duration=None):
+        duration=None, 
+        **kwargs):
     if organisation or\
             date_time or\
             recorder_code or\
@@ -132,19 +122,6 @@ def _get_snippet(id=None,
 def snippet(request, **kwargs):
     snippet = _get_snippet(**kwargs)
     snippets = request.session.get('snippets', [])
-    if snippet.id in snippets:
-        index = snippets.index(snippet.id)
-        try:
-            next_id = snippets[index + 1]
-        except IndexError:
-            next_id = None
-        try:
-            previous_id = snippets[index - 1]
-        except IndexError:
-            previous_id = None
-    else:
-        next_id = None
-        previous_id = None
 
     idens = snippet.identifications.all()
     tags = Counter()
@@ -154,54 +131,74 @@ def snippet(request, **kwargs):
     return render(request,
                   'recordings/snippet.html',
                   {'snippet': snippet,
-                   'next_id': next_id,
-                   'previous_id': previous_id,
+                   'next_index': kwargs.get('next_index', None),
+                   'previous_index': kwargs.get('previous_index', None),
+                   'index': kwargs.get('index', None),
+                   'count': kwargs.get('count', None),
                    'tags': dict(tags)})
 
-def _get_snippets(order, filters, page):
-    code = 'simple-north-island-brown-kiwi'
-    version = '0.1.2'
-    detector = Detector.objects.get(code=code, version=version)
-    return _paginate(Snippet.objects.\
-        filter(scores__detector = detector, scores__score__lt = 1e10).\
-        filter(scores__detector = Detector.objects.get(code='amplitude'), scores__score__lt=32000).\
-        order_by(order).\
-        filter(**filters), page)
 
-def _update_session(request, snippets, page, order, filters):
-    request.session['snippets'] = [snippet.id for snippet in snippets]
-    request.session['page'] = page
-    request.session['order'] = order
-    request.session['filters'] = filters
-
-def _same_page(request, page, order, filters):
-    return page == request.session.get(page) and \
-        order == request.session.get(order) and \
-        filters == request.session.get(filters)
-
-def snippets(request):
+def snippets(request, index):
     filters = _get_filters(request, level='snippet')
     order = _get_order(request) or '-scores__score'
-    try:
-        page = int(request.GET.get('page') or 1)
-        index = request.GET.get('index', None)
-        if index:
-            index = int(index)
-    except ValueError:
-        raise Http404
-    if page < 0 or index >= PER_PAGE or index < 0:
-        raise Http404 
-    if _same_page(request, page, order, filters) and index:
-        print 'same page', page
-        return snippet(request, id=request.session.get('snippets')[index])
-    else:
-        print 'get snippets'
-        snippets = _get_snippets(order, filters, page)
-    if index >= 0:
-        return snippet(request, id=snippets[index].id)
     request_parameters = _get_parameters(request)
-    _update_session(request, snippets, page, order, filters)
-    return render(request, 'recordings/snippets_list.html', {'snippets': snippets, 'request_parameters': request_parameters})
+    try:
+        index = int(index)
+    except ValueError:
+        raise Http404 
+    if index < 1:
+        raise Http404 
+    page = int(math.floor((index - 1)/PER_PAGE)) + 1
+    # If we are still on the same page, return the next snippet
+    if page == (int(math.floor((request.session.get('index', 0) - 1)/PER_PAGE)) + 1) and \
+            order == request.session.get('order') and \
+            filters == request.session.get('filters'):
+        print 'Same page'
+        snippets = request.session.get('snippets', [])
+        count = request.session.get('count', 0)
+    # Otherwise, run a query to identify the next page
+    else:
+        print 'New query'
+        code = 'simple-north-island-brown-kiwi'
+        version = '0.1.2'
+        detector = Detector.objects.get(code=code, version=version)
+        snippet_ids = Snippet.objects.\
+            filter(scores__detector = detector, scores__score__lt = 1e10).\
+            filter(scores__detector = Detector.objects.get(code='amplitude'), scores__score__lt=32000).\
+            order_by(order).\
+            filter(**filters).\
+            values_list('id', flat=True)
+        paginator = Paginator(snippet_ids, PER_PAGE)
+        # Handle return values outside the range
+        if paginator.count == 0:
+            return render(request, 'recordings/snippet.html', {})
+        elif index > paginator.count or page > paginator.num_pages: 
+            raise Http404
+        snippet_page = paginator.page(page)
+        snippets = list(snippet_page)
+        count = paginator.count
+        #Update the session
+        request.session['snippets'] = snippets
+        request.session['index'] = index
+        request.session['order'] = order
+        request.session['filters'] = filters
+        request.session['count'] = count
+    page_index = (index - 1)%PER_PAGE + 1
+    if page_index > len(snippets):
+        raise Http404
+    # Now work out the next and previous  page and index
+    next_index = index + 1
+    previous_index = index - 1
+    if previous_index < 1:
+        previous_index = None
+    if next_index > count:
+        next_index = None
+    return snippet(request, 
+        id=snippets[page_index - 1],
+        index=index,
+        next_index=next_index,
+        previous_index=previous_index,
+        count=count)
 
 def play_snippet(request, **kwargs):
     """Play a snippet. If we cant find it, generate it from the recording"""
