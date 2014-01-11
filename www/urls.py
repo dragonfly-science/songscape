@@ -19,6 +19,7 @@ urlpatterns = patterns(
     url(r'^snippet/(?P<id>\d+)/$', 'www.recordings.views.snippet', name='snippet'),
     url(r'^snippet/%s/$' % snippet_regex, 'www.recordings.views.snippet', name='snippet_name'),
     url(r'^snippets/(?P<index>\d+)/$', 'www.recordings.views.snippets', name='snippet_list'),
+    url(r'^snippets/$', 'www.recordings.views.snippets', name='first_snippet'),
     url(r'^tags$', 'www.recordings.views.tags', name='tags'),
     url(r'^analysis/create$', 'www.recordings.views.analysis_create', name='analysis_create'),
     url(r'^analysis/$', 'www.recordings.views.analysis_list', name='analysis_list'),
