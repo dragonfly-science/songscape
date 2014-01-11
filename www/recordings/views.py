@@ -138,7 +138,7 @@ def snippet(request, **kwargs):
                    'tags': dict(tags)})
 
 
-def snippets(request, index):
+def snippets(request, index=1):
     filters = _get_filters(request, level='snippet')
     order = _get_order(request) or '-scores__score'
     request_parameters = _get_parameters(request)

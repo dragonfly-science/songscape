@@ -2,46 +2,37 @@
 {% block title %}Songscape - homepage{% endblock title %}
 
 {% block content %}
-
-<div class="row-fluid" id="title-row">
-    <h1 style="font-size: 2.2em; color: #555555">Monitoring biodiversity with sound</h1>
-</div>
-<div class="row-fluid">
-    <div class="span5" style="align: center">
-        <div class="thumbnail">
-            <img src="/static/images/nibk.jpg" alt="North Island brown kiwi" title="North Island brown kiwi" class="flexible">
-            <div class="byline">
-                <a href="http://creativecommons.org/licenses/by/3.0/deed.en">CC-BY</a> Edward Abraham
-            </div>
-            <p> New Zealand North Island brown kiwi. Kiwi are active at night, and their distinctive call makes them ideal
-            candidates for acoustic monitoring.</p>
+    <!-- Main jumbotron for a primary marketing message or call to action -->
+    <div class="jumbotron" style="background: #443b32 url(/static/images/nibk-background.jpg) no-repeat top right">
+      <div class="container">
+        <h1 style="color: white">Monitoring biodiversity with sound</h1>
+        <p><a class="btn btn-primary btn-lg" role="button" href="{% url 'first_snippet' %}">Explore the sounds &raquo;</a></p>
+      </div>
+    </div>
+    <p>
+        New Zealand North Island brown kiwi. Kiwi are active at night, and their distinctive call makes them ideal candidates for acoustic monitoring. Photo of a kiwi
+        <a href="http://creativecommons.org/licenses/by/3.0/deed.en">CC-BY</a> Edward Abraham
+    </p>
+    <div class="container">
+      <!-- Example row of columns -->
+      <div class="row">
+        <div class="col-md-4">
+          <h2>Machine learning</h2>
+             <p>Recording birdsong and other animal sounds is an effective technique for monitoring biodiversity. The challenge is then to manage
+        and analyse the data. Songscape allows a combination of machine learning and himan classification to efficiently manage score large acoustic datasets.</p>
         </div>
-        <br>
-        <div class="thumbnail">
-            <img src="/static/images/kiwi-recorder.jpg" alt="Sound recorder" title="Sound recorder" class="flexible">
-            <div class="byline">
-                <a href="http://creativecommons.org/licenses/by/3.0/deed.en">CC-BY</a> Edward Abraham
-            </div>
-            <p> Deploying a <a href="http://www.doc.govt.nz">Department of Conservation</a> sound recorder to  monitor the reintroduction of North Island brown kiwi near Wainuiomata, New Zealand.  The reintroduction is a community project run by the 
-            <a href="http://www.rimutakatrust.org.nz/projects/kiwi.htm">Rimutaka Forest Trust Park</a>. Kiwi are vulnerable
-            to mammalian predators, and ongoing monitoring is needed to ensure that the reintroduction remains sucessful.</p>
+        <div class="col-md-4">
+          <h2>Heading</h2>
+          <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
+          <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
+       </div>
+        <div class="col-md-4">
+          <h2>Stay in touch</h2>
+          <p>Songscape is in development. We are interested in working with people who have acoustic datasets to analyse. Please email us to find out more, or</p>
+          <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
         </div>
+      </div>
 
-    </div><!-- span 5 -->
-    <div class="span7">
-        <p class="lead">Recording birdsong and other animal sounds is an effective technique for monitoring biodiversity. 
-        The development of portable field recorders allows for rapid collection of acoustic data. The challenge is then to manage
-        and analyse the data. </p>
 
-        <p class="lead">Songscape faciltates analysis of hundreds of gigabytes of acoustic data, through a combination of automated and manual classification.
-        </p>
-   
-        <p class="lead"> We aim to make large repositories of acoustic data publicly available, and to engage people in conservation.</p>
 
-        <p class="lead"> At this stage, songscape is more of an idea than a reality. We are focused on analysing data on New Zealand north island brown kiwi. If you would like to do something similar with your acoustic data, please <a href="mailto:edward@dragonfly.co.nz">get in touch.</a> </p>
-        <p style="text-align: center">
-            <a href="/summary/" class="btn btn-info jumbotron btn-large" style="font-size: 20px; font-weight: normal; padding: 14px 24px; margin-top:24px;">Explore the sounds</a>
-        </p>
-    </div><!-- span 7 -->
-</div><!-- row-fluid -->
 {% endblock content %}
