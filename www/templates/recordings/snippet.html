@@ -43,7 +43,7 @@
   </div>
 </div>
 <canvas id="canvas" width="1000" height="360"></canvas>
-<a class="btn btn-small" href="{{ snippet|wav_url }}"><i class="icon-volume-up"></i> Download sound file</a>
+<a href="{{ snippet|wav_url }}" role="button" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-volume-up"></span> Download sound file</a>
 
 <!-- TODO: just draw the image and pop up controls if no canvas
 img id="sonogram" src="{{ snippet|sonogram_url }}" -->

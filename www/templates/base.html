@@ -2,6 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <link href='//fonts.googleapis.com/css?family=Source+Sans+Pro|Bitter' rel='stylesheet' type='text/css'>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,7 +28,7 @@
 
   <body>
     {% browserid_info %}
-
+<div id="wrap">
     <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="container">
         <div class="navbar-header">
@@ -46,7 +47,7 @@
           </ul>
             {% if user.is_authenticated %}
             <ul class="nav navbar-nav navbar-right">
-                <li>{{ user.email }}</li>
+                <li><p>{{ user.email }}</p></li>
                 {% if user.is_staff %}
                 <li><a href="/admin/" >Admin</a></li>
                 {% endif %}
@@ -54,7 +55,7 @@
             </ul>
             {% else %}
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="#" data-next="/" class="browserid-login" ><span>Sign in</span>
+                <li><a href="#" data-next="/" class="browserid-login" ><span ><span class="glyphicon glyphicon-user"></span> Sign in </span>
 </a></li>
             </ul>
             {% endif %}
@@ -75,23 +76,30 @@
     </div><!--/container-->
 {% endblock main %}
 
-<div class="container">
-      <div class="well" id="footer">
-        <div id="logos">
-                <a href="http://www.dragonfly.co.nz"
-                    alt="Dragonfly Science" title="Dragonfly Science">
-                  <span class="logo" id="dfly"><img src="/static/images/greyds.png"></span>
-                </a>
-                  <span class="logo" id="cc"><img src="/static/images/cc.logo.large.png" alt="Creative Commons"
-                    title="Creative Commons"></span>
+</div><!--/wrap-->
+        {% block footer %}
+        <div id="footer">
+            <div class="container">
+            <div class="row">
+                <div class = "col-md-2 footer-text" >
+                    <a href="http://www.dragonfly.co.nz"><img src='/static/images/cc.logo.large.png' width="100%"style="max-width: 160px"></a>
+                </div>
+                <div class = "col-md-6 footer-text">
+        <p> Unless otherwise stated data, recordings, and images on this site are made available under a <a href="http://creativecommons.org/licenses/by/3.0/"> creative commons attribution 3.0 licence</a>.This licence allows the data to be used for any other purpose and republished, provided that
+attribution is given. Songscape is a project of <a href="http://www.dragonfly.co.nz">Dragonfly Data Science</a>. 
+                </div>
+                <div class="col-md-3 footer-logo">
+                    <a href="http://www.dragonfly.co.nz"><img src='/static/images/Dragonfly-logo-reversed-RGB.png' width="200px"></a>
+                </div>
+
+            </div>
+            </div>
         </div>
-        <br/>
-        <p> Songscape is a project of <a href="http://www.dragonfly.co.nz">Dragonfly Science</a>. Unless otherwise stated data, recordings, and images on this site are made available under a <a href="http://creativecommons.org/licenses/by/3.0/"> creative commons attribution 3.0 licence</a>.This licence allows the data to be used for any other purpose and republished, provided that
-attribution is given.
-    </div><!-- footer -->
-    </div><!-- container-->
+        {% endblock %}
     <!-- Javascript -->
     <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    {% block script %}
+    {% endblock script %}
     <script src="/js/bootstrap.min.js"></script> 
     {% browserid_js %}
     <script>
