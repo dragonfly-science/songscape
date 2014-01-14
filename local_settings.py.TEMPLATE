@@ -22,6 +22,7 @@ EMAIL_HOST = ''
 SERVER_EMAIL = ''
 
 ALLOWED_HOSTS = ['.dragonfly.co.nz']
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTOCOL', 'https')
 
 # generate this per server, and add to debconf
 # python -c 'import random; print "".join([random.choice("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)") for i in range(50)])'
