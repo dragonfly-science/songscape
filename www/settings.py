@@ -32,7 +32,7 @@ USE_L10N = True
 SITE_ID = 1
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
-MEDIA_ROOT = '/kiwi'
+MEDIA_ROOT = os.path.join(PROJECT_DIR, 'media')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -203,17 +203,16 @@ MIN_FREQ=500
 MAX_FREQ=4000
 N_FFT=512
 
-try:
-    from local_settings import *
-except ImportError:
-    print "Error loading local settings"
-    pass
 
 # MEDIA_ROOT can be overridden in local_settings
 SONOGRAM_DIR = 'sonograms/'
 SNIPPET_DIR = 'snippets/'
 
-
+try:
+    from local_settings import *
+except ImportError:
+    print "Error loading local settings"
+    pass
 
 
 import sys
