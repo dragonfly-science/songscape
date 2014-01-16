@@ -38,6 +38,7 @@ urlpatterns = patterns(
     #(r'^accounts/login/$', redirect_to, {'url': '/login/'}),
     url(r'^sonogram/(?P<id>\d+).jpg', 'www.recordings.views.get_sonogram', name='sonogram_id'),
     url(r'^sonogram/%s.jpg' % snippet_regex, 'www.recordings.views.get_sonogram', name='sonogram'),
+    url(r'^sonogram/(?P<index>\d+)/$', 'www.recordings.views.get_sonogram_by_index', name='sonogram_index'),
     url(r'^media/sonograms/(?P<path>.*)$', 'django.views.static.serve', {'document_root': os.path.join(settings.MEDIA_ROOT, settings.SONOGRAM_DIR)}, name='sonogram-media'),
     url(r'^media/snippets/(?P<path>.*)$', 'django.views.static.serve', {'document_root': os.path.join(settings.MEDIA_ROOT, settings.SNIPPET_DIR)}, name='snippet-media'),
     url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}, name="media"),

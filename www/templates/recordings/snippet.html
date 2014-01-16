@@ -125,10 +125,10 @@ $(document).ready(function() {
   });
 
 });
-{% if next_id %}
+{% if next_index %}
 $(window).load(function() {
   var next_image = new Image();
-  next_image.src = "{% url 'sonogram_id' next_id %}"
+  next_image.src = "{% url 'sonogram_index' index=next_index %}"
 });
 {% endif %}
 </script>
