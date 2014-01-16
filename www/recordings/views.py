@@ -138,7 +138,7 @@ def snippet(request, **kwargs):
                    'tags': dict(tags)})
 
 
-def snippets(request, index=1):
+def _snippets(request, index):
     filters = _get_filters(request, level='snippet')
     order = _get_order(request) or '-scores__score'
     request_parameters = _get_parameters(request)
@@ -193,16 +193,18 @@ def snippets(request, index=1):
         previous_index = None
     if next_index > count:
         next_index = None
-    return snippet(request, 
-        id=snippets[page_index - 1],
+    return dict(id=snippets[page_index - 1],
         index=index,
         next_index=next_index,
         previous_index=previous_index,
         count=count)
 
-def play_snippet(request, **kwargs):
-    """Play a snippet. If we cant find it, generate it from the recording"""
-    snippet = _get_snippet(**kwargs)
+def snippets(request, index):
+    return snippet(request, **_snippets(request, index))
+
+
+def _guarantee_soundfile(snippet):
+    print 'Guarantee soundfile'
     try:
         if not os.path.exists(snippet.soundfile.path):
             raise ValueError
@@ -211,11 +213,17 @@ def play_snippet(request, **kwargs):
     if snippet.soundfile and not snippet.soundfile.name.startswith(settings.SNIPPET_DIR):
         snippet.soundfile.name = os.path.join(settings.SNIPPET_DIR, snippet.get_soundfile_name())
         snippet.save()
+
+def play_snippet(request, **kwargs):
+    """Play a snippet. If we cant find it, generate it from the recording"""
+    snippet = _get_snippet(**kwargs)
+    _guarantee_soundfile(snippet)
     return HttpResponseRedirect(reverse('media', args=(snippet.soundfile.name,))) 
 
 def get_sonogram(request, **kwargs):
     """Get a sonogram. If we cant find it, generate it from the snippet"""
     snippet = _get_snippet(**kwargs)
+    _guarantee_soundfile(snippet)
     try:
         if not os.path.exists(snippet.sonogram.path):
             raise ValueError
@@ -226,6 +234,9 @@ def get_sonogram(request, **kwargs):
         snippet.save()
     return HttpResponseRedirect(reverse('media', 
         args=(snippet.sonogram.name,))) 
+
+def get_sonogram_by_index(request, index):
+    return get_sonogram(request, id=_snippets(request, index)['id'])
 
 def tags(request):
     # TODO: Login required!

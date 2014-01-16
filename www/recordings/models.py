@@ -184,8 +184,10 @@ class Snippet(models.Model):
 
     def get_audio(self, max_framerate=settings.MAX_FRAMERATE):
         try:
+            print 'Getting audio locally'
             return wavy.get_audio(self.soundfile.path, max_framerate=max_framerate)
         except (ValueError, SuspiciousOperation, AttributeError, IOError):
+            print 'Getting audio remotely'
             return self.recording.get_audio(self.offset, self.duration, max_framerate=max_framerate)
 
     def save_sonogram(self, replace=False, n_fft=settings.N_FFT, \
