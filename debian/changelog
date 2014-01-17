@@ -1,3 +1,9 @@
+songscape (20140118-2) precise; urgency=low
+
+  * Bump to update local settings
+
+ -- Edward Abraham <edward@dragonfly.co.nz>  Sat, 18 Jan 2014 20:22:04 +1200
+
 songscape (20140118-1) precise; urgency=low
 
   * Change the site URL to https
