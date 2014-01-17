@@ -1,6 +1,6 @@
+html,
 body {
-    padding-top: 50px;
-    padding-bottom: 20px;
+    height: 100%;
 }
 
 form.inline-form {
@@ -17,7 +17,7 @@ h1 {
 
 /* Jumbotron */
 .jumbotron {
-    margin-top: 30px;
+    margin-top: 80px;
     margin-bottom: 5px;
     padding-top:30px;
     padding-bottom: 70px;
@@ -114,6 +114,16 @@ h1 {
     color: rgba(255, 255, 255, 0.75);
 }
 /* Footer */
+/* Wrapper for page content to push down footer */
+#wrap {
+  min-height: 100%;
+  height: auto !important;
+  height: 100%;
+  /* Negative indent footer by the sum of its height and top-margin */
+  margin: 0 auto -190px;
+  /* Pad bottom by footer height */
+  padding: 0 0 120px;
+}
 
 /* Set the fixed height of the footer here */
 #footer {

@@ -199,7 +199,7 @@ def _snippets(request, index):
         previous_index=previous_index,
         count=count)
 
-def snippets(request, index):
+def snippets(request, index=1):
     return snippet(request, **_snippets(request, index))
 
 
