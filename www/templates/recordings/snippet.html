@@ -29,7 +29,7 @@
 
 <div class="row">
   <div class="span4">
-    <audio id="snippet">
+    <audio id="snippet" preload="none">
      <source src="{{ snippet|wav_url }}" type="audio/wav">
      "Hmm can't play the sound"
     </audio>
@@ -137,10 +137,10 @@ $(document).ready(function() {
   });
 
 });
-{% if next_id %}
+{% if next_index %}
 $(window).load(function() {
   var next_image = new Image();
-  next_image.src = "{% url 'sonogram_id' next_id %}"
+  next_image.src = "{% url 'sonogram_index' index=next_index %}"
 });
 {% endif %}
 </script>
