@@ -9,7 +9,7 @@ fabric
 south
 coverage
 django-debug-toolbar
-django-browserid
+git+https://github.com/mozilla/django-browserid.git@04e4a860e282432
 git+https://github.com/dragonfly-science/kokako.git
 pymongo
 git+https://github.com/dragonfly-science/numpy-wavy.git
