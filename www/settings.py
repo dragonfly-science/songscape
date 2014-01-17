@@ -178,7 +178,6 @@ AUTHENTICATION_BACKENDS = (
    'django_browserid.auth.BrowserIDBackend',
 )
 
-#SESSION_COOKIE_SECURE = False
 
 # Path to redirect to on successful login.
 LOGIN_REDIRECT_URL = '/'
