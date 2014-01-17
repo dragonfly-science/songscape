@@ -36,7 +36,7 @@ def database_test_setup():
 def data_refresh():
     "Get the media sorted. In this case we only need to collect static"
     with cd(env.remote_path):
-        run("python manage.py collectstatic --noinput")
+        sudo("python manage.py collectstatic --noinput")
 
 
 # TESTING
