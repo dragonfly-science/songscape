@@ -175,6 +175,7 @@ class Snippet(models.Model):
     sonogram = models.ImageField(upload_to=os.path.join(settings.MEDIA_ROOT, settings.SONOGRAM_DIR), null=True, blank=True)
     soundcloud = models.IntegerField(null=True, blank=True)
     soundfile = models.FileField(upload_to=os.path.join(settings.MEDIA_ROOT, settings.SNIPPET_DIR), null=True, blank=True)
+    fans = models.ManyToManyField(User, related_name='favourites', null=True, blank=True)
 
     class Meta:
         unique_together = (('recording', 'offset', 'duration'),)

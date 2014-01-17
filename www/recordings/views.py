@@ -6,6 +6,7 @@ from tempfile import TemporaryFile
 from collections import Counter
 import math
 import mimetypes
+import random
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -128,15 +129,17 @@ def snippet(request, **kwargs):
     for iden in idens:
         tags.update(iden.true_tags.all())
 
+    count = kwargs.get('count', None)
+    random_index = random.randint(1, count) if count and count > 1 else None
     return render(request,
                   'recordings/snippet.html',
                   {'snippet': snippet,
                    'next_index': kwargs.get('next_index', None),
                    'previous_index': kwargs.get('previous_index', None),
                    'index': kwargs.get('index', None),
-                   'count': kwargs.get('count', None),
+                   'count': count,
+                   'random_index': random_index,
                    'tags': dict(tags)})
-
 
 def _snippets(request, index):
     filters = _get_filters(request, level='snippet')
@@ -237,6 +240,16 @@ def get_sonogram(request, **kwargs):
 
 def get_sonogram_by_index(request, index):
     return get_sonogram(request, id=_snippets(request, index)['id'])
+
+@login_required
+def api(request, id, action):
+    print id, action
+    snippet = _get_snippet(id=id)
+    if action == 'favourite' and request.is_ajax():
+        print 'favourite'
+        snippet.favourites.add(request.user)
+    else:
+       raise Http404 
 
 def tags(request):
     # TODO: Login required!

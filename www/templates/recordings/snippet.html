@@ -12,12 +12,18 @@
   </li>
 {% endif %}
   <li>
-  <span>{{ snippet.recording.deployment.site }}, {{ snippet.datetime }}</span>
-  <li>
+    <span>{{ snippet.recording.deployment.site }}, {{ snippet.datetime }}</span>
+  </li>
 {% if index %}
   <li>
-  <span>{{ index }} of {{ count }}</span>
-  <li>
+    <span>{{ index }} of {{ count }}</span>
+  </li>
+{% endif %}
+{% if random_index %}
+  <!--
+    <li>
+    <a href="{% url 'snippet_list' random_index %}">Random</a>
+  </li>-->
 {% endif %}
 {% if next_index %}
   <li class="next">
@@ -45,13 +51,16 @@
 <canvas id="canvas" width="1000" height="360"></canvas>
 <a href="{{ snippet|wav_url }}" role="button" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-volume-up"></span> Download sound file</a>
 
+<button class="btn btn-default btn-sm" id="favourite"><span class="glyphicon glyphicon-heart"></span></button>
+
 <!-- TODO: just draw the image and pop up controls if no canvas
 img id="sonogram" src="{{ snippet|sonogram_url }}" -->
 
+
+
 <script type="text/javascript">
-    var disqus_shortname = 'songscape'; // Required - Replace example with your forum shortname
+    var disqus_shortname = 'songscape';
     var disqus_identifier = '{{ snippet|snippet_name }}';
-    var disqus_url = '{{ snippet|snippet_name }}';
     (function() {
         var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
         dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
@@ -137,6 +146,17 @@ $(document).ready(function() {
   });
 
 });
+
+$(document).ready(function() {
+    $('#favourite').bind('click', function() {
+        var $this = $(this);
+        var post_id = this.id;
+        $.post("{% url 'api' snippet.id 'favourite' %}", function() {
+            $this.replaceWith("<span class='liked'>Liked</span>");
+        });
+    });
+});
+
 {% if next_index %}
 $(window).load(function() {
   var next_image = new Image();
