@@ -17,6 +17,7 @@ urlpatterns = patterns(
     '',
     url(r'^browserid/', include('django_browserid.urls')),
     url(r'^snippet/(?P<id>\d+)/$', 'www.recordings.views.snippet', name='snippet'),
+    url(r'^api/(?P<id>\d+)/(?P<action>[\w-]+)/$', 'www.recordings.views.api', name='api'),
     url(r'^snippet/%s/$' % snippet_regex, 'www.recordings.views.snippet', name='snippet_name'),
     url(r'^snippets/(?P<index>\d+)/$', 'www.recordings.views.snippets', name='snippet_list'),
     url(r'^snippets/$', 'www.recordings.views.snippets', name='first_snippet'),
