@@ -1,3 +1,15 @@
+songscape (20140118-4) precise; urgency=low
+
+  * Upgrade wasnt triggered on server
+
+ -- Edward Abraham <edward@dragonfly.co.nz>  Sat, 18 Jan 2014 21:22:04 +1200
+
+songscape (20140118-3) precise; urgency=low
+
+  * OK. Local settings seem to be copied to the wrong place
+
+ -- Edward Abraham <edward@dragonfly.co.nz>  Sat, 18 Jan 2014 20:22:04 +1200
+
 songscape (20140118-2) precise; urgency=low
 
   * Bump to update local settings
