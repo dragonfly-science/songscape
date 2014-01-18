@@ -82,7 +82,6 @@ def _get_filters(request, level='snippet'):
 def _get_order(request):
     return request.GET.getlist('order')
 
-
 def _get_parameters(request):
     """Get the request parameters, apart from page and index"""
     parameters = request.GET.copy()
@@ -91,7 +90,6 @@ def _get_parameters(request):
     while 'index' in parameters:
         del parameters['index']
     return parameters.urlencode()
-
 
 def home(request):
     return render(request, 'home.html')
@@ -124,15 +122,21 @@ def _get_snippet(id=None,
 
 def snippet(request, **kwargs):
     snippet = _get_snippet(**kwargs)
-    snippets = request.session.get('snippets', [])
-
-    idens = snippet.identifications.all()
-    tags = Counter()
-    for iden in idens:
-        tags.update(iden.true_tags.all())
-
+    if kwargs.get('analysis', None):
+        identifications = Identification.objects.filter(
+            snippet_id__exact=kwargs['id'], 
+            user_id__exact=request.user.id,
+            analysis=kwargs['analysis'])
+        id_before = identifications.count() > 0
+        tags = []
+        if id_before:
+            tags = identifications[0].true_tags.all()
+    else:
+        identifications = snippet.identifications.all()
+        tags = Counter()
+        for i in identifications:
+            tags.update(i.true_tags.all())
     count = kwargs.get('count', None)
-    random_index = random.randint(1, count) if count and count > 1 else None
     favourite = snippet.fans.filter(id=request.user.id).count()
     favourites = snippet.fans.count()
     return render(request,
@@ -144,10 +148,9 @@ def snippet(request, **kwargs):
                    'count': count,
                    'favourite': favourite,
                    'favourites': favourites,
-                   'random_index': random_index,
                    'tags': dict(tags)})
 
-def _snippets(request, index):
+def _get_snippets(request, index):
     filters = _get_filters(request, level='snippet')
     order = _get_order(request) or '-scores__score'
     request_parameters = _get_parameters(request)
@@ -162,12 +165,10 @@ def _snippets(request, index):
     if page == (int(math.floor((request.session.get('index', 0) - 1)/PER_PAGE)) + 1) and \
             order == request.session.get('order') and \
             filters == request.session.get('filters'):
-        print 'Same page'
         snippets = request.session.get('snippets', [])
         count = request.session.get('count', 0)
     # Otherwise, run a query to identify the next page
     else:
-        print 'New query'
         code = 'simple-north-island-brown-kiwi'
         version = '0.1.2'
         detector = Detector.objects.get(code=code, version=version)
@@ -209,11 +210,9 @@ def _snippets(request, index):
         count=count)
 
 def snippets(request, index=1):
-    return snippet(request, **_snippets(request, index))
-
+    return snippet(request, **_get_snippets(request, index))
 
 def _guarantee_soundfile(snippet):
-    print 'Guarantee soundfile'
     try:
         if not os.path.exists(snippet.soundfile.path):
             raise ValueError
@@ -245,7 +244,7 @@ def get_sonogram(request, **kwargs):
         args=(snippet.sonogram.name,))) 
 
 def get_sonogram_by_index(request, index):
-    return get_sonogram(request, id=_snippets(request, index)['id'])
+    return get_sonogram(request, id=_get_snippets(request, index)['id'])
 
 @login_required
 @csrf_exempt
@@ -320,9 +319,30 @@ def analysis_detail(request, code):
                    {'analysis': analysis})
 
 
+def _get_analysis_snippets(request, analysis, index):
+    snippets = request.session.get('analysis_set', [])
+    if not snippets or analysis.id != request.session.get('analysis_id', ''):
+        snippets = [a.snippet.id for a in
+            AnalysisSet.objects.filter(analysis=analysis).order_by('?')]
+        request.session['analysis_set'] = snippets
+        request.session['analysis_id'] = analysis.id
+    if index < 0 or index >= len(snippets):
+        raise Http404
+    if index:
+        next_index = index + 1 if index < len(snippets) - 1 else None
+        previous_index = index - 1 if index > 0 else None
+    else:
+        next_index = 1
+        previous_index = None
+    return dict(id=snippets[index],
+        index=index,
+        analysis = analysis,
+        next_index=next_index,
+        previous_index=previous_index,
+        count=len(snippets))
+
 @login_required
-def analysis_snippet(request, code, snippet_id=None):
-    snippet = Snippet.objects.get(id=snippet_id)
+def analysis_snippet(request, code, index=0):
     analysis = Analysis.objects.get(code=code)
     if request.method == "POST":
         true_tags = []
@@ -332,57 +352,16 @@ def analysis_snippet(request, code, snippet_id=None):
                 true_tags.append(tag)
             else:
                 false_tags.append(tag)
-
-        iden = Identification(user = request.user, analysis=analysis, snippet=snippet, comment="")
+        iden = Identification(user = request.user, 
+            analysis=analysis, 
+            snippet=Snippet.objects.get(id=request.POST['snippet']),
+            comment="")
         iden.save()
         iden.true_tags.add(*true_tags)
         iden.false_tags.add(*false_tags)
 
         return redirect('analysis_snippet', code=code, snippet_id=request.POST["next_id"])
-
-    snippets = request.session.get('analysis_set', [])
-    if not snippets:
-        snippets = [a.snippet.id for a in AnalysisSet.objects.filter(analysis=analysis).order_by('?')]
-        request.session['analysis_set'] = snippets
-    previous = Identification.objects.filter(analysis=analysis)
-    if snippet_id and int(snippet_id) in snippets:
-        index = snippets.index(int(snippet_id))
-        try:
-            next_id = snippets[index + 1]
-        except IndexError:
-            next_id = None
-        try:
-            previous_id = snippets[index - 1]
-        except IndexError:
-            previous_id = None
-    else:
-        index = 0
-        snippet_id = snippets[0]
-        next_id = snippets[1]
-        previous_id = None
-
-    previous_identification = Identification.objects.filter(snippet_id__exact=snippet_id, user_id__exact=request.user.id)
-
-    id_before = previous_identification.count() > 0
-    true_tags = []
-    false_tags = []
-    if id_before:
-        true_tags = previous_identification[0].true_tags.all()
-        false_tags = previous_identification[0].false_tags.all()
-
-
-    return render(request,
-                  'recordings/analysis_snippet.html',
-                  {'snippet': snippet,
-                   'analysis': analysis,
-                   'next_id': next_id,
-                   'id_before': id_before,
-                   'true_tags': true_tags,
-                   'false_tags': false_tags,
-                   'previous_id': previous_id,
-                   'index': index,
-                   'n_snippets': len(snippets)})
-
+    return snippet(request, **_get_analysis_snippets(request, analysis, int(index)))
 
 def analysis(request, code):
     this_analysis = Analysis.objects.get(code=code)
