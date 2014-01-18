@@ -168,6 +168,8 @@ REPOSITORIES = {'RFPT': 'http://192.168.0.123:8888'}
 # Set your site url for security
 SITE_URL = 'http://localhost:8000'
 
+BROWSERID_AUDIENCES = ['http://localhost:8000',]
+
 DEBUG_TOOLBAR_CONFIG = {'INTERCEPT_REDIRECT': False}
 
 # Add the django_browserid authentication backend.
@@ -176,7 +178,6 @@ AUTHENTICATION_BACKENDS = (
    'django_browserid.auth.BrowserIDBackend',
 )
 
-#SESSION_COOKIE_SECURE = False
 
 # Path to redirect to on successful login.
 LOGIN_REDIRECT_URL = '/'
