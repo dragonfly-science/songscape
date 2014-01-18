@@ -56,18 +56,6 @@
 <!-- TODO: just draw the image and pop up controls if no canvas
 img id="sonogram" src="{{ snippet|sonogram_url }}" -->
 
-
-
-<script type="text/javascript">
-    var disqus_shortname = 'songscape';
-    var disqus_identifier = '{{ snippet|snippet_name }}';
-    (function() {
-        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    })();
-</script>
-
 {% endblock content %}
 
 {% block script %}

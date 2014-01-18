@@ -16,3 +16,5 @@ media/*
 rfpt/*
 dumps/*
 static/*
+.coverage
+nosetests.xml
