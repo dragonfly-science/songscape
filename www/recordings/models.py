@@ -160,12 +160,6 @@ class Recording(models.Model):
     def get_audio(self, offset=0, duration=0, max_framerate=settings.MAX_FRAMERATE):
         return wavy.get_audio(self.path, offset=offset, duration=duration, max_framerate=max_framerate)
 
-class Tag(UniqueSlugMixin, models.Model):
-    code = models.SlugField(max_length=64, unique=True)
-    name = models.TextField()
-
-    def __unicode__(self):
-        return '%s' % (self.code)
 
 
 class Snippet(models.Model):
@@ -300,6 +294,17 @@ class Score(models.Model):
     class Meta:
         unique_together = (('snippet', 'detector'),)
 
+class Tag(UniqueSlugMixin, models.Model):
+    code = models.SlugField(max_length=64, unique=True)
+    name = models.TextField()
+    datetime = models.DateTimeField(auto_now=True)
+    #TODO: Add in a link to species
+    #TODO: Rename the 'no-kiwis' tag to 'none'
+    #TODO: Drop the 'interesting' tag (we will stick with the favourites for that)
+
+
+    def __unicode__(self):
+        return '%s' % (self.code)
 
 class Analysis(SlugMixin, models.Model):
     name = models.TextField()
@@ -307,32 +312,26 @@ class Analysis(SlugMixin, models.Model):
     description = models.TextField(default="")
     datetime = models.DateTimeField(auto_now=True)
     tags = models.ManyToManyField(Tag)
-    ubertag = models.ForeignKey(Tag, related_name="ubertags", null=True, blank=True)  #TODO: Rename to default_tag, related_name="analyses_default"
     snippets = models.ManyToManyField(Snippet, through='AnalysisSet', related_name="analyses")
-    organisation = models.ForeignKey(Organisation, related_name="analyses") #Replace with user
+    user = models.ForeignKey(User, related_name="analyses")
 
     class Meta:
-        unique_together = (('organisation', 'code'),)
+        unique_together = (('user', 'code'),)
 
     def __unicode__(self):
         return '%s' % (self.name)
-
-    def normal_tags(self):
-        return self.tags.all().exclude(id__exact=self.ubertag.id)
 
 class AnalysisSet(models.Model):
     analysis = models.ForeignKey(Analysis, related_name="set")
     snippet = models.ForeignKey(Snippet, related_name="set")
     selection_method = models.TextField(default="")
-
+    datetime = models.DateTimeField(auto_now=True)
 
 class Identification(models.Model):
     user = models.ForeignKey(User, related_name="identifications")
-    analysis = models.ForeignKey(Analysis, related_name="identifications")
+    analysisset = models.ForeignKey(AnalysisSet, related_name="identifications")
     datetime = models.DateTimeField(auto_now=True)
-    snippet = models.ForeignKey(Snippet, related_name="identifications")
-    scores = models.ManyToManyField(Score)  # This holds the list of scores that the user saw when they made the identification
-    true_tags = models.ManyToManyField(Tag, related_name="identifications")
-    false_tags = models.ManyToManyField(Tag, related_name="negative_identifications")
+    true_tags = models.ManyToManyField(Tag, related_name="identifications") #Rename to tags
+    false_tags = models.ManyToManyField(Tag, related_name="negative_identifications") #Drop the false_tags
     comment = models.TextField(default="")
 
