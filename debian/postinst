@@ -27,7 +27,7 @@ set_config () {
     perl -i -e '$field=shift;$value=shift if (scalar(@ARGV)>1);$value||="";while (<>) { s/^(\s*$field\s*=\s*).*/$1$value/; print; }' $1 $2 $3;
 }
 
-LOCAL_SETTINGS=/var/www/django/songscape/local_settings.py
+LOCAL_SETTINGS=/var/www/django/songscape/www/local_settings.py
 
 case "$1" in
     configure)
@@ -123,7 +123,7 @@ case "$1" in
         pip install --upgrade pip
         pip install --upgrade Pillow
         pip install --upgrade matplotlib -f https://sourceforge.net/projects/matplotlib/files/matplotlib/matplotlib-1.3.1/matplotlib-1.3.1.tar.gz
-        pip install -r /etc/songscape/requirements.txt
+        pip install -r /etc/songscape/requirements.txt --upgrade
 
         cd /var/www/django/songscape/
         python manage.py collectstatic --noinput

@@ -15,6 +15,7 @@ h1 {
     color: red;
 }
 
+
 /* Jumbotron */
 .jumbotron {
     margin-top: 80px;
@@ -153,5 +154,12 @@ h1 {
 /* Snippet page */
 .pager {
     margin-top: 80px;
+}
+#favourite{
+    color: grey;
+}
+
+#favourite.liked {
+    color: red;
 }
 
