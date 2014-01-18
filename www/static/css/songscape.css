@@ -22,6 +22,11 @@ h1 {
     margin-bottom: 5px;
     padding-top:30px;
     padding-bottom: 70px;
+    background: url(/static/images/nibk-background-1140.jpg);
+    background-repeat: no-repeat;
+    background-color: #443b32 
+    background-position: top right;
+    background-size: cover;
 }
 
 .jumbotron-byline {
