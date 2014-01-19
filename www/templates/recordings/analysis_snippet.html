@@ -35,8 +35,8 @@
   <input type="hidden" id="{{ tag.code }}_real" name="{{ tag.code }}" value=false>
   <input type="button" class="btn btn-default tag-btn" id="{{ tag.code }}" value="{{ tag.name }}">
 {% endfor %}
-<input type="hidden" id="uncertain_real" name="uncertain" value=false>
-<input type="button" class="btn btn-default" id="uncertain-btn" value="Not sure">
+<!--<input type="hidden" id="uncertain_real" name="uncertain" value=false>
+<input type="button" class="btn btn-default" id="uncertain_" value="Not sure">-->
 <input type="submit" class="btn btn-primary" id="null_tag" value="Nothing to be tagged">
 <input type="hidden" id="null_real" name="{{ analysis.ubertag.code }}" value=true>
 <input type="hidden" name="next_index" value={{ next_index }}>
@@ -49,27 +49,38 @@
 
 
 {% block extrascript %}
+
+var check_tag_state = function(element){
+    console.log(element);
+    $('#' + element.attr('id') + '_real').val(
+        element.hasClass('btn-success')
+    );
+    $(element).removeClass('active');
+};
+
 $('.tag-btn').bind('click', function() {
 	$('#null_tag').attr('value', 'Save');
 	$('#null_real').val(false);
     $(this).toggleClass('btn-success');
+    $(this).toggleClass('active');
     if ($(this).hasClass('btn-success')){
-        $('#uncertain-btn').removeClass('btn-success');
-        $('#uncertain_real').val(false)
+        $('#uncertain').removeClass('btn-success');
+        $('#uncertain').removeClass('active');
+        $('#uncertain_real').val(false);
     };
-	$('#' + $(this).attr('id') + '_real').val(
+    $('#' + $(this).attr('id') + '_real').val(
         $(this).hasClass('btn-success')
     );
 });
 
-$('#uncertain-btn').bind('click', function() {
+$('#uncertain').bind('click', function() {
 	$('#null_tag').attr('value', 'Save');
-    $(this).toggleClass('btn-success');
+    $('#uncertain').toggleClass('btn-success');
+    $('#' + $(this).attr('id') + '_real').val(
+        $(this).hasClass('btn-success')
+    );
     if ($(this).hasClass('btn-success')){
         $('.tag-btn').removeClass('btn-success');
     };
-    $('uncertain_real').val(
-        $(this).hasClass('btn-success')
-    );
 });
 {% endblock extrascript %}
