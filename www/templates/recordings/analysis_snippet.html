@@ -1,13 +1,12 @@
 {% extends 'recordings/snippet.html' %}
 
-{% block toprow %}
-<h4> {{ snippet.recording.deployment.site }}, {{ snippet.datetime }} ({{ index }} of {{ n_snippets }})</h4>
+{% block secondrow %}
 
 {% if id_before %}
 <div class="row">
   <div class="span6">
     <ul class="inline">
-        {% for tag in true_tags %}
+        {% for tag in tags %}
         <li class="outlined">{{ tag.name }} </li>
         {% endfor %}
     </ul>
@@ -15,49 +14,62 @@
 
 
 
-<div class="span2">
-<span class="btn"><a href="{% url 'analysis_snippet' analysis.code next_id  %}">Skip</a></span>
+<div class="col-md-2">
+<span class="btn"><a href="{% url 'analysis_snippet' analysis.code next_index  %}">Skip</a></span>
 </div>
 </div>
 
 {% endif %}
-<form method="post">{% csrf_token %}
 <div class="row">
+<form method="post">{% csrf_token %}
 
-<div class="span2">
-{% if previous_id %}
-<span class="btn"><a href="{% url 'analysis_snippet' analysis.code previous_id %}">&larr; Previous</a></span>
+<div class="col-md-2">
+{% if previous_index %}
+<span class="btn"><a href="{% url 'analysis_snippet' analysis.code previous_index %}">&larr; Previous</a></span>
 {% endif %}
 </div>
 
-<div class="span4">
-<div class="btn-group" id="tag-group" data-toggle="buttons-checkbox">
-{% for tag in analysis.normal_tags %}
+<div class="col-md-10">
+<div id="tag-group" data-toggle="buttons-checkbox">
+{% for tag in analysis.tags.all %}
   <input type="hidden" id="{{ tag.code }}_real" name="{{ tag.code }}" value=false>
-  <input type="button" class="btn tag-btn" id="{{ tag.code }}" value="{{ tag.name }}">
+  <input type="button" class="btn btn-default tag-btn" id="{{ tag.code }}" value="{{ tag.name }}">
 {% endfor %}
+<input type="hidden" id="uncertain_real" name="uncertain" value=false>
+<input type="button" class="btn btn-default" id="uncertain-btn" value="Not sure">
+<input type="submit" class="btn btn-primary" id="null_tag" value="Nothing to be tagged">
+<input type="hidden" id="null_real" name="{{ analysis.ubertag.code }}" value=true>
+<input type="hidden" name="next_index" value={{ next_index }}>
 </div>
-</div>
-
-<div class="span2">
-<input type="submit" class="btn btn-primary" id="uber" value="{{ analysis.ubertag.name }}">
-<input type="hidden" id="uber_real" name="{{ analysis.ubertag.code }}" value=true>
-<input type="hidden" name="next_id" value={{ next_id }}>
-</div>
-
 </div>
 </form>
+</div>
 
-{% endblock toprow %}
+{% endblock secondrow %}
 
 
 {% block extrascript %}
 $('.tag-btn').bind('click', function() {
-	$('#uber').attr('value', 'Save');
-	$('#uber_real').val(false);
-	$('#' + $(this).attr('id') + '_real').val(true);
-	// TODO - should probably return uber tag if all tags are unselected
-	// TODO handle unclick ... :)
+	$('#null_tag').attr('value', 'Save');
+	$('#null_real').val(false);
+    $(this).toggleClass('btn-success');
+    if ($(this).hasClass('btn-success')){
+        $('#uncertain-btn').removeClass('btn-success');
+        $('#uncertain_real').val(false)
+    };
+	$('#' + $(this).attr('id') + '_real').val(
+        $(this).hasClass('btn-success')
+    );
 });
 
+$('#uncertain-btn').bind('click', function() {
+	$('#null_tag').attr('value', 'Save');
+    $(this).toggleClass('btn-success');
+    if ($(this).hasClass('btn-success')){
+        $('.tag-btn').removeClass('btn-success');
+    };
+    $('uncertain_real').val(
+        $(this).hasClass('btn-success')
+    );
+});
 {% endblock extrascript %}
