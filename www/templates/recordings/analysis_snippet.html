@@ -20,67 +20,61 @@
 </div>
 
 {% endif %}
-<div class="row">
-<form method="post">{% csrf_token %}
 
+<div class="row">
 <div class="col-md-2">
 {% if previous_index %}
-<span class="btn"><a href="{% url 'analysis_snippet' analysis.code previous_index %}">&larr; Previous</a></span>
+<span class="btn btn-default"><a href="{% url 'analysis_snippet' analysis.code previous_index %}">&larr; Previous</a></span>
 {% endif %}
 </div>
-
 <div class="col-md-10">
-<div id="tag-group" data-toggle="buttons-checkbox">
+<form action="{% url 'analysis_snippet' analysis.code index %}" method="post" >{% csrf_token %}
 {% for tag in analysis.tags.all %}
-  <input type="hidden" id="{{ tag.code }}_real" name="{{ tag.code }}" value=false>
-  <input type="button" class="btn btn-default tag-btn" id="{{ tag.code }}" value="{{ tag.name }}">
+<input type="hidden" id="{{ tag.code }}_real" name="{{ tag.code }}" value=false>
+<input type="button" class="btn btn-default tag-btn" id="{{ tag.code }}" value="{{ tag.name }}">
 {% endfor %}
-<!--<input type="hidden" id="uncertain_real" name="uncertain" value=false>
-<input type="button" class="btn btn-default" id="uncertain_" value="Not sure">-->
-<input type="submit" class="btn btn-primary" id="null_tag" value="Nothing to be tagged">
-<input type="hidden" id="null_real" name="{{ analysis.ubertag.code }}" value=true>
+<input type="hidden" id="unsure_real" name="unsure" value=false>
+<input type="button" class="btn btn-default" id="unsure" value="Not sure">
+<input type="hidden" id="null_real" name="null_tag" value=true>
 <input type="hidden" name="next_index" value={{ next_index }}>
-</div>
-</div>
+<input type="submit" class="btn btn-primary" id="null_tag" value="Nothing to be tagged">
 </form>
 </div>
-
+</div>
 {% endblock secondrow %}
 
 
 {% block extrascript %}
 
-var check_tag_state = function(element){
-    console.log(element);
-    $('#' + element.attr('id') + '_real').val(
-        element.hasClass('btn-success')
-    );
-    $(element).removeClass('active');
+var deactivate_button = function(){
+    $(this).removeClass('btn-success');
+    $(this).removeClass('active');
+    $('#' + $(this).attr('id') + '_real').val(false);
 };
 
+var toggle_button = function(){
+    $(this).toggleClass('btn-success');
+    $('#' + $(this).attr('id') + '_real').val(
+        $(this).hasClass('btn-success')
+    );
+};
+    
 $('.tag-btn').bind('click', function() {
 	$('#null_tag').attr('value', 'Save');
 	$('#null_real').val(false);
-    $(this).toggleClass('btn-success');
-    $(this).toggleClass('active');
+    $(this).each(toggle_button);
     if ($(this).hasClass('btn-success')){
-        $('#uncertain').removeClass('btn-success');
-        $('#uncertain').removeClass('active');
-        $('#uncertain_real').val(false);
+        $('#unsure').removeClass('btn-success');
+        $('#unsure').removeClass('active');
+        $('#unsure_real').val(false);
     };
-    $('#' + $(this).attr('id') + '_real').val(
-        $(this).hasClass('btn-success')
-    );
 });
 
-$('#uncertain').bind('click', function() {
+$('#unsure').bind('click', function() {
+    $(this).each(toggle_button);
 	$('#null_tag').attr('value', 'Save');
-    $('#uncertain').toggleClass('btn-success');
-    $('#' + $(this).attr('id') + '_real').val(
-        $(this).hasClass('btn-success')
-    );
-    if ($(this).hasClass('btn-success')){
-        $('.tag-btn').removeClass('btn-success');
+    if ($('#unsure_real').val()){
+        $('.tag-btn').each(deactivate_button);
     };
 });
 {% endblock extrascript %}
