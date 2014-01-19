@@ -33,10 +33,9 @@
 <input type="hidden" id="{{ tag.code }}_real" name="{{ tag.code }}" value=false>
 <input type="button" class="btn btn-default tag-btn" id="{{ tag.code }}" value="{{ tag.name }}">
 {% endfor %}
-<input type="hidden" id="unsure_real" name="unsure" value=false>
-<input type="button" class="btn btn-default" id="unsure" value="Not sure">
 <input type="hidden" id="null_real" name="null_tag" value=true>
 <input type="hidden" name="next_index" value={{ next_index }}>
+<input type="hidden" name="snippet" value={{ snippet.id }}>
 <input type="submit" class="btn btn-primary" id="null_tag" value="Nothing to be tagged">
 </form>
 </div>
@@ -46,10 +45,21 @@
 
 {% block extrascript %}
 
+var check_save = function(){
+    if ($('.tag-btn').hasClass('btn-success')){
+	    $('#null_tag').attr('value', 'Save');
+	    $('#null_real').val(false);
+    } else {
+	    $('#null_tag').attr('value', 'Nothing to be tagged');
+	    $('#null_real').val(false);
+    };  
+};
+
 var deactivate_button = function(){
     $(this).removeClass('btn-success');
     $(this).removeClass('active');
     $('#' + $(this).attr('id') + '_real').val(false);
+    check_save();
 };
 
 var toggle_button = function(){
@@ -57,24 +67,20 @@ var toggle_button = function(){
     $('#' + $(this).attr('id') + '_real').val(
         $(this).hasClass('btn-success')
     );
+    check_save();
 };
-    
-$('.tag-btn').bind('click', function() {
-	$('#null_tag').attr('value', 'Save');
-	$('#null_real').val(false);
+
+$('.tag-btn:not(#uncertain)').bind('click', function() {
     $(this).each(toggle_button);
     if ($(this).hasClass('btn-success')){
-        $('#unsure').removeClass('btn-success');
-        $('#unsure').removeClass('active');
-        $('#unsure_real').val(false);
+        $('#uncertain').each(deactivate_button);
     };
 });
 
-$('#unsure').bind('click', function() {
+$('#uncertain').bind('click', function() {
     $(this).each(toggle_button);
-	$('#null_tag').attr('value', 'Save');
-    if ($('#unsure_real').val()){
-        $('.tag-btn').each(deactivate_button);
+    if ($('#uncertain_real').val()){
+        $('.tag-btn:not(#uncertain)').each(deactivate_button);
     };
 });
 {% endblock extrascript %}
