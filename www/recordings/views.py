@@ -124,15 +124,15 @@ def snippet(request, **kwargs):
     snippet = _get_snippet(**kwargs)
     if kwargs.get('analysis', None):
         identifications = Identification.objects.filter(
-            snippet_id__exact=kwargs['id'], 
+            analysisset__snippet_id__exact=kwargs['id'], 
             user_id__exact=request.user.id,
-            analysis=kwargs['analysis'])
+            analysisset__analysis=kwargs['analysis'])
         id_before = identifications.count() > 0
         tags = []
         if id_before:
             tags = identifications[0].true_tags.all()
     else:
-        identifications = snippet.identifications.all()
+        identifications = Identification.objects.filter(analysisset__snippet = snippet)
         tags = Counter()
         for i in identifications:
             tags.update(i.true_tags.all())
@@ -353,8 +353,8 @@ def analysis_snippet(request, code, index=0):
             else:
                 false_tags.append(tag)
         iden = Identification(user = request.user, 
-            analysis=analysis, 
-            snippet=Snippet.objects.get(id=request.POST['snippet']),
+            analysisset__analysis=analysis, 
+            analysisset__snippet=Snippet.objects.get(id=request.POST['snippet']),
             comment="")
         iden.save()
         iden.true_tags.add(*true_tags)
@@ -370,7 +370,7 @@ def analysis(request, code):
         tag_summary[tag.name] = tag.identifications.filter(analysis=this_analysis).count()
     sort_options = ['score', 'time', 'random']
 
-    identifications = Identification.objects.filter(analysis=this_analysis).select_related()
+    identifications = Identification.objects.filter(analysisset__analysis=this_analysis).select_related()
     identification_list = [(x.snippet, x.snippet.recording.deployment.site.code,
         datetime.datetime.strftime(x.snippet.datetime, "%Y-%m-%d"),
         datetime.datetime.strftime(x.snippet.datetime, "%H:%M:%S"),
