@@ -32,5 +32,5 @@ admin.site.register(Detector, DetectorAdmin)
 
 class AnalysisAdmin(admin.ModelAdmin):
     list_display = ('name', 'code', 'description', 'datetime',)
-    list_filter = ('organisation', )
+    list_filter = ('user', )
 admin.site.register(Analysis, AnalysisAdmin)

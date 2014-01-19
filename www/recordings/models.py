@@ -322,8 +322,8 @@ class Analysis(SlugMixin, models.Model):
         return '%s' % (self.name)
 
 class AnalysisSet(models.Model):
-    analysis = models.ForeignKey(Analysis, related_name="set")
-    snippet = models.ForeignKey(Snippet, related_name="set")
+    analysis = models.ForeignKey(Analysis, related_name="sets")
+    snippet = models.ForeignKey(Snippet, related_name="sets")
     selection_method = models.TextField(default="")
     datetime = models.DateTimeField(auto_now=True)
 
