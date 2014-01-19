@@ -331,7 +331,7 @@ class Identification(models.Model):
     user = models.ForeignKey(User, related_name="identifications")
     analysisset = models.ForeignKey(AnalysisSet, related_name="identifications")
     datetime = models.DateTimeField(auto_now=True)
-    true_tags = models.ManyToManyField(Tag, related_name="identifications") #Rename to tags
-    false_tags = models.ManyToManyField(Tag, related_name="negative_identifications") #Drop the false_tags
+    tags = models.ManyToManyField(Tag, related_name="identifications") 
+    tag_set = models.ManyToManyField(Tag) 
     comment = models.TextField(default="")
 
