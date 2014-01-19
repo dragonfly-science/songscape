@@ -32,15 +32,10 @@
 {% endif %}
 </ul>
 {% endblock toprow %}
-
+{% block secondrow %}
+{% endblock secondrow %}
 <div class="row">
-  <div class="span4">
-    <audio id="snippet" preload="none">
-     <source src="{{ snippet|wav_url }}" type="audio/wav">
-     "Hmm can't play the sound"
-    </audio>
-  </div>
-  <div class="span6">
+  <div>
     <ul class="inline">
         {% for tag, c in tags.items %}
         <li class="outlined">{{ tag }} <span class="badge">{{ c }}</span></li>
@@ -48,6 +43,12 @@
     </ul>
   </div>
 </div>
+  <div>
+    <audio id="snippet" preload="none">
+     <source src="{{ snippet|wav_url }}" type="audio/wav">
+     "Hmm can't play the sound"
+    </audio>
+  </div>
 <canvas id="canvas" width="1000" height="360"></canvas>
 <a href="{{ snippet|wav_url }}" role="button" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-volume-up"></span> Download sound file</a>
 

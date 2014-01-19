@@ -122,7 +122,9 @@ def _get_snippet(id=None,
 
 def snippet(request, **kwargs):
     snippet = _get_snippet(**kwargs)
-    if kwargs.get('analysis', None):
+    analysis = kwargs.get('analysis', None)
+    if analysis:
+        template = 'recordings/analysis_snippet.html'
         identifications = Identification.objects.filter(
             analysisset__snippet_id__exact=kwargs['id'], 
             user_id__exact=request.user.id,
@@ -132,15 +134,17 @@ def snippet(request, **kwargs):
         if id_before:
             tags = identifications[0].true_tags.all()
     else:
+        template = 'recordings/snippet.html'
         identifications = Identification.objects.filter(analysisset__snippet = snippet)
         tags = Counter()
+        id_before = 0
         for i in identifications:
             tags.update(i.true_tags.all())
     count = kwargs.get('count', None)
     favourite = snippet.fans.filter(id=request.user.id).count()
     favourites = snippet.fans.count()
     return render(request,
-                  'recordings/snippet.html',
+                  template,
                   {'snippet': snippet,
                    'next_index': kwargs.get('next_index', None),
                    'previous_index': kwargs.get('previous_index', None),
@@ -148,6 +152,8 @@ def snippet(request, **kwargs):
                    'count': count,
                    'favourite': favourite,
                    'favourites': favourites,
+                   'analysis': analysis,
+                   'id_before': id_before,
                    'tags': dict(tags)})
 
 def _get_snippets(request, index):
