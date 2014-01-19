@@ -132,14 +132,14 @@ def snippet(request, **kwargs):
         id_before = identifications.count() > 0
         tags = []
         if id_before:
-            tags = identifications[0].true_tags.all()
+            tags = identifications[0].tags.all()
     else:
         template = 'recordings/snippet.html'
         identifications = Identification.objects.filter(analysisset__snippet = snippet)
         tags = Counter()
         id_before = 0
         for i in identifications:
-            tags.update(i.true_tags.all())
+            tags.update(i.tags.all())
     count = kwargs.get('count', None)
     favourite = snippet.fans.filter(id=request.user.id).count()
     favourites = snippet.fans.count()
@@ -351,22 +351,22 @@ def _get_analysis_snippets(request, analysis, index):
 def analysis_snippet(request, code, index=0):
     analysis = Analysis.objects.get(code=code)
     if request.method == "POST":
-        true_tags = []
-        false_tags = []
-        for tag in analysis.tags.all():
-            if request.POST[tag.code] == 'true':
-                true_tags.append(tag)
-            else:
-                false_tags.append(tag)
-        iden = Identification(user = request.user, 
-            analysisset__analysis=analysis, 
-            analysisset__snippet=Snippet.objects.get(id=request.POST['snippet']),
+        iden = Identification(user=request.user, 
+            analysisset=AnalysisSet.objects.get(analysis=analysis,
+                    snippet=Snippet.objects.get(id=request.POST['snippet'])
+                ),
             comment="")
         iden.save()
-        iden.true_tags.add(*true_tags)
-        iden.false_tags.add(*false_tags)
+        iden.tag_set.add(*analysis.tags.all())
+        tags = []
+        for tag in analysis.tags.all():
+            if request.POST[tag.code] == 'true':
+                tags.append(tag)
+        if tags:
+            iden.tags.add(*tags)
+        iden.save()
 
-        return redirect('analysis_snippet', code=code, snippet_id=request.POST["next_id"])
+        return redirect('analysis_snippet', code=code, index=request.POST["next_index"])
     return snippet(request, **_get_analysis_snippets(request, analysis, int(index)))
 
 def analysis(request, code):
@@ -380,7 +380,7 @@ def analysis(request, code):
     identification_list = [(x.snippet, x.snippet.recording.deployment.site.code,
         datetime.datetime.strftime(x.snippet.datetime, "%Y-%m-%d"),
         datetime.datetime.strftime(x.snippet.datetime, "%H:%M:%S"),
-        ";".join([t.code for t in x.true_tags.all()]),
+        ";".join([t.code for t in x.tags.all()]),
         "%0.1s%0.1s"%(x.user.first_name, x.user.last_name)) for x in
                            identifications]
 

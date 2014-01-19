@@ -326,6 +326,9 @@ class AnalysisSet(models.Model):
     snippet = models.ForeignKey(Snippet, related_name="sets")
     selection_method = models.TextField(default="")
     datetime = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        unique_together = (('analysis', 'snippet'),)
 
 class Identification(models.Model):
     user = models.ForeignKey(User, related_name="identifications")
