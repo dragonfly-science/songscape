@@ -153,6 +153,8 @@ def snippet(request, **kwargs):
                    'next_snippet': kwargs.get('next_snippet', None),
                    'previous_snippet': kwargs.get('previous_snippet', None),
                    'index': kwargs.get('index', None),
+                   'next_index': kwargs.get('next_index', None),
+                   'previous_index': kwargs.get('previous_index', None),
                    'skip': kwargs.get('skip', None),
                    'count': count,
                    'favourite': favourite,
@@ -208,18 +210,17 @@ def _get_snippets(request, index):
     if page_index > len(snippets):
         raise Http404
     # Now work out the next and previous  page and index
-    next_index = index + 1
-    previous_index = index - 1
-    if previous_index < 1:
-        previous_index = None
-    if next_index > count:
-        next_index = None
+    next_index = index + 1 if index < count else None
+    next_snippet = snippets[(next_index - 1) % PER_PAGE] if next_index else None
+    previous_index = index - 1 if index > 1 else None
+    previous_snippet = snippets[(next_index - 1) % PER_PAGE] if previous_index else None
+    
     return dict(id=snippets[page_index - 1],
         index=index,
         next_index=next_index,
-        next_snippet=snippets[(next_index - 1) % PAGE],
+        next_snippet=next_snippet,
         previous_index=previous_index,
-        previous_snippet=snippets[(previous_index - 1) % PAGE],
+        previous_snippet=previous_snippet,
         count=count)
 
 def snippets(request, index=1):

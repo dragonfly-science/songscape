@@ -6,9 +6,9 @@
 
 {% block toprow %}
 <ul class="pager">
-{% if previous_snippet and not analysis %}
+{% if previous_index and not analysis %}
   <li class="previous">
-    <a href="{% url 'snippet_list' previous_snippet %}">&larr; Previous</a>
+    <a href="{% url 'snippet_list' previous_index %}">&larr; Previous</a>
   </li>
 {% endif %}
   <li>
@@ -19,9 +19,9 @@
     <span>{{ index }} of {{ count }}</span>
   </li>
 {% endif %}
-{% if next_snippet and not analysis %}
+{% if next_index and not analysis %}
   <li class="next">
-    <a href="{% url 'snippet_list' next_snippet %}">Next &rarr;</a>
+    <a href="{% url 'snippet_list' next_index %}">Next &rarr;</a>
   </li>
 {% endif %}
 </ul>
