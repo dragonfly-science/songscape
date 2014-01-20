@@ -9,15 +9,16 @@ class Migration(DataMigration):
     def forwards(self, orm):
         "Write your forwards methods here."
         # Note: Remember to use orm['appname.ModelName'] rather than "from appname.models..."
-        for i in range(max(orm.Identification.objects.all().values_list('id'))[0] + 1):
-            try:
-                iden = orm.Identification.objects.get(id__exact=i)
-                dups = orm.Identification.objects.filter(analysisset=iden.analysisset,
-                    user=iden.user).exclude(id__exact=iden.id)
-                for a in list(dups):
-                    a.delete()
-            except orm.Identification.DoesNotExist:
-                pass
+        if len(Identification.objects.all()):
+            for i in range(max(orm.Identification.objects.all().values_list('id'))[0] + 1):
+                try:
+                    iden = orm.Identification.objects.get(id__exact=i)
+                    dups = orm.Identification.objects.filter(analysisset=iden.analysisset,
+                        user=iden.user).exclude(id__exact=iden.id)
+                    for a in list(dups):
+                        a.delete()
+                except orm.Identification.DoesNotExist:
+                    pass
 
     def backwards(self, orm):
         "Write your backwards methods here."
