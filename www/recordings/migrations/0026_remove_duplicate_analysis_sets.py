@@ -15,15 +15,16 @@ class Migration(DataMigration):
                 analysis=i.analysisset.analysis).exclude(identifications=i)
             for a in list(dups):
                 a.delete()
-        for i in range(max(orm.AnalysisSet.objects.all().values_list('id'))[0] + 1):
-            try:
-                aset = orm.AnalysisSet.objects.get(id__exact=i)
-                dups = orm.AnalysisSet.objects.filter(snippet=aset.snippet,
-                    analysis=aset.analysis).exclude(id__exact=aset.id)
-                for a in list(dups):
-                    a.delete()
-            except orm.AnalysisSet.DoesNotExist:
-                pass
+        if len(orm.AnalysisSet.objects.all()):
+            for i in range(max(orm.AnalysisSet.objects.all().values_list('id'))[0] + 1):
+                try:
+                    aset = orm.AnalysisSet.objects.get(id__exact=i)
+                    dups = orm.AnalysisSet.objects.filter(snippet=aset.snippet,
+                        analysis=aset.analysis).exclude(id__exact=aset.id)
+                    for a in list(dups):
+                        a.delete()
+                except orm.AnalysisSet.DoesNotExist:
+                    pass
 
     def backwards(self, orm):
         "Write your backwards methods here."
