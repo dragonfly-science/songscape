@@ -126,13 +126,17 @@ def snippet(request, **kwargs):
     tags = Counter()
     if analysis:
         template = 'recordings/analysis_snippet.html'
-        identifications = Identification.objects.filter(
-            analysisset__snippet_id__exact=kwargs['id'], 
-            user_id__exact=request.user.id,
-            analysisset__analysis=kwargs['analysis'])
-        id_before = identifications.count() > 0
-        if id_before:
-            tags.update(identifications[0].tags.all())
+        analysisset = AnalysisSet.objects.get(
+            snippet__id=kwargs['id'],
+            analysis=kwargs['analysis'])
+        try:
+            identification = Identification.objects.get(
+                analysisset=analysisset, 
+                user__id=request.user.id)
+            id_before = True
+            tags.update(identification.tags.all())
+        except Identification.DoesNotExist:
+            id_before = False
     else:
         template = 'recordings/snippet.html'
         identifications = Identification.objects.filter(analysisset__snippet = snippet)

@@ -11,9 +11,8 @@ class Migration(DataMigration):
         try:
             no_kiwis = orm.Tag.objects.get(code='no-kiwis')
             no_kiwis.delete()
-        except:
-            orm.Tag.DoesNotExist:
-                pass
+        except orm.Tag.DoesNotExist:
+            pass
 
     def backwards(self, orm):
         "Write your backwards methods here."
