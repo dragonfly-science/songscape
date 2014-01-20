@@ -353,7 +353,7 @@ def _get_analysis_snippets(request, analysis, snippet_id, refresh=False):
         raise Http404
     try:
         Identification.objects.get(analysisset__snippet__id=snippet_id,
-            analysisset__analysis=analysis)
+            analysisset__analysis=analysis, user=request.user)
         skip=request.session.get('skip', snippet_id)
     except Identification.DoesNotExist:
         skip=snippet_id
