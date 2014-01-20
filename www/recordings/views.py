@@ -434,7 +434,6 @@ def summary(request):
     # get the total duration
     duration = Recording.objects.all().aggregate(total_duration=Sum('duration'))
     duration = str(datetime.timedelta(seconds = round(duration['total_duration'], 0)))
-
     tags = Tag.objects.all().annotate(tag_count=Count('identifications')).order_by('-tag_count')
 
     return render(request,
@@ -446,7 +445,7 @@ def summary(request):
                     'snippet_count': Snippet.objects.count(),
                     'duration': duration,
                     'identification_count': Identification.objects.count(),
-                    'remaining_count': Snippet.objects.filter(identifications__exact=None).count(),
+                    'remaining_count': AnalysisSet.objects.filter(identifications__exact=None).count(),
                     'tags': tags
                   }
         )
