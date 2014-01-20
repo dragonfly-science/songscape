@@ -331,10 +331,17 @@ def analysis_detail(request, code):
 
 def _get_analysis_snippets(request, analysis, index):
     snippets = request.session.get('analysis_set', [])
-    if not snippets or analysis.id != request.session.get('analysis_id', ''):
-        snippets = [a.snippet.id for a in
-            AnalysisSet.objects.filter(analysis=analysis).order_by('?')]
-        request.session['analysis_set'] = snippets
+    refresh = request.GET.get('refresh', '0')
+    if not snippets or analysis.id != request.session.get('analysis_id', '') or refresh=='1':
+        user_snippets = Snippet.objects.filter(sets__analysis=analysis,
+            sets__identifications__user=request.user)
+        snippets = Snippet.objects.filter(sets__analysis=analysis).\
+            annotate(num_id=Count('sets__identifications')).\
+            filter(num_id__lt=2).\
+            exclude(id__in=user_snippets).\
+            order_by('?').\
+            values_list('id', flat=True)
+        request.session['analysis_set'] = list(snippets)
         request.session['analysis_id'] = analysis.id
     if index < 0 or index >= len(snippets):
         raise Http404
@@ -355,17 +362,19 @@ def _get_analysis_snippets(request, analysis, index):
 def analysis_snippet(request, code, index=0):
     analysis = Analysis.objects.get(code=code)
     if request.method == "POST":
-        iden = Identification(user=request.user, 
-            analysisset=AnalysisSet.objects.get(analysis=analysis,
-                    snippet=Snippet.objects.get(id=request.POST['snippet'])
-                ),
-            comment="")
+        analysisset=AnalysisSet.objects.get(analysis=analysis,
+            snippet=Snippet.objects.get(id=request.POST['snippet']))
+        iden, created = Identification.objects.get_or_create(
+                user=request.user, 
+                analysisset=analysisset)
         iden.save()
+        iden.tag_set.clear()
         iden.tag_set.add(*analysis.tags.all())
         tags = []
         for tag in analysis.tags.all():
             if request.POST[tag.code] == 'true':
                 tags.append(tag)
+        iden.tags.clear()
         if tags:
             iden.tags.add(*tags)
         iden.save()

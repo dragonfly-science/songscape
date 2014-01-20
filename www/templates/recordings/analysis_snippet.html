@@ -3,16 +3,6 @@
 {% block secondrow %}
 
 {% if id_before %}
-<div class="row">
-  <div class="span6">
-    <ul class="inline">
-        {% for tag in tags %}
-        <li class="outlined">{{ tag.name }} </li>
-        {% endfor %}
-    </ul>
-  </div>
-
-
 
 <div class="col-md-2">
 <span class="btn"><a href="{% url 'analysis_snippet' analysis.code next_index  %}">Skip</a></span>
@@ -30,8 +20,8 @@
 <div class="col-md-10">
 <form action="{% url 'analysis_snippet' analysis.code index %}" method="post" >{% csrf_token %}
 {% for tag in analysis.tags.all %}
-<input type="hidden" id="{{ tag.code }}_real" name="{{ tag.code }}" value=false>
-<input type="button" class="btn btn-default tag-btn" id="{{ tag.code }}" value="{{ tag.name }}">
+<input type="hidden" id="{{ tag.code }}_real" name="{{ tag.code }}" value={% if tag in tags %}true{% else %}false{% endif %}>
+<input type="button" class="btn btn-default tag-btn {% if tag in tags %}btn-success{% endif %}" id="{{ tag.code }}" value="{{ tag.name }}">
 {% endfor %}
 <input type="hidden" id="null_real" name="null_tag" value=true>
 <input type="hidden" name="next_index" value={{ next_index }}>
@@ -54,7 +44,7 @@ var check_save = function(){
 	    $('#null_real').val(false);
     };  
 };
-
+$(document).ready(check_save);
 var deactivate_button = function(){
     $(this).removeClass('btn-success');
     $(this).removeClass('active');
