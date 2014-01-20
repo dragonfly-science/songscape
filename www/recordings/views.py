@@ -150,8 +150,8 @@ def snippet(request, **kwargs):
     return render(request,
                   template,
                   {'snippet': snippet,
-                   'next_index': kwargs.get('next_index', None),
-                   'previous_index': kwargs.get('previous_index', None),
+                   'next_snippet': kwargs.get('next_snippet', None),
+                   'previous_snippet': kwargs.get('previous_snippet', None),
                    'index': kwargs.get('index', None),
                    'count': count,
                    'favourite': favourite,
@@ -203,7 +203,7 @@ def _get_snippets(request, index):
         request.session['order'] = order
         request.session['filters'] = filters
         request.session['count'] = count
-    page_index = (index - 1)%PER_PAGE + 1
+    page_index = (index - 1) % PER_PAGE + 1
     if page_index > len(snippets):
         raise Http404
     # Now work out the next and previous  page and index
@@ -216,7 +216,9 @@ def _get_snippets(request, index):
     return dict(id=snippets[page_index - 1],
         index=index,
         next_index=next_index,
+        next_snippet=snippets[(next_index - 1) % PAGE],
         previous_index=previous_index,
+        previous_snippet=snippets[(previous_index - 1) % PAGE],
         count=count)
 
 def snippets(request, index=1):
@@ -329,37 +331,38 @@ def analysis_detail(request, code):
                    {'analysis': analysis})
 
 
-def _get_analysis_snippets(request, analysis, index):
+def _get_analysis_snippets(request, analysis, snippet_id, refresh=False):
     snippets = request.session.get('analysis_set', [])
-    refresh = request.GET.get('refresh', '0')
-    if not snippets or analysis.id != request.session.get('analysis_id', '') or refresh=='1':
+    refresh = request.GET.get('refresh', '0') == '1' or refresh
+    if not snippets or analysis.id != request.session.get('analysis_id', '') or refresh:
         user_snippets = Snippet.objects.filter(sets__analysis=analysis,
             sets__identifications__user=request.user)
-        snippets = Snippet.objects.filter(sets__analysis=analysis).\
+        snippets = list(Snippet.objects.filter(sets__analysis=analysis).\
             annotate(num_id=Count('sets__identifications')).\
             filter(num_id__lt=2).\
             exclude(id__in=user_snippets).\
             order_by('?').\
-            values_list('id', flat=True)
-        request.session['analysis_set'] = list(snippets)
+            values_list('id', flat=True))
+        request.session['analysis_set'] = snippets
         request.session['analysis_id'] = analysis.id
-    if index < 0 or index >= len(snippets):
+    if snippet_id == 0:
+        snippet_id = snippets[0]
+    if not snippet_id in snippets:
         raise Http404
-    if index:
-        next_index = index + 1 if index < len(snippets) - 1 else None
-        previous_index = index - 1 if index > 0 else None
-    else:
-        next_index = 1
-        previous_index = None
-    return dict(id=snippets[index],
+    index = snippets.index(snippet_id)
+    next_index = index + 1 if index < len(snippets) - 1 else None
+    previous_index = index - 1 if index > 0 else None
+    next_snippet = snippets[next_index] if next_index else None
+    previous_snippet = snippets[previous_index] if previous_index else None
+    return dict(id=snippet_id,
         index=index,
         analysis = analysis,
-        next_index=next_index,
-        previous_index=previous_index,
+        next_snippet=next_snippet,
+        previous_snippet=previous_snippet,
         count=len(snippets))
 
 @login_required
-def analysis_snippet(request, code, index=0):
+def analysis_snippet(request, code, snippet_id=0):
     analysis = Analysis.objects.get(code=code)
     if request.method == "POST":
         analysisset=AnalysisSet.objects.get(analysis=analysis,
@@ -379,8 +382,11 @@ def analysis_snippet(request, code, index=0):
             iden.tags.add(*tags)
         iden.save()
 
-        return redirect('analysis_snippet', code=code, index=request.POST["next_index"])
-    return snippet(request, **_get_analysis_snippets(request, analysis, int(index)))
+        return redirect('analysis_snippet', code=code, snippet_id=request.POST["next_snippet"])
+    analysis_snippets = _get_analysis_snippets(request, analysis, int(snippet_id), refresh=int(snippet_id)==0)
+    if int(snippet_id) == 0:
+        return redirect('analysis_snippet', code=code, snippet_id=analysis_snippets['id'])
+    return snippet(request, **analysis_snippets)
 
 def analysis(request, code):
     this_analysis = Analysis.objects.get(code=code)
