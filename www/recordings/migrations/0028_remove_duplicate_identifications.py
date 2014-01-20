@@ -9,7 +9,7 @@ class Migration(DataMigration):
     def forwards(self, orm):
         "Write your forwards methods here."
         # Note: Remember to use orm['appname.ModelName'] rather than "from appname.models..."
-        if len(Identification.objects.all()):
+        if len(orm.Identification.objects.all()):
             for i in range(max(orm.Identification.objects.all().values_list('id'))[0] + 1):
                 try:
                     iden = orm.Identification.objects.get(id__exact=i)
