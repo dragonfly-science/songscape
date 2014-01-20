@@ -6,9 +6,9 @@
 
 {% block toprow %}
 <ul class="pager">
-{% if previous_index %}
+{% if previous_snippet and not analysis %}
   <li class="previous">
-    <a href="{% url 'snippet_list' previous_index %}">&larr; Previous</a>
+    <a href="{% url 'snippet_list' previous_snippet %}">&larr; Previous</a>
   </li>
 {% endif %}
   <li>
@@ -19,15 +19,9 @@
     <span>{{ index }} of {{ count }}</span>
   </li>
 {% endif %}
-{% if random_index %}
-  <!--
-    <li>
-    <a href="{% url 'snippet_list' random_index %}">Random</a>
-  </li>-->
-{% endif %}
-{% if next_index %}
+{% if next_snippet and not analysis %}
   <li class="next">
-    <a href="{% url 'snippet_list' next_index %}">Next &rarr;</a>
+    <a href="{% url 'snippet_list' next_snippet %}">Next &rarr;</a>
   </li>
 {% endif %}
 </ul>
@@ -154,12 +148,14 @@ $(document).ready(function() {
     });
 });
 
-{% if next_index %}
+{% block preload %}
+{% if next_snippet %}
 $(window).load(function() {
   var next_image = new Image();
-  next_image.src = "{% url 'sonogram_index' index=next_index %}"
+  next_image.src = "{% url 'sonogram_id' id=next_snippet %}"
 });
 {% endif %}
+{% endblock preload %}
 </script>
 
 {% endblock %}
