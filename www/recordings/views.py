@@ -153,6 +153,7 @@ def snippet(request, **kwargs):
                    'next_snippet': kwargs.get('next_snippet', None),
                    'previous_snippet': kwargs.get('previous_snippet', None),
                    'index': kwargs.get('index', None),
+                   'skip': kwargs.get('skip', None),
                    'count': count,
                    'favourite': favourite,
                    'favourites': favourites,
@@ -349,6 +350,13 @@ def _get_analysis_snippets(request, analysis, snippet_id, refresh=False):
         snippet_id = snippets[0]
     if not snippet_id in snippets:
         raise Http404
+    try:
+        Identification.objects.get(analysisset__snippet__id=snippet_id,
+            analysisset__analysis=analysis)
+        skip=request.session.get('skip', snippet_id)
+    except Identification.DoesNotExist:
+        skip=snippet_id
+        request.session['skip'] = snippet_id
     index = snippets.index(snippet_id)
     next_index = index + 1 if index < len(snippets) - 1 else None
     previous_index = index - 1 if index > 0 else None
@@ -359,6 +367,7 @@ def _get_analysis_snippets(request, analysis, snippet_id, refresh=False):
         analysis = analysis,
         next_snippet=next_snippet,
         previous_snippet=previous_snippet,
+        skip = skip,
         count=len(snippets))
 
 @login_required
