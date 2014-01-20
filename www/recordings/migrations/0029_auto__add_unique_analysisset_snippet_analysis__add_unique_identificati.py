@@ -1,23 +1,22 @@
 # -*- coding: utf-8 -*-
 import datetime
 from south.db import db
-from south.v2 import DataMigration
+from south.v2 import SchemaMigration
 from django.db import models
 
-class Migration(DataMigration):
+
+class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        "Write your forwards methods here."
-        try:
-            no_kiwis = orm.Tag.objects.get(code='no-kiwis')
-            no_kiwis.delete()
-        except:
-            orm.Tag.DoesNotExist:
-                pass
+        # Adding unique constraint on 'Identification', fields ['analysisset', 'user']
+        db.create_unique(u'recordings_identification', ['analysisset_id', 'user_id'])
+
 
     def backwards(self, orm):
-        "Write your backwards methods here."
-        raise RuntimeError("Cannot reverse this migration.")
+        # Removing unique constraint on 'Identification', fields ['analysisset', 'user']
+        db.delete_unique(u'recordings_identification', ['analysisset_id', 'user_id'])
+
+
 
     models = {
         u'auth.group': {
@@ -68,7 +67,7 @@ class Migration(DataMigration):
             'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'analyses'", 'to': u"orm['auth.User']"})
         },
         u'recordings.analysisset': {
-            'Meta': {'object_name': 'AnalysisSet'},
+            'Meta': {'unique_together': "(('analysis', 'snippet'),)", 'object_name': 'AnalysisSet'},
             'analysis': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'sets'", 'to': u"orm['recordings.Analysis']"}),
             'datetime': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
@@ -93,7 +92,7 @@ class Migration(DataMigration):
             'version': ('django.db.models.fields.TextField', [], {})
         },
         u'recordings.identification': {
-            'Meta': {'object_name': 'Identification'},
+            'Meta': {'unique_together': "(('analysisset', 'user'),)", 'object_name': 'Identification'},
             'analysisset': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'identifications'", 'to': u"orm['recordings.AnalysisSet']"}),
             'comment': ('django.db.models.fields.TextField', [], {'default': "''"}),
             'datetime': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
@@ -169,4 +168,3 @@ class Migration(DataMigration):
     }
 
     complete_apps = ['recordings']
-    symmetrical = True

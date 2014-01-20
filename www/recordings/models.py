@@ -338,3 +338,5 @@ class Identification(models.Model):
     tag_set = models.ManyToManyField(Tag) 
     comment = models.TextField(default="")
 
+    class Meta:
+        unique_together = (('analysisset', 'user'),)
