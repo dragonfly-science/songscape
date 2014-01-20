@@ -1,23 +1,13 @@
 {% extends 'recordings/snippet.html' %}
 
 {% block secondrow %}
-
-{% if id_before %}
-
-<div class="col-md-2">
-<span class="btn"><a href="{% url 'analysis_snippet' analysis.code next_snippet  %}">Skip</a></span>
-</div>
-</div>
-
-{% endif %}
-
 <div class="row">
 <div class="col-md-2">
 {% if previous_snippet %}
 <span class="btn btn-default"><a href="{% url 'analysis_snippet' analysis.code previous_snippet %}">&larr; Previous</a></span>
 {% endif %}
 </div>
-<div class="col-md-10">
+<div class="col-md-8">
 <form action="{% url 'analysis_snippet' analysis.code snippet.id %}" method="post" >{% csrf_token %}
 {% for tag in analysis.tags.all %}
 <input type="hidden" id="{{ tag.code }}_real" name="{{ tag.code }}" value={% if tag in tags %}true{% else %}false{% endif %}>
@@ -28,6 +18,11 @@
 <input type="hidden" name="snippet" value={{ snippet.id }}>
 <input type="submit" class="btn btn-primary" id="null_tag" value="Nothing to be tagged">
 </form>
+</div>
+<div class="col-md-2">
+{% if skip != snippet.id %}
+<span class="btn btn-default"><a href="{% url 'analysis_snippet' analysis.code skip %}">Skip forwards &rarr;</a></span>
+{% endif %}
 </div>
 </div>
 {% endblock secondrow %}
