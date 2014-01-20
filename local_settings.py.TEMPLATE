@@ -16,7 +16,7 @@ DATABASES = {
 DEBUG = False
 
 SITE_URL = ''
-MEDIA_ROOT = '/kiwi'
+MEDIA_ROOT = '/var/lib/sitedata/songscape/uploaded'
 
 EMAIL_HOST = ''
 SERVER_EMAIL = ''
