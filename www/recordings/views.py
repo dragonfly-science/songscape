@@ -408,13 +408,13 @@ def analysis(request, code):
     this_analysis = Analysis.objects.get(code=code)
     tag_summary = {}
     for tag in this_analysis.tags.all():
-        tag_summary[tag.name] = tag.identifications.filter(analysis=this_analysis).count()
+        tag_summary[tag.name] = tag.identifications.filter(analysisset__analysis=this_analysis).count()
     sort_options = ['score', 'time', 'random']
 
     identifications = Identification.objects.filter(analysisset__analysis=this_analysis).select_related()
-    identification_list = [(x.snippet, x.snippet.recording.deployment.site.code,
-        datetime.datetime.strftime(x.snippet.datetime, "%Y-%m-%d"),
-        datetime.datetime.strftime(x.snippet.datetime, "%H:%M:%S"),
+    identification_list = [(x.analysisset.snippet, x.analysisset.snippet.recording.deployment.site.code,
+        datetime.datetime.strftime(x.analysisset.snippet.datetime, "%Y-%m-%d"),
+        datetime.datetime.strftime(x.analysisset.snippet.datetime, "%H:%M:%S"),
         ";".join([t.code for t in x.tags.all()]),
         "%0.1s%0.1s"%(x.user.first_name, x.user.last_name)) for x in
                            identifications]

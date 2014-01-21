@@ -1,25 +1,32 @@
-{% extends 'full.html' %}
-{% load url from future %}
+{% extends 'base.html' %}
 
 {% block content %}
+    <div class="jumbotron">
+      <div class="container">
+        <h1 style="color: white">Monitoring biodiversity with sound</h1>
+        <p><a class="btn btn-primary btn-lg" role="button" href="{% url 'first_snippet' %}">Explore the sounds &raquo;</a></p>
+      </div>
+    </div>
+    <p class="jumbotron-byline">
+        New Zealand North Island brown kiwi. Kiwi are active at night, and their distinctive call makes them suited for acoustic monitoring. Photo
+        <a href="http://creativecommons.org/licenses/by/3.0/deed.en">CC-BY</a> Edward Abraham
+    </p>
 
-<form method="post" action="{% url 'django.contrib.auth.views.login' %}" class="form-horizontal">
+<form method="post" action="{% url 'django.contrib.auth.views.login' %}" role="form">
 {% csrf_token %}
 <fieldset>
 <legend>Login</legend>
 {% for field in form %}
-    <div class="control-group{% if form.errors %} error{% endif %}">
-        <label class="control-label"> {{ field.label_tag }}</label>
-        <div class="controls"> {{ field }}
+    <div class="form-group{% if form.errors %} error{% endif %}">
+        <label > {{ field.label_tag }}</label>
+        <div> {{ field }}
             {% if form.errors and forloop.first %}<span class="help-inline">Your username and password didn't match, please try again</span>{% endif %}
         </div> 
     </div>
 {% endfor %}
-<div class="control-group">
-    <div class="controls">
+<div class="form-group">
         <input type="submit" value="login" class="btn btn-primary"/>
         <input type="hidden" name="next" value="{{ next }}" />
-    </div>
 </div>
 </fieldset>
 </form>
