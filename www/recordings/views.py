@@ -155,6 +155,7 @@ def snippet(request, **kwargs):
                    'index': kwargs.get('index', None),
                    'next_index': kwargs.get('next_index', None),
                    'previous_index': kwargs.get('previous_index', None),
+                   'random_index': kwargs.get('random_index', None),
                    'skip': kwargs.get('skip', None),
                    'count': count,
                    'favourite': favourite,
@@ -221,6 +222,7 @@ def _get_snippets(request, index):
         next_snippet=next_snippet,
         previous_index=previous_index,
         previous_snippet=previous_snippet,
+        random_index=random.randint(0, count-1),
         count=count)
 
 def snippets(request, index=1):
