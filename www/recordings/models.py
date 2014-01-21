@@ -227,18 +227,20 @@ class Snippet(models.Model):
             close()
 
     def save_soundfile(self, replace=False):
+        filename = self.get_soundfile_name()
+        name = os.path.join(settings.SNIPPET_DIR, filename)
+        path = os.path.join(settings.MEDIA_ROOT, name)
         try:
-            if not os.path.exists(self.soundfile.path):
+            if not os.path.exists(path):
                 replace = True
         except (ValueError, SuspiciousOperation, AttributeError):
             replace = True
         if replace:
-            filename = self.get_soundfile_name()
             wav_file = TemporaryFile()
             wavy.slice_wave(self.recording.path, wav_file, self.offset, self.duration)
             wav_file.seek(0)
             self.soundfile.save(filename, File(wav_file, name=filename), save=False)
-            self.soundfile.name = os.path.join(settings.SNIPPET_DIR, filename)
+            self.soundfile.name = name
             self.save()
 
     def url_path(self):

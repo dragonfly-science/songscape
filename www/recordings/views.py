@@ -229,13 +229,15 @@ def snippets(request, index=1):
     return snippet(request, **_get_snippets(request, index))
 
 def _guarantee_soundfile(snippet):
+    name = os.path.join(settings.SNIPPET_DIR, snippet.get_soundfile_name())
+    path = os.path.join(settings.MEDIA_ROOT, name)
     try:
-        if not os.path.exists(snippet.soundfile.path):
+        if not os.path.exists(path):
             raise ValueError
     except (ValueError, SuspiciousOperation, AttributeError):
         snippet.save_soundfile(replace=True)
-    if snippet.soundfile and not snippet.soundfile.name.startswith(settings.SNIPPET_DIR):
-        snippet.soundfile.name = os.path.join(settings.SNIPPET_DIR, snippet.get_soundfile_name())
+    if snippet.soundfile and not snippet.soundfile.name == name:
+        snippet.soundfile.name = name
         snippet.save()
 
 def play_snippet(request, **kwargs):
@@ -385,13 +387,13 @@ def analysis_snippet(request, code, snippet_id=0):
                 user=request.user, 
                 analysisset=analysisset)
         iden.save()
-        iden.tag_set.clear()
+        iden.tag_set = []
         iden.tag_set.add(*analysis.tags.all())
         tags = []
         for tag in analysis.tags.all():
             if request.POST[tag.code] == 'true':
                 tags.append(tag)
-        iden.tags.clear()
+        iden.tags = []
         if tags:
             iden.tags.add(*tags)
         iden.save()
