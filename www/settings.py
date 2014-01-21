@@ -76,7 +76,6 @@ TEMPLATE_LOADERS = (
 
 TEMPLATE_CONTEXT_PROCESSORS = (
    'django.contrib.auth.context_processors.auth',
-   'django_browserid.context_processors.browserid',
    'django.core.context_processors.request',
    'django.core.context_processors.media',
    'django.core.context_processors.debug',
@@ -99,7 +98,6 @@ LOGIN_REDIRECT_URL = '/'
 
 INSTALLED_APPS = (
     'django.contrib.auth',
-    'django_browserid',  # Load after auth
     'django.contrib.contenttypes',
     'django.contrib.sessions',
      'django.contrib.sites',
@@ -175,7 +173,6 @@ DEBUG_TOOLBAR_CONFIG = {'INTERCEPT_REDIRECT': False}
 # Add the django_browserid authentication backend.
 AUTHENTICATION_BACKENDS = (
    'django.contrib.auth.backends.ModelBackend', # required for admin
-   'django_browserid.auth.BrowserIDBackend',
 )
 
 
