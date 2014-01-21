@@ -245,17 +245,19 @@ def play_snippet(request, **kwargs):
 def get_sonogram(request, **kwargs):
     """Get a sonogram. If we cant find it, generate it from the snippet"""
     snippet = _get_snippet(**kwargs)
-    _guarantee_soundfile(snippet)
+    name = os.path.join(settings.SONOGRAM_DIR, snippet.get_sonogram_name())
+    path = os.path.join(settings.MEDIA_ROOT, name)
     try:
-        if not os.path.exists(snippet.sonogram.path):
+        if not os.path.exists(path):
             raise ValueError
     except (ValueError, SuspiciousOperation, AttributeError):
+        _guarantee_soundfile(snippet)
         snippet.save_sonogram(replace=True)
-    if snippet.sonogram and not snippet.sonogram.name.startswith(settings.SONOGRAM_DIR): #name should not be absolute
-        snippet.sonogram.name = os.path.join(settings.SONOGRAM_DIR, snippet.get_sonogram_name())
+    if snippet.sonogram and not snippet.sonogram.name == name: #name should not be absolute
+        snippet.sonogram.name = name
         snippet.save()
     return HttpResponseRedirect(reverse('media', 
-        args=(snippet.sonogram.name,))) 
+        args=(name,))) 
 
 def get_sonogram_by_index(request, index):
     return get_sonogram(request, id=_get_snippets(request, index)['id'])
