@@ -92,7 +92,9 @@ def _get_parameters(request):
     return parameters.urlencode()
 
 def home(request):
-    return render(request, 'home.html')
+    duration = Recording.objects.all().aggregate(total_duration=Sum('duration'))
+    duration = int(round(duration['total_duration']/(60*60*24), 0))
+    return render(request, 'home.html', {'duration':duration, 'sites': Site.objects.count()})
 
 def _get_snippet(id=None,
         organisation=None,
