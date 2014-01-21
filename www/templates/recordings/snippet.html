@@ -8,6 +8,9 @@
 <ul class="pager">
 {% if previous_index and not analysis %}
   <li class="previous">
+    <a href="{% url 'snippet_list' 1 %}">&larr; First</a>
+  </li>
+  <li class="previous">
     <a href="{% url 'snippet_list' previous_index %}">&larr; Previous</a>
   </li>
 {% endif %}
@@ -17,6 +20,11 @@
 {% if index %}
   <li>
     <span>{{ index }} of {{ count }}</span>
+  </li>
+{% endif %}
+{% if random_index and not analysis %}
+  <li class="next">
+    <a href="{% url 'snippet_list' random_index %}">Random</a>
   </li>
 {% endif %}
 {% if next_index and not analysis %}
@@ -40,7 +48,7 @@
 </div>
 {% endif %}
   <div>
-    <audio id="snippet" preload="none">
+    <audio id="snippet">
      <source src="{{ snippet|wav_url }}" type="audio/wav">
      "Hmm can't play the sound"
     </audio>
@@ -155,6 +163,10 @@ $(document).ready(function() {
 $(window).load(function() {
   var next_image = new Image();
   next_image.src = "{% url 'sonogram_id' id=next_snippet %}"
+  
+  var next_audio = new Audio();
+  next_audio.src = "{% url 'play' id=next_snippet %}";
+  next_audio.preload = "auto";
 });
 {% endif %}
 {% endblock preload %}
