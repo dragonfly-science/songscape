@@ -2,7 +2,7 @@ songscape (20140122-4) precise; urgency=low
 
   * Remove the --upgrade flag on pip
 
-   -- Edward Abraham <edward@dragonfly.co.nz>  Wed, 22 Jan 2014 21:22:04 +1200
+ -- Edward Abraham <edward@dragonfly.co.nz>  Wed, 22 Jan 2014 21:22:04 +1200
 
 songscape (20140118-4) precise; urgency=low
 
