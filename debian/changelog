@@ -1,4 +1,4 @@
-songscape (20140122-4ubuntu1) precise; urgency=low
+songscape (20140124-1) precise; urgency=low
 
   * Remove the collect static line to get the postinst to run
 
