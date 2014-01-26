@@ -68,29 +68,29 @@ img id="sonogram" src="{{ snippet|sonogram_url }}" -->
 {% block extrascript %}
 {% endblock extrascript %}
 $(document).ready(function() {
-  var canvas = document.getElementById("canvas");
-  var context = document.getElementById('canvas').getContext('2d');
-  var snippet = document.getElementById('snippet');
+    var canvas = document.getElementById("canvas");
+    var context = document.getElementById('canvas').getContext('2d');
+    var snippet = document.getElementById('snippet');
 
-  var sonogram = new Image();
-  sonogram.onload = function() {
-    context.drawImage(this, 0, 0);
-  }
-  sonogram.src = '{{ snippet|sonogram_url }}';
+    var sonogram = new Image();
+    sonogram.onload = function() {
+        context.drawImage(this, 0, 0);
+    }
+    sonogram.src = '{{ snippet|sonogram_url }}';
 
-  function draw_playback(canvas_offset) {
-    // SVG might be more efficient oh well.
-    // And it could be animated cleanly - oh well you have to start somewhere
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    context.drawImage(sonogram, 0, 0);
-    context.beginPath();
-    context.moveTo(canvas_offset, 0);
-    context.lineTo(canvas_offset, canvas.height);
-    context.stroke();
-    context.closePath();
-  }
+    function draw_playback(canvas_offset) {
+        // SVG might be more efficient oh well.
+        // And it could be animated cleanly - oh well you have to start somewhere
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(sonogram, 0, 0);
+        context.beginPath();
+        context.moveTo(canvas_offset, 0);
+        context.lineTo(canvas_offset, canvas.height);
+        context.stroke();
+        context.closePath();
+    }
 
-  /*snippet.addEventListener('canplaythrough', function(){
+    /*snippet.addEventListener('canplaythrough', function(){
     console.log('Can play through');
     console.log(snippet.src);
     console.log(snippet.networkState);
@@ -98,49 +98,78 @@ $(document).ready(function() {
       console.log('Reload');
       snippet.load();
     }; 
-  }, false);;*/
+     }, false);;*/
 
-  snippet.preload = "auto";
-  $('#canvas').bind('click', function(d) {
-    // hack hack - for some reason the first time a page is loaded the
-    // media is not seekable - something to do with the redirect
-    // Do we want to be able to pause it? Or do we just click
-    // on what we want and then when done move to the next one?
-    // offset = 0.13 is basically the start the sonogram and 0.9 the end.
+    snippet.preload = "auto";
     var sonogram_start = 0.1266;
     var sonogram_end = 0.905;
     var sonogram_range = sonogram_end - sonogram_start;
-    var offset = d.offsetX / $(this).width();
-    // scale accordingly
-    offset -= sonogram_start;
-    offset /= sonogram_range;
-    if (offset > 1.0){
-        snippet.currentTime = snippet.duration;
-        draw_playback(canvas.width*sonogram_end);
-    } 
-    else if (offset < 0){
-        snippet.currentTime = 0.0;
-        snippet.play();
-    }
-    else {
-        snippet.currentTime = offset * snippet.duration
-        draw_playback(d.offsetX);
-        snippet.play();
-    };
 
-    $('#snippet').bind('timeupdate', function(e) {
-        var offset = snippet.currentTime / snippet.duration;
-        offset *= sonogram_range;
-        offset += sonogram_start;
-        offset *= canvas.width
-        draw_playback(offset);
+    function draw_line(){ 
+        $('#snippet').bind('timeupdate', function(e) {
+            var offset = snippet.currentTime / snippet.duration;
+            offset *= sonogram_range;
+            offset += sonogram_start;
+            offset *= canvas.width
+            draw_playback(offset);
+        });
+    }
+
+    $('#canvas').bind('click', function(d) {
+        var offset = d.offsetX / $(this).width();
+        // scale accordingly
+        offset -= sonogram_start;
+        offset /= sonogram_range;
+        if (offset > 1.0){
+            snippet.currentTime = snippet.duration;
+            draw_playback(canvas.width*sonogram_end);
+        } 
+        else if (offset < 0){
+            snippet.currentTime = 0.0;
+            snippet.pause();
+        }
+        else {
+            snippet.currentTime = offset * snippet.duration
+            draw_playback(d.offsetX);
+            snippet.play();
+        };
+        draw_line();
     });
 
-  });
-
-});
-
-$(document).ready(function() {
+    /* Keypresses */
+    $(window).keydown(function(event){
+        switch(event.which){
+        case 32:
+            if (snippet.paused){
+                draw_line();
+                snippet.play();
+            } else {
+                snippet.pause();
+            }
+            break;
+        case 39:
+            if (snippet.currentTime > snippet.duration*0.95){
+                snippet.currentTime = snippet.duration;
+                snippet.pause();
+            }  else { 
+                snippet.currentTime += snippet.duration/20.0;
+                draw_line();
+                snippet.play();
+            }
+            break;
+        case 37:
+            if (snippet.currentTime < snippet.duration/20.0){
+                snippet.currentTime = 0;
+                snippet.pause();
+            }  else { 
+                snippet.currentTime -= snippet.duration/20.0;
+                draw_line();
+                snippet.play();
+            }
+            break;
+        }
+    });
+    /* Favorite button */
     $('#favourite').bind('click', function() {
         var $this = $(this);
         var post_id = this.id;
@@ -157,6 +186,7 @@ $(document).ready(function() {
         });
     });
 });
+
 
 {% block preload %}
 {% if next_snippet %}
