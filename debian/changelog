@@ -1,3 +1,9 @@
+songscape (20140124-1) precise; urgency=low
+
+  * Remove the collect static line to get the postinst to run
+
+ -- Edward Abraham <edward@victoria.dragonfly.co.nz>  Fri, 24 Jan 2014 19:06:24 +1300
+
 songscape (20140122-4) precise; urgency=low
 
   * Remove the --upgrade flag on pip
