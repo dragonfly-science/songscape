@@ -115,7 +115,7 @@ $(document).ready(function() {
         });
     }
 
-    $('#canvas').bind('click', function(d) {
+    $('#canvas').bind('click touchstart', function(d) {
         var offset = d.offsetX / $(this).width();
         // scale accordingly
         offset -= sonogram_start;
@@ -169,21 +169,27 @@ $(document).ready(function() {
             break;
         }
     });
+
     /* Favorite button */
-    $('#favourite').bind('click', function() {
-        var $this = $(this);
-        var post_id = this.id;
-        if ($this.hasClass('liked')){
-            var favourite_url = "{% url 'api' snippet.id 'unfavourite' %}";
-        } 
-        else {
-            var favourite_url = "{% url 'api' snippet.id 'favourite' %}";
-        };
-        $.getJSON(favourite_url, function(data) {
-            var newClass = (data["favourite"] == 1) ? 'liked' : 'notliked'
-            $this.removeClass("liked notliked");
-            $this.addClass(newClass);
-        });
+    var favourite_flag = false;
+    $('#favourite').bind('touchstart click', function() {
+        if (!favourite_flag) {
+            favourite_flag = true;
+            setTimeout(function(){favourite_flag = false;}, 100);
+            var $this = $(this);
+            var post_id = this.id;
+            if ($this.hasClass('liked')){
+                var favourite_url = "{% url 'api' snippet.id 'unfavourite' %}";
+            } 
+            else {
+                var favourite_url = "{% url 'api' snippet.id 'favourite' %}";
+            };
+            $.getJSON(favourite_url, function(data) {
+                var newClass = (data["favourite"] == 1) ? 'liked' : 'notliked'
+                $this.removeClass("liked notliked");
+                $this.addClass(newClass);
+            });
+        }
     });
 });
 
