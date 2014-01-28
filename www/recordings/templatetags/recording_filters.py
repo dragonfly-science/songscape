@@ -2,6 +2,8 @@ import os
 import datetime
 from django import template
 from django.core.urlresolvers import reverse
+from django.core.exceptions import SuspiciousOperation
+from django.conf import settings
 
 register = template.Library()
 
@@ -17,7 +19,8 @@ def _snippet_url(snippet, url_name):
     
 @register.filter
 def wav_url(snippet):
-    return _snippet_url(snippet, 'play_name')
+    filename = snippet.save_soundfile()
+    return reverse('snippet-media', args=(filename,))
 
 @register.filter
 def wav_name(snippet): 

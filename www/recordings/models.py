@@ -238,6 +238,7 @@ class Snippet(models.Model):
             wav_file = open(path, 'w')
             wavy.slice_wave(self.recording.path, wav_file, self.offset, self.duration)
             wav_file.close()
+        return filename
 
     def url_path(self):
         full_path = self.recording.path
