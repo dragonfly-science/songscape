@@ -230,23 +230,11 @@ def _get_snippets(request, index):
 def snippets(request, index=1):
     return snippet(request, **_get_snippets(request, index))
 
-def _guarantee_soundfile(snippet):
-    name = os.path.join(settings.SNIPPET_DIR, snippet.get_soundfile_name())
-    path = os.path.join(settings.MEDIA_ROOT, name)
-    try:
-        if not os.path.exists(path):
-            raise ValueError
-    except (ValueError, SuspiciousOperation, AttributeError):
-        snippet.save_soundfile(replace=True)
-    if snippet.soundfile and not snippet.soundfile.name == name:
-        snippet.soundfile.name = name
-        snippet.save()
-
 def play_snippet(request, **kwargs):
     """Play a snippet. If we cant find it, generate it from the recording"""
     snippet = _get_snippet(**kwargs)
-    _guarantee_soundfile(snippet)
-    return HttpResponseRedirect(reverse('media', args=(snippet.soundfile.name,))) 
+    filename = snippet.save_soundfile()
+    return HttpResponseRedirect(reverse('snippet-media', args=(filename,))) 
 
 def get_sonogram(request, **kwargs):
     """Get a sonogram. If we cant find it, generate it from the snippet"""
@@ -257,7 +245,7 @@ def get_sonogram(request, **kwargs):
         if not os.path.exists(path):
             raise ValueError
     except (ValueError, SuspiciousOperation, AttributeError):
-        _guarantee_soundfile(snippet)
+        soundfile = snippet.save_soundfile()
         snippet.save_sonogram(replace=True)
     if snippet.sonogram and not snippet.sonogram.name == name: #name should not be absolute
         snippet.sonogram.name = name
