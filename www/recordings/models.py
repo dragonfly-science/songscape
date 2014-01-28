@@ -168,7 +168,6 @@ class Snippet(models.Model):
     duration = models.FloatField()
     sonogram = models.ImageField(upload_to=os.path.join(settings.MEDIA_ROOT, settings.SONOGRAM_DIR), null=True, blank=True)
     soundcloud = models.IntegerField(null=True, blank=True)
-    soundfile = models.FileField(upload_to=os.path.join(settings.MEDIA_ROOT, settings.SNIPPET_DIR), null=True, blank=True)
     fans = models.ManyToManyField(User, related_name='favourites', null=True, blank=True)
 
     class Meta:
@@ -180,7 +179,7 @@ class Snippet(models.Model):
     def get_audio(self, max_framerate=settings.MAX_FRAMERATE):
         try:
             print 'Getting audio locally'
-            return wavy.get_audio(self.soundfile.path, max_framerate=max_framerate)
+            return wavy.get_audio(self.get_soundfile_name(), max_framerate=max_framerate)
         except (ValueError, SuspiciousOperation, AttributeError, IOError):
             print 'Getting audio remotely'
             return self.recording.get_audio(self.offset, self.duration, max_framerate=max_framerate)
@@ -236,12 +235,9 @@ class Snippet(models.Model):
         except (ValueError, SuspiciousOperation, AttributeError):
             replace = True
         if replace:
-            wav_file = TemporaryFile()
+            wav_file = open(path, 'w')
             wavy.slice_wave(self.recording.path, wav_file, self.offset, self.duration)
-            wav_file.seek(0)
-            self.soundfile.save(filename, File(wav_file, name=filename), save=False)
-            self.soundfile.name = name
-            self.save()
+            wav_file.close()
 
     def url_path(self):
         full_path = self.recording.path

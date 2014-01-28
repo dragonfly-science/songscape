@@ -238,15 +238,12 @@ def _guarantee_soundfile(snippet):
             raise ValueError
     except (ValueError, SuspiciousOperation, AttributeError):
         snippet.save_soundfile(replace=True)
-    if snippet.soundfile and not snippet.soundfile.name == name:
-        snippet.soundfile.name = name
-        snippet.save()
 
 def play_snippet(request, **kwargs):
     """Play a snippet. If we cant find it, generate it from the recording"""
     snippet = _get_snippet(**kwargs)
     _guarantee_soundfile(snippet)
-    return HttpResponseRedirect(reverse('media', args=(snippet.soundfile.name,))) 
+    return HttpResponseRedirect(reverse('snippet-media', args=(snippet.get_soundfile_name(),))) 
 
 def get_sonogram(request, **kwargs):
     """Get a sonogram. If we cant find it, generate it from the snippet"""
