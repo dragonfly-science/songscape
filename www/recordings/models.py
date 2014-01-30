@@ -24,8 +24,11 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.template.defaultfilters import slugify
 from django.core.exceptions import SuspiciousOperation
+from django.utils.timezone import utc
 
-from www.recordings.templatetags.recording_filters import wav_name, sonogram_name, snippet_name
+
+from www.recordings.templatetags.recording_filters import wav_name, sonogram_name, \
+    snippet_name, isotime, timezone_lookup
 import wavy
 
 rcParams['font.size'] = 10
@@ -101,12 +104,12 @@ class Deployment(models.Model):
     start = models.DateTimeField()
     end = models.DateTimeField(null=True, blank=True)
     comments = models.TextField(null=True, blank=True)
+    start_timezone = models.TextField()
 
     def __unicode__(self):
-        return '%s-%s-%s-%s'%(self.site,
-            datetime.datetime.strftime(self.start, '%Y%m%d-%H%M%S'),
-            datetime.datetime.strftime(self.end, '%Y%m%d-%H%M%S'),
-            self.recorder,
+        return '%s-%s-%s-%s'%(self.organisation.code, self.site,
+            isotime(self.start),
+            isotime(self.end)
         )
 
     class Meta:
@@ -125,10 +128,10 @@ class Recording(models.Model):
     path = models.TextField()
 
     def __unicode__(self):
-        return '%s-%s-%s'%(self.deployment.site.code, self.deployment.recorder.code, self.datetime)
+        return '%s-%s-%s'%(self.deployment.owner.code, self.deployment.site.code, isotime(self.datetime))
 
-    class Meta:
-        unique_together = (('datetime', 'deployment'),)
+    #class Meta:
+    #    unique_together = (('datetime', 'deployment'),)
 
     def get_hash(self):
         hasher = hashlib.md5()

@@ -111,7 +111,7 @@ def _get_snippet(id=None,
             duration or\
             offset:
         return Snippet.objects.get(
-                recording__datetime=datetime.datetime.strptime(date_time, "%Y%m%d%H%M%S"),
+                recording__datetime=datetime.datetime.strptime(date_time, "%Y-%m-%dT%H:%M:%SZ"),
                 recording__deployment__recorder__code=recorder_code,
                 recording__deployment__owner__code=organisation,
                 recording__deployment__site__code=site_code,
