@@ -27,7 +27,8 @@ def _snippet_url(snippet, url_name):
     
 @register.filter
 def wav_url(snippet):
-    return _snippet_url(snippet, 'play_name')
+    filename = snippet.save_soundfile()
+    return reverse('snippet-media', args=(filename,))
 
 @register.filter
 def wav_name(snippet): 
