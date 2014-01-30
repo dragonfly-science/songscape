@@ -107,7 +107,7 @@ class Deployment(models.Model):
     start_timezone = models.TextField()
 
     def __unicode__(self):
-        return '%s-%s-%s-%s'%(self.organisation.code, self.site,
+        return '%s-%s-%s-%s'%(self.owner.code, self.site,
             isotime(self.start),
             isotime(self.end)
         )
