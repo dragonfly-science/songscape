@@ -24,10 +24,11 @@ DATABASES = {
     }
 }
 
-#TIME_ZONE = 'Pacific/Auckland'
+TIME_ZONE = 'UTC'
 LANGUAGE_CODE = 'en-nz'
 USE_I18N = True
 USE_L10N = True
+USE_TZ = True
 
 SITE_ID = 1
 
