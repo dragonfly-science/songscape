@@ -20,6 +20,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.core.exceptions import SuspiciousOperation
 from django.views.decorators.csrf import csrf_exempt
+from django.utils.timezone import utc
 
 from www.recordings.models import (Snippet, Score, Detector, Tag, Analysis, 
     Deployment, Organisation, Identification, AnalysisSet)
@@ -99,20 +100,17 @@ def home(request):
 def _get_snippet(id=None,
         organisation=None,
         site_code=None,
-        recorder_code=None,
         date_time=None,
         offset=None,
         duration=None, 
         **kwargs):
     if organisation or\
             date_time or\
-            recorder_code or\
             site_code or\
             duration or\
             offset:
         return Snippet.objects.get(
-                recording__datetime=datetime.datetime.strptime(date_time, "%Y-%m-%dT%H:%M:%SZ"),
-                recording__deployment__recorder__code=recorder_code,
+                recording__datetime=datetime.datetime.strptime(date_time, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=utc),
                 recording__deployment__owner__code=organisation,
                 recording__deployment__site__code=site_code,
                 duration=duration,
