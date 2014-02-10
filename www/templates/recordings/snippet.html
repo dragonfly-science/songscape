@@ -100,7 +100,7 @@ $(document).ready(function() {
     }; 
      }, false);;*/
 
-    snippet.preload = "auto";
+    snippet.preload = "metadata";
     var sonogram_start = 0.1266;
     var sonogram_end = 0.905;
     var sonogram_range = sonogram_end - sonogram_start;
@@ -200,9 +200,9 @@ $(window).load(function() {
   var next_image = new Image();
   next_image.src = "{% url 'sonogram_id' id=next_snippet %}"
   
-  var next_audio = new Audio();
+  /*var next_audio = new Audio();
   next_audio.src = "{% url 'play' id=next_snippet %}";
-  next_audio.preload = "auto";
+  next_audio.preload = "auto";*/
 });
 {% endif %}
 {% endblock preload %}
