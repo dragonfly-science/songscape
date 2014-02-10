@@ -1,5 +1,7 @@
 import os
 import datetime
+import urllib
+
 from django import template
 from django.core.urlresolvers import reverse
 from django.utils.timezone import utc
@@ -32,7 +34,7 @@ def wav_url(snippet):
 
 @register.filter
 def wav_name(snippet): 
-    return os.path.split(_snippet_url(snippet, 'play_name'))[1]
+    return urllib.unquote(os.path.split(_snippet_url(snippet, 'play_name'))[1])
 
 @register.filter
 def sonogram_url(snippet):
@@ -40,11 +42,11 @@ def sonogram_url(snippet):
 
 @register.filter
 def sonogram_name(snippet): 
-    return os.path.split(_snippet_url(snippet, 'sonogram'))[1]
+    return urllib.unquote(os.path.split(_snippet_url(snippet, 'sonogram'))[1])
 
 @register.filter
 def snippet_name(snippet): 
     url = _snippet_url(snippet, 'snippet_name')
     if url.endswith('/'): 
         url = url[:-1]
-    return os.path.split(url)[1]
+    return urllib.unquote(os.path.split(url)[1])

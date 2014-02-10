@@ -191,8 +191,11 @@ class Snippet(models.Model):
         min_freq=settings.MIN_FREQ, \
         max_freq=settings.MAX_FREQ, \
         max_framerate=settings.MAX_FRAMERATE):
+        filename = self.get_sonogram_name()
+        name = os.path.join(settings.SONOGRAM_DIR, filename)
+        path = os.path.join(settings.MEDIA_ROOT, name)
         try:
-            if not os.path.exists(self.sonogram.path):
+            if not os.path.exists(path):
                 replace = True
         except (ValueError, SuspiciousOperation, AttributeError):
             replace = True
@@ -212,20 +215,9 @@ class Snippet(models.Model):
                 extent=(bins[0], bins[-1], freqs[f][0], freqs[f][-1]), 
                 aspect='auto', 
                 cmap=cm.gray )
-            string_buffer = StringIO()
             gca().set_ylabel('Frequency (Hz)')
             gca().set_xlabel('Time (s)')
-            savefig(string_buffer, format='jpg')
-            imagefile = ContentFile(string_buffer.getvalue())
-            if self.sonogram:
-                try:
-                    self.sonogram.delete()
-                except:
-                    pass
-            filename = self.get_sonogram_name()
-            self.sonogram.save(filename, imagefile, save=False)
-            self.sonogram.name = os.path.join(settings.SONOGRAM_DIR, filename)
-            self.save()
+            savefig(open(path, 'wb'), format='jpg')
             close()
 
     def save_soundfile(self, replace=False):

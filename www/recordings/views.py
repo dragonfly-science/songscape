@@ -8,6 +8,7 @@ import math
 import mimetypes
 import random
 import json
+import urllib
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -245,9 +246,6 @@ def get_sonogram(request, **kwargs):
     except (ValueError, SuspiciousOperation, AttributeError):
         soundfile = snippet.save_soundfile()
         snippet.save_sonogram(replace=True)
-    if snippet.sonogram and not snippet.sonogram.name == name: #name should not be absolute
-        snippet.sonogram.name = name
-        snippet.save()
     return HttpResponseRedirect(reverse('media', 
         args=(name,))) 
 
