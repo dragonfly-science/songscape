@@ -17,9 +17,9 @@
   <li>
     <span>{{ snippet.recording.deployment.site }}, {{ snippet.datetime }}</span>
   </li>
-{% if index %}
+{% if count_user %}
   <li>
-    <span>{{ index }} of {{ count }}</span>
+    <span>You have analysed {{ count_user }} snippets, out of {{ count_all }}. There are {{ count }} to go. </span>
   </li>
 {% endif %}
 {% if random_index and not analysis %}

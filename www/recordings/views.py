@@ -146,6 +146,11 @@ def snippet(request, **kwargs):
         for i in identifications:
             tags.update(i.tags.all())
     count = kwargs.get('count', None)
+    index =  kwargs.get('index', None)
+    if index:
+        count -= index
+    count_all = kwargs.get('count_all', None)
+    count_user = kwargs.get('count_user', None)
     favourite = snippet.fans.filter(id=request.user.id).count()
     favourites = snippet.fans.count()
     return render(request,
@@ -159,6 +164,8 @@ def snippet(request, **kwargs):
                    'random_index': kwargs.get('random_index', None),
                    'skip': kwargs.get('skip', None),
                    'count': count,
+                   'count_all': count_all,
+                   'count_user': count_user,
                    'favourite': favourite,
                    'favourites': favourites,
                    'analysis': analysis,
@@ -355,13 +362,19 @@ def _get_analysis_snippets(request, analysis, snippet_id, refresh=False):
     previous_index = index - 1 if index > 0 else None
     next_snippet = snippets[next_index] if next_index else None
     previous_snippet = snippets[previous_index] if previous_index else None
+    count_all = Snippet.objects.filter(sets__analysis=analysis).count()
+    count_user = Snippet.objects.filter(sets__analysis=analysis,
+            sets__identifications__user=request.user).count()
     return dict(id=snippet_id,
         index=index,
         analysis = analysis,
         next_snippet=next_snippet,
         previous_snippet=previous_snippet,
         skip = skip,
-        count=len(snippets))
+        count=len(snippets),
+        count_user=count_user,
+        count_all=count_all,
+        )
 
 @login_required
 def analysis_snippet(request, code, snippet_id=0):
