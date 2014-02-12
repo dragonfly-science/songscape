@@ -333,7 +333,7 @@ def _get_analysis_snippets(request, analysis, snippet_id, refresh=False):
             sets__identifications__user=request.user)
         snippets = list(Snippet.objects.filter(sets__analysis=analysis).\
             annotate(num_id=Count('sets__identifications')).\
-            filter(num_id__lt=2).\
+            filter(num_id__lt=1).\
             exclude(id__in=user_snippets).\
             order_by('?').\
             values_list('id', flat=True))
