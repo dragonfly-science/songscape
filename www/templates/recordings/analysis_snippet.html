@@ -48,25 +48,125 @@ var deactivate_button = function(){
 };
 
 var toggle_button = function(){
-    $(this).toggleClass('btn-success');
+    var $this = $(this);
+    if ($this.hasClass('btn-success')){
+        if ($('.call-tagged[data-call-label="' + String($this.attr("value")) + '"]').length == 0){
+            $this.removeClass('btn-success');
+        }
+    } else {
+        $this.addClass('btn-success');
+    }
     $('#' + $(this).attr('id') + '_real').val(
         $(this).hasClass('btn-success')
     );
     check_save();
 };
 
-$('.tag-btn:not(#uncertain)').bind('click', function() {
+$('.tag-btn').bind('click', function() {
     $(this).each(toggle_button);
-    if ($(this).hasClass('btn-success')){
-        $('#uncertain').each(deactivate_button);
-    };
 });
 
-$('#uncertain').bind('click', function() {
-    $(this).each(toggle_button);
-    if ($('#uncertain_real').val()){
-        $('.tag-btn:not(#uncertain)').each(deactivate_button);
+    var isDragging = false;
+    var wasDragging = false;
+    var mousedownX = -1;
+    var mouseupX = -1;
+    var mousedownY = -1;
+    var mouseupY = -1;
+    $('#canvas-container').on('mousedown', function(d){
+        var canvas_offset = $('#canvas-container').offset()
+        mousedownX =  d.pageX - canvas_offset.left;
+        mousedownY = d.pageY - canvas_offset.top;
+        $('#canvas-container').on('mousemove', function(d) {
+            var call_left = Math.min(mousedownX, d.pageX - canvas_offset.left);
+            var call_top = Math.min(mousedownY, d.pageY - canvas_offset.top);
+            var call_width = Math.abs(d.pageX - canvas_offset.left - mousedownX);
+            var call_height = Math.abs(d.pageY - canvas_offset.top - mousedownY);
+            if (isDragging | (call_width > 5 & call_height > 5)){
+                if (!isDragging){
+                    //$('#new-call').remove();
+                    $('#canvas-container').append("<div id='new-call' class='call-label call-untagged'><button type='button' data-dismiss='alert' aria-hidden='true'>&times;</button></div>");
+                    $('#new-call').alert();
+                    $('#new-call').css("left", String(call_left) + "px" );
+                    $('#new-call').css("top", String(call_top) + "px");
+                } else {
+                    $('#new-call').css("left", String(call_left) + "px" );
+                    $('#new-call').css("top", String(call_top) + "px" );
+                    $('#new-call').css("height", String(call_height) + "px" );
+                    $('#new-call').css("width", String(call_width) + "px" );
+                }
+                isDragging = true;
+            }
+        });
+    });
+    
+    function new_call(){
+        $('#new-call').removeAttr('id');
     };
-});
+    
+    $(document).on('mouseup', function(d) {
+        wasDragging = isDragging;
+        isDragging = false;
+        $('#canvas-container').unbind('mousemove');
+        if (wasDragging){
+            new_call();
+        }
+    });
+    $('#canvas-container').on('mouseup', function(d) {
+        wasDragging = isDragging;
+        isDragging = false;
+        $('#canvas-container').unbind('mousemove');
+        if (wasDragging){
+            new_call();
+        } else {
+            var offset = d.offsetX / $(this).width();
+            // scale accordingly
+            offset -= sonogram_start;
+            offset /= sonogram_range;
+            if (offset > 1.0){
+                snippet.currentTime = snippet.duration;
+                draw_playback(canvas.width*sonogram_end);
+            } 
+            else if (offset < 0){
+                snippet.currentTime = 0.0;
+                snippet.pause();
+            }
+            else {
+                snippet.currentTime = offset * snippet.duration
+                draw_playback(d.offsetX);
+                snippet.play();
+            };
+            draw_line();
+        };
+    });
+
+    /* Label calls */
+    var label_flag = false;
+    $('.tag-btn').on('click', function(e){
+        var tag_btn  = $(this);
+        if (!label_flag) {
+            favourite_flag = true;
+            setTimeout(function(){label_flag = false;}, 100);
+            var call_labels = [];
+            $('.call-untagged').each(function(i, d){
+                var $d = $(d);
+                var position = $d.position();
+                call_labels.push([tag_btn.attr('id'), 
+                    position.left, 
+                    position.left + $d.width(),
+                    position.top + $d.height(),
+                    position.top,
+                ]);
+                $(this).append(tag_btn.attr('value'));
+                $(this).attr('data-call-label', tag_btn.attr('value'));
+                $(this).addClass('call-tagged');
+                $(this).removeClass('call-untagged');
+            });
+           var request = $.ajax({
+                type: 'POST',
+                url: "{% url 'api' snippet.id 'call-label' %}",
+                data: {call_labels: call_labels, sonogram:sonogram.src },
+                });
+        }
+    });
 {% endblock extrascript %}
 

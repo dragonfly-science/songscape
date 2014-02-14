@@ -271,6 +271,8 @@ def api(request, id, action):
             snippet.fans.remove(request.user)
         result['favourite'] = snippet.fans.filter(id=request.user.id).count()
         result['favourites'] = snippet.fans.count()
+    elif action == 'call-label':
+        print request.POST
     else:
        raise Http404 
     return HttpResponse(json.dumps(result), mimetype='application/json')
