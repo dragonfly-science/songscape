@@ -67,8 +67,6 @@ img id="sonogram" src="{{ snippet|sonogram_url }}" -->
 
 {% block script %}
 <script type="text/javascript">
-{% block extrascript %}
-{% endblock extrascript %}
 $(document).ready(function() {
     var canvas = document.getElementById("canvas");
     var context = document.getElementById('canvas').getContext('2d');
@@ -117,49 +115,7 @@ $(document).ready(function() {
         });
     }
 
-    var isDragging = false;
-    var wasDragging = false;
-    var mousedownX = -1;
-    var mouseupX = -1;
-    var mousedownY = -1;
-    var mouseupY = -1;
-    $('#canvas-container').on('mousedown', function(d){
-        var canvas_offset = $('#canvas-container').offset()
-        mousedownX =  d.pageX - canvas_offset.left;
-        mousedownY = d.pageY - canvas_offset.top;
-        $('#canvas-container').on('mousemove', function(d) {
-            var call_left = Math.min(mousedownX, d.pageX - canvas_offset.left);
-            var call_top = Math.min(mousedownY, d.pageY - canvas_offset.top);
-            var call_width = Math.abs(d.pageX - canvas_offset.left - mousedownX);
-            var call_height = Math.abs(d.pageY - canvas_offset.top - mousedownY);
-            if (!isDragging){
-                //$('#new-call').remove();
-                $('#canvas-container').append("<div id='new-call' class='alert alert-info' style='opacity: 0.5; z-index:1001; position:absolute'><button type='button' class='close' data-dismiss='alert' aria-hidden='true'>&times;</button></div>");
-                $('#new-call').alert();
-                $('#new-call').css("left", String(call_left) + "px" );
-                $('#new-call').css("top", String(call_top) + "px");
-            } else {
-                $('#new-call').css("left", String(call_left) + "px" );
-                $('#new-call').css("top", String(call_top) + "px" );
-                $('#new-call').css("height", String(call_height) + "px" );
-                $('#new-call').css("width", String(call_width) + "px" );
-            }
-            isDragging = true;
-        });
-    });
-    
-    function new_call(){
-        $('#new-call').removeAttr('id');
-    };
-    
-    $(document).on('mouseup', function(d) {
-        wasDragging = isDragging;
-        isDragging = false;
-        $('#canvas-container').unbind('mousemove');
-        if (wasDragging){
-            new_call();
-        }
-    });
+
     // disable irritating text selection on these pages
     $(document).attr('unselectable','on')
      .css({'-moz-user-select':'-moz-none',
@@ -177,33 +133,6 @@ $(document).ready(function() {
     });
 
 
-    $('#canvas-container').on('mouseup', function(d) {
-        wasDragging = isDragging;
-        isDragging = false;
-        $('#canvas-container').unbind('mousemove');
-        if (wasDragging){
-            new_call();
-        } else {
-            var offset = d.offsetX / $(this).width();
-            // scale accordingly
-            offset -= sonogram_start;
-            offset /= sonogram_range;
-            if (offset > 1.0){
-                snippet.currentTime = snippet.duration;
-                draw_playback(canvas.width*sonogram_end);
-            } 
-            else if (offset < 0){
-                snippet.currentTime = 0.0;
-                snippet.pause();
-            }
-            else {
-                snippet.currentTime = offset * snippet.duration
-                draw_playback(d.offsetX);
-                snippet.play();
-            };
-            draw_line();
-        };
-    });
 
     /* Keypresses */
     $(window).keydown(function(event){
@@ -239,6 +168,7 @@ $(document).ready(function() {
         }
     });
 
+    /* API callbacks */
     /* Favorite button */
     var favourite_flag = false;
     $('#favourite').bind('touchstart click', function() {
@@ -260,6 +190,10 @@ $(document).ready(function() {
             });
         }
     });
+    
+    {% block extrascript %}
+    {% endblock extrascript %}
+    
 });
 
 

@@ -168,3 +168,30 @@ h1 {
     color: red;
 }
 
+/* Call labelling */
+
+.call-label {
+    border: 1px solid #70DCFA; 
+    font-size: 12px; 
+    z-index:1001; 
+    position: absolute; 
+    color: #70DCFA;
+}
+
+.call-label button {
+    color: #70DCFA; 
+    background: none; 
+    border: none; 
+    position: absolute; 
+    right: 0; 
+    top: 0; 
+    font-size: 15px; 
+    margin: -7px -18px;
+}
+.call-tagged {
+    color: #B7E8D4;
+    border-color: #B7E8D4;
+}
+.call-tagged button {
+    color: #B7E8D4;
+}
