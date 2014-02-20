@@ -235,6 +235,7 @@ class Snippet(models.Model):
                 cmap=cm.gray )
             gca().set_ylabel('Frequency (Hz)')
             gca().set_xlabel('Time (s)')
+            #gca().transData.transform(np.array((gca().get_xlim(), gca().get_ylim())))
             savefig(open(path, 'wb'), format='jpg', dpi=fig.get_dpi())
             close()
 
