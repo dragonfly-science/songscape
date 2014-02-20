@@ -164,7 +164,26 @@ class Recording(models.Model):
         return wavy.get_audio(self.path, offset=offset, duration=duration, max_framerate=max_framerate)
 
 
+class SonogramTransform(models.Model):
+    max_framerate = models.FloatField()
+    n_fft = models.IntegerField()
+    min_freq = models.FloatField()
+    max_freq = models.FloatField()
+    duration = models.FloatField()
+    top_px = models.FloatField()
+    bottom_px = models.FloatField()
+    left_px = models.FloatField()
+    right_px = models.FloatField()
 
+    def pixel_to_physical(self, x, y):
+        time = (x - self.left_px)/float(self.right_px - self.left_px)*self.duration
+        frequency = (y - self.bottom_px)/float(self.top_px - self.bottom_px)*(self.max_freq - self.min_freq) + self.min_freq
+        return time, frequency
+
+    def physical_to_pixel(self, time, frequency):
+        x = time/float(duration)*(right_px - left_px) + left_px
+        y = (frequency - self.min_freq)/float(self.max_freq - self.min_freq)*(top_px - bottom_px) + bottom_px
+    
 class Snippet(models.Model):
     recording = models.ForeignKey(Recording, related_name='snippets')
     offset = models.FloatField() #seconds
@@ -209,14 +228,14 @@ class Snippet(models.Model):
             Pxx[where(Pxx > percentile(Pxx[f].flatten(), 99.99))] =  percentile(Pxx[f].flatten(), 99.99)
             Pxx[where(Pxx < percentile(Pxx[f].flatten(), 0.01))] =  percentile(Pxx[f].flatten(), 0.01)
             clf()
-            fig = figure(figsize=(10, 3.5))
+            fig = figure(figsize=(10, 3.5), dpi=100)
             imshow(flipud(10*log10(Pxx[f,])), 
                 extent=(bins[0], bins[-1], freqs[f][0], freqs[f][-1]), 
                 aspect='auto', 
                 cmap=cm.gray )
             gca().set_ylabel('Frequency (Hz)')
             gca().set_xlabel('Time (s)')
-            savefig(open(path, 'wb'), format='jpg')
+            savefig(open(path, 'wb'), format='jpg', dpi=fig.get_dpi())
             close()
 
     def save_soundfile(self, replace=False):
@@ -333,3 +352,22 @@ class Identification(models.Model):
 
     class Meta:
         unique_together = (('analysisset', 'user'),)
+
+#class CallLabel(model.Model):
+#    user = models.ForeignKey(User, related_name="identifications")
+#    analysisset = models.ForeignKey(AnalysisSet, related_name="identifications")
+#    datetime = models.DateTimeField(auto_now=True)
+#    tags = models.ForeignKey(Tag, related_name="call_labels") 
+#    tag_set = models.ManyToManyField(Tag)
+#    sonogram = models.TextField()
+#    top = models.FloatField()
+#    bottom = models.FloatField()
+#    left = models.FloatField()
+#    right = models.FloatField()
+#    start_time = models.FloatField()
+#    end_time = models.FloatField()
+#    low_frequency = models.FloatField()
+#    high_frequency = models.FloatField()
+#
+#
+#

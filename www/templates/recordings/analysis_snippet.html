@@ -39,6 +39,7 @@ var check_save = function(){
 	    $('#null_real').val(false);
     };  
 };
+
 $(document).ready(check_save);
 var deactivate_button = function(){
     $(this).removeClass('btn-success');
@@ -47,24 +48,21 @@ var deactivate_button = function(){
     check_save();
 };
 
-var toggle_button = function(){
-    var $this = $(this);
-    if ($this.hasClass('btn-success')){
-        if ($('.call-tagged[data-call-label="' + String($this.attr("value")) + '"]').length == 0){
-            $this.removeClass('btn-success');
-        }
-    } else {
-        $this.addClass('btn-success');
-    }
-    $('#' + $(this).attr('id') + '_real').val(
-        $(this).hasClass('btn-success')
-    );
+var activate_button = function(){
+    $(this).addClass('btn-success');
+    $(this).addClass('active');
+    $('#' + $(this).attr('id') + '_real').val(true);
     check_save();
 };
 
-$('.tag-btn').bind('click', function() {
-    $(this).each(toggle_button);
-});
+var check_button = function(){
+    var tag_btn = $(this);
+    if ($('.call-tagged[data-call-id="' + tag_btn.attr('id') + '"]').length > 0){
+        tag_btn.each(activate_button);
+    } else {
+        tag_btn.each(deactivate_button);
+    }
+};
 
     var isDragging = false;
     var wasDragging = false;
@@ -140,6 +138,15 @@ $('.tag-btn').bind('click', function() {
     });
 
     /* Label calls */
+    function randString(){
+        var text = '';
+        var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        for(var i=0; i < 10; i++){
+            text += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return text;
+    }
+
     var label_flag = false;
     $('.tag-btn').on('click', function(e){
         var tag_btn  = $(this);
@@ -150,7 +157,9 @@ $('.tag-btn').bind('click', function() {
             $('.call-untagged').each(function(i, d){
                 var $d = $(d);
                 var position = $d.position();
-                call_labels.push([tag_btn.attr('id'), 
+                var call_label_id = randString();
+                call_labels.push([call_label_id,
+                    tag_btn.attr('id'), 
                     position.left, 
                     position.left + $d.width(),
                     position.top + $d.height(),
@@ -158,15 +167,39 @@ $('.tag-btn').bind('click', function() {
                 ]);
                 $(this).append(tag_btn.attr('value'));
                 $(this).attr('data-call-label', tag_btn.attr('value'));
+                $(this).attr('data-call-id', tag_btn.attr('id'));
                 $(this).addClass('call-tagged');
                 $(this).removeClass('call-untagged');
-            });
-           var request = $.ajax({
-                type: 'POST',
-                url: "{% url 'api' snippet.id 'call-label' %}",
-                data: {call_labels: call_labels, sonogram:sonogram.src },
+                $(this).children(':first').on('click', function(e){
+                    var position = $d.position();
+                    var call_label = [call_label_id,
+                        $d.attr('data-call-id'),
+                        position.left, 
+                        position.left + $d.width(),
+                        position.top + $d.height(),
+                        position.top
+                    ];   
+                    if ($('.call-tagged[data-call-id="' + tag_btn.attr('id') + '"]').length <= 1){
+                        console.log('deactivte');
+                        tag_btn.each(deactivate_button);
+                    }
+                    var request = $.ajax({
+                        type: 'POST',
+                        url: "{% url 'api' snippet.id 'call-label-delete' %}",
+                        data: {call_label_id: call_label_id},
+                    });
                 });
+            });
+            tag_btn.each(check_button);
+            if (call_labels.length > 0){
+                var request = $.ajax({
+                    type: 'POST',
+                    url: "{% url 'api' snippet.id 'call-label' %}",
+                    data: {call_labels: call_labels, sonogram:sonogram.src },
+                });
+            }
         }
     });
+
 {% endblock extrascript %}
 
