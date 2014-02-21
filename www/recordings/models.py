@@ -163,10 +163,12 @@ class Recording(models.Model):
     def get_audio(self, offset=0, duration=0, max_framerate=settings.MAX_FRAMERATE):
         return wavy.get_audio(self.path, offset=offset, duration=duration, max_framerate=max_framerate)
 
-
 class SonogramTransform(models.Model):
-    max_framerate = models.FloatField()
-    n_fft = models.IntegerField()
+    n_fft = models.FloatField()
+    framerate = models.FloatField()
+    width = models.FloatField()
+    height = models.FloatField()
+    dpi = models.FloatField()
     min_freq = models.FloatField()
     max_freq = models.FloatField()
     duration = models.FloatField()
@@ -177,13 +179,15 @@ class SonogramTransform(models.Model):
 
     def pixel_to_physical(self, x, y):
         time = (x - self.left_px)/float(self.right_px - self.left_px)*self.duration
-        frequency = (y - self.bottom_px)/float(self.top_px - self.bottom_px)*(self.max_freq - self.min_freq) + self.min_freq
+        frequency = (self.height - y - self.bottom_px)/float(self.top_px - self.bottom_px)*(self.max_freq - self.min_freq) + self.min_freq
         return time, frequency
 
     def physical_to_pixel(self, time, frequency):
-        x = time/float(duration)*(right_px - left_px) + left_px
-        y = (frequency - self.min_freq)/float(self.max_freq - self.min_freq)*(top_px - bottom_px) + bottom_px
-    
+        x = time/float(self.duration)*(self.right_px - self.left_px) + self.left_px
+        y = self.height - (frequency - self.min_freq)/float(self.max_freq - self.min_freq)*(self.top_px - self.bottom_px) - self.bottom_px
+        return x, y
+
+
 class Snippet(models.Model):
     recording = models.ForeignKey(Recording, related_name='snippets')
     offset = models.FloatField() #seconds
@@ -208,6 +212,9 @@ class Snippet(models.Model):
     def save_sonogram(self, replace=False, n_fft=settings.N_FFT, \
         min_freq=settings.MIN_FREQ, \
         max_freq=settings.MAX_FREQ, \
+        dpi=100,
+        width=1000,
+        height=350,
         max_framerate=settings.MAX_FRAMERATE):
         filename = self.get_sonogram_name()
         name = os.path.join(settings.SONOGRAM_DIR, filename)
@@ -228,15 +235,33 @@ class Snippet(models.Model):
             Pxx[where(Pxx > percentile(Pxx[f].flatten(), 99.99))] =  percentile(Pxx[f].flatten(), 99.99)
             Pxx[where(Pxx < percentile(Pxx[f].flatten(), 0.01))] =  percentile(Pxx[f].flatten(), 0.01)
             clf()
-            fig = figure(figsize=(10, 3.5), dpi=100)
+            fig = figure(figsize=(float(width)/dpi, float(height)/dpi), dpi=dpi)
             imshow(flipud(10*log10(Pxx[f,])), 
                 extent=(bins[0], bins[-1], freqs[f][0], freqs[f][-1]), 
                 aspect='auto', 
                 cmap=cm.gray )
             gca().set_ylabel('Frequency (Hz)')
             gca().set_xlabel('Time (s)')
-            #gca().transData.transform(np.array((gca().get_xlim(), gca().get_ylim())))
-            savefig(open(path, 'wb'), format='jpg', dpi=fig.get_dpi())
+            axis_pixels = gca().transData.transform(np.array((gca().get_xlim(), gca().get_ylim())).T)
+            st, created = SonogramTransform.objects.get_or_create(
+                n_fft=n_fft,
+                framerate=framerate,
+                min_freq=min_freq, 
+                max_freq=max_freq,
+                duration=self.duration,
+                width=width,
+                height=height,
+                dpi=dpi,
+                top_px=max(axis_pixels[:,1]),
+                bottom_px=min(axis_pixels[:,1]),
+                left_px=min(axis_pixels[:,0]), 
+                right_px=max(axis_pixels[:,0]),
+                )
+            savefig(open(path, 'wb'), format='jpg', dpi=dpi)
+            sonogram, created = Sonogram.objects.get_or_create(
+                snippet = self,
+                transform = st,
+                path = name)
             close()
 
     def save_soundfile(self, replace=False):
@@ -282,6 +307,11 @@ class Snippet(models.Model):
             if tag in identification.false_tags.all():
                 negative += 1
         return positive, negative, len(identifications)
+
+class Sonogram(models.Model):
+    snippet = models.ForeignKey(Snippet)
+    transform = models.ForeignKey(SonogramTransform)
+    path = models.TextField()
 
 class Detector(models.Model):
     code = models.SlugField(max_length=64)
@@ -354,21 +384,17 @@ class Identification(models.Model):
     class Meta:
         unique_together = (('analysisset', 'user'),)
 
-#class CallLabel(model.Model):
-#    user = models.ForeignKey(User, related_name="identifications")
-#    analysisset = models.ForeignKey(AnalysisSet, related_name="identifications")
-#    datetime = models.DateTimeField(auto_now=True)
-#    tags = models.ForeignKey(Tag, related_name="call_labels") 
-#    tag_set = models.ManyToManyField(Tag)
-#    sonogram = models.TextField()
-#    top = models.FloatField()
-#    bottom = models.FloatField()
-#    left = models.FloatField()
-#    right = models.FloatField()
-#    start_time = models.FloatField()
-#    end_time = models.FloatField()
-#    low_frequency = models.FloatField()
-#    high_frequency = models.FloatField()
-#
-#
-#
+class CallLabel(models.Model):
+    code = models.TextField(unique=True)
+    user = models.ForeignKey(User, related_name="call_labels")
+    analysisset = models.ForeignKey(AnalysisSet, related_name="call_labels")
+    datetime = models.DateTimeField(auto_now=True)
+    tag = models.ForeignKey(Tag, related_name="call_labels") 
+    tag_set = models.ManyToManyField(Tag)
+    start_time = models.FloatField()
+    end_time = models.FloatField()
+    low_frequency = models.FloatField()
+    high_frequency = models.FloatField()
+
+
+

@@ -195,7 +195,7 @@ var check_button = function(){
                 var request = $.ajax({
                     type: 'POST',
                     url: "{% url 'api' snippet.id 'call-label' %}",
-                    data: {call_labels: call_labels, sonogram:sonogram.src },
+                    data: {'call_labels': call_labels, 'sonogram':sonogram.src, 'snippet':{{ snippet.id }}, 'analysis':"{{ analysis.code }}" },
                 });
             }
         }

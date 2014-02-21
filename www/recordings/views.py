@@ -24,7 +24,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.timezone import utc
 
 from www.recordings.models import (Snippet, Score, Detector, Tag, Analysis, 
-    Deployment, Organisation, Identification, AnalysisSet)
+    Deployment, Organisation, Identification, AnalysisSet, CallLabel, SonogramTransform,)
 
 from .forms import TagForm
 from .models import Recording, Site
@@ -272,7 +272,32 @@ def api(request, id, action):
         result['favourite'] = snippet.fans.filter(id=request.user.id).count()
         result['favourites'] = snippet.fans.count()
     elif action == 'call-label':
-        print request.POST
+        labels = []
+        for key in request.POST.keys():
+            if key.startswith('call_label'):
+                labels.append(request.POST.getlist(key))
+        if labels:
+            snippet = Snippet.objects.get(id=request.POST.get('snippet'))
+            analysis = Analysis.objects.get(code=request.POST.get('analysis'))
+            analysisset = AnalysisSet.objects.get(snippet=snippet, analysis=analysis)
+            if SonogramTransform.objects.count() == 0:
+                Snippet.objects.all()[0].save_sonogram(replace=True)
+            transform = list(SonogramTransform.objects.all())[-1]
+            for label in labels:
+                start_time, low_frequency = transform.pixel_to_physical(float(label[2]), float(label[4]))
+                end_time, high_frequency = transform.pixel_to_physical(float(label[3]), float(label[5]))
+                call_label = CallLabel(
+                    code=label[0],
+                    user=request.user,
+                    analysisset=analysisset,
+                    tag=Tag.objects.get(code=label[1]),
+                    start_time=start_time,
+                    end_time=end_time,
+                    low_frequency=low_frequency,
+                    high_frequency=high_frequency)
+                call_label.save()
+                call_label.tag_set.add(*analysis.tags.all())
+                call_label.save()
     elif action == 'call-label-delete':
         print request.POST
     else:
