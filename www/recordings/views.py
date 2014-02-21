@@ -130,6 +130,7 @@ def snippet(request, **kwargs):
         analysisset = AnalysisSet.objects.get(
             snippet__id=kwargs['id'],
             analysis=kwargs['analysis'])
+        call_labels = CallLabel.objects.filter(analysisset=analysisset)
         try:
             identification = Identification.objects.get(
                 analysisset=analysisset, 
@@ -140,6 +141,7 @@ def snippet(request, **kwargs):
             id_before = False
     else:
         template = 'recordings/snippet.html'
+        call_labels = CallLabel.objects.filter(analysisset__snippet=snippet)
         identifications = Identification.objects.filter(analysisset__snippet = snippet)
         tags = Counter()
         id_before = 0
@@ -153,9 +155,17 @@ def snippet(request, **kwargs):
     count_user = kwargs.get('count_user', None)
     favourite = snippet.fans.filter(id=request.user.id).count()
     favourites = snippet.fans.count()
+    for label in call_labels:
+        #TODO: use the actual transform
+        transform = list(SonogramTransform.objects.all())[-1]
+        label.left, bottom = transform.physical_to_pixel(label.start_time, label.low_frequency)
+        right, label.top = transform.physical_to_pixel(label.end_time, label.high_frequency)
+        label.width = right - label.left
+        label.height = bottom - label.top
     return render(request,
                   template,
                   {'snippet': snippet,
+                   'call_labels': call_labels,
                    'next_snippet': kwargs.get('next_snippet', None),
                    'previous_snippet': kwargs.get('previous_snippet', None),
                    'index': kwargs.get('index', None),
