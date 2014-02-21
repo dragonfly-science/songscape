@@ -376,17 +376,25 @@ def analysis_detail(request, code):
 def _get_analysis_snippets(request, analysis, snippet_id, refresh=False):
     snippets = request.session.get('analysis_set', [])
     refresh = request.GET.get('refresh', '0') == '1' or refresh
-    if not snippets or analysis.id != request.session.get('analysis_id', '') or refresh:
+    filt = request.GET.get('filter', '') or request.session.get('filter', '')
+    if not snippets or analysis.id != request.session.get('analysis_id', '') or refresh or request.session.get('filter') != filt:
+        print filt
+        if filt == 'tagged':
+            filters = {'num_tags__gt': 0}
+        else:
+            filters = {'num_id__lt': 1}
         user_snippets = Snippet.objects.filter(sets__analysis=analysis,
             sets__identifications__user=request.user)
         snippets = list(Snippet.objects.filter(sets__analysis=analysis).\
             annotate(num_id=Count('sets__identifications')).\
-            filter(num_id__lt=1).\
+            annotate(num_tags=Count('sets__identifications__tags')).\
+            filter(**filters).\
             exclude(id__in=user_snippets).\
             order_by('?').\
             values_list('id', flat=True))
         request.session['analysis_set'] = snippets
         request.session['analysis_id'] = analysis.id
+        request.session['filter'] = filt
     if snippet_id == 0:
         snippet_id = snippets[0]
     if not snippet_id in snippets:
@@ -443,29 +451,6 @@ def analysis_snippet(request, code, snippet_id=0):
     if int(snippet_id) == 0:
         return redirect('analysis_snippet', code=code, snippet_id=analysis_snippets['id'])
     return snippet(request, **analysis_snippets)
-
-def analysis(request, code):
-    this_analysis = Analysis.objects.get(code=code)
-    tag_summary = {}
-    for tag in this_analysis.tags.all():
-        tag_summary[tag.name] = tag.identifications.filter(analysisset__analysis=this_analysis).count()
-    sort_options = ['score', 'time', 'random']
-
-    identifications = Identification.objects.filter(analysisset__analysis=this_analysis).select_related()
-    identification_list = [(x.analysisset.snippet, x.analysisset.snippet.recording.deployment.site.code,
-        datetime.datetime.strftime(x.analysisset.snippet.datetime, "%Y-%m-%d"),
-        datetime.datetime.strftime(x.analysisset.snippet.datetime, "%H:%M:%S"),
-        ";".join([t.code for t in x.tags.all()]),
-        "%0.1s%0.1s"%(x.user.first_name, x.user.last_name)) for x in
-                           identifications]
-
-    return render(request,
-            'recordings/analysis.html',
-            {'sort_options': sort_options,
-                'analysis': this_analysis,
-                'tag_summary': tag_summary,
-            }
-        )
 
 
 @login_required
