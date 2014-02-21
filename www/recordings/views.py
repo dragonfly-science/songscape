@@ -299,7 +299,9 @@ def api(request, id, action):
                 call_label.tag_set.add(*analysis.tags.all())
                 call_label.save()
     elif action == 'call-label-delete':
-        print request.POST
+        call_label = CallLabel.objects.get(code=request.POST.get('call_label_id'))
+        call_label.delete()
+
     else:
        raise Http404 
     return HttpResponse(json.dumps(result), mimetype='application/json')
