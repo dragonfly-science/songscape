@@ -180,7 +180,6 @@ var check_button = function(){
                         position.top
                     ];   
                     if ($('.call-tagged[data-call-id="' + tag_btn.attr('id') + '"]').length <= 1){
-                        console.log('deactivte');
                         tag_btn.each(deactivate_button);
                     }
                     var request = $.ajax({
