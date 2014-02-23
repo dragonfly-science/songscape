@@ -29,6 +29,8 @@ from www.recordings.models import (Snippet, Score, Detector, Tag, Analysis,
 from .forms import TagForm
 from .models import Recording, Site
 
+import pytz
+
 PER_PAGE = 100
 FILTERS = {
     'score': {
@@ -177,6 +179,7 @@ def snippet(request, **kwargs):
     return render(request,
                   template,
                   {'snippet': snippet,
+                   'datetime': snippet.datetime.astimezone(pytz.timezone(snippet.recording.deployment.start_timezone)),
                    'call_labels': call_labels,
                    'next_snippet': kwargs.get('next_snippet', None),
                    'previous_snippet': kwargs.get('previous_snippet', None),
@@ -424,7 +427,6 @@ def _get_analysis_snippets(request, analysis, snippet_id, refresh=False):
             annotate(num_tags=Count('sets__identifications__tags')).\
             annotate(num_labs=Count('sets__call_labels')).\
             filter(**filters).\
-            exclude(id__in=user_snippets).\
             order_by('?').\
             values_list('id', flat=True))
         request.session['analysis_set'] = snippets
