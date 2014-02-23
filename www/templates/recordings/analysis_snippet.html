@@ -4,18 +4,17 @@
 <div class="row">
 <div class="col-md-2">
 {% if previous_snippet %}
-<span class="btn btn-default"><a href="{% url 'analysis_snippet' analysis.code previous_snippet %}">&larr; Previous</a></span>
+<span class="btn btn-default btn-sm"><a href="{% url 'analysis_snippet' analysis.code previous_snippet %}">&larr; Previous</a></span>
 {% endif %}
 </div>
-<div class="col-md-8">
+<div class="col-md-10">
 {% for tag in analysis.tags.all %}
-<span class="btn btn-default tag-btn {% if tag in tags %}btn-success{% endif %}" id="{{ tag.code }}">{{ tag.name }}</span>
+<span class="btn btn-default btn-sm tag-btn {% if tag in tags %}btn-success{% endif %}" data-call-id="{{ tag.code }}">{{ tag.name }}</span>
 {% endfor %}
-</div>
-<div class="col-md-2">
-<span class="btn btn-default"><a href="{% url 'analysis_snippet' analysis.code next_snippet %}">Next &rarr;</a></span>
+<button class="btn btn-default btn-sm {% if favourite %}liked{% else %}notliked{% endif %}"  id="favourite"><span class="glyphicon glyphicon-heart"></span></button>
+<span class="btn btn-default btn-sm"><a href="{% url 'analysis_snippet' analysis.code next_snippet %}">Next &rarr;</a></span>
 {% if skip != snippet.id %}
-<span class="btn btn-default"><a href="{% url 'analysis_snippet' analysis.code skip %}">Skip forwards &rarr;</a></span>
+<span class="btn btn-default btn-sm"><a href="{% url 'analysis_snippet' analysis.code skip %}">Skip forwards &rarr;</a></span>
 {% endif %}
 </div>
 </div>
@@ -39,7 +38,7 @@ var activate_button = function(){
 
 var check_button = function(){
     var tag_btn = $(this);
-    if ($('.call-tagged[data-call-id="' + tag_btn.attr('id') + '"]').length > 0){
+    if ($('.call-tagged[data-call-id="' + tag_btn.attr('data-call-id') + '"]').length > 0){
         tag_btn.each(activate_button);
     } else {
         tag_btn.each(deactivate_button);
@@ -141,15 +140,15 @@ var check_button = function(){
                 var position = $d.position();
                 var call_label_id = randString();
                 call_labels.push([call_label_id,
-                    tag_btn.attr('id'), 
+                    tag_btn.attr('data-call-id'), 
                     position.left, 
                     position.left + $d.width(),
                     position.top + $d.height(),
                     position.top,
                 ]);
-                $(this).append(tag_btn.attr('value'));
-                $(this).attr('data-call-label', tag_btn.attr('value'));
-                $(this).attr('data-call-id', tag_btn.attr('id'));
+                $(this).append(tag_btn.text());
+                $(this).attr('data-call-label', tag_btn.text());
+                $(this).attr('data-call-id', tag_btn.attr('data-call-id'));
                 $(this).addClass('call-tagged');
                 $(this).removeClass('call-untagged');
                 $(this).children(':first').on('click', function(e){

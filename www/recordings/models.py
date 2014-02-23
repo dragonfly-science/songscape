@@ -30,6 +30,7 @@ from django.utils.timezone import utc
 from www.recordings.templatetags.recording_filters import wav_name, sonogram_name, \
     snippet_name, isotime, timezone_lookup
 import wavy
+import pytz
 
 rcParams['font.size'] = 10
 
@@ -135,7 +136,7 @@ class Recording(models.Model):
 
     def get_hash(self):
         hasher = hashlib.md5()
-        hasher.update(open(self.path).read())
+        hasher.update(open(self.get_path()).read())
         return hasher.hexdigest()
 
     def verify_hash(self):
@@ -148,9 +149,24 @@ class Recording(models.Model):
         except Recording.DoesNotExistError:
             return False
 
+    def get_path(self):
+        owner_dir = self.deployment.owner.code
+        deployment_dir = "%s-%s" % (self.deployment.site.code, 
+            self.deployment.start.\
+                astimezone(pytz.timezone(self.deployment.start_timezone)).\
+                strftime('%Y-%m-%d')) 
+        name = "%s-%s-%s.wav" % (self.deployment.owner.code, 
+            self.deployment.site.code, 
+            isotime(self.datetime), 
+            )
+        return os.path.join(settings.RECORDINGS_ROOT, 
+            owner_dir,
+            deployment_dir,
+            name)
+
     def save(self, *args, **kwargs):
         "Given a path, datetime, and a deployment, saves the recording and populates the other data"
-        wav = wave.open(self.path)
+        wav = wave.open(self.get_path())
         (nchannels, sampwidth, framerate, nframes, comptype, compname) = wav.getparams()
         self.framerate = framerate
         self.sampwidth = sampwidth
@@ -161,7 +177,7 @@ class Recording(models.Model):
 
 
     def get_audio(self, offset=0, duration=0, max_framerate=settings.MAX_FRAMERATE):
-        return wavy.get_audio(self.path, offset=offset, duration=duration, max_framerate=max_framerate)
+        return wavy.get_audio(self.get_path(), offset=offset, duration=duration, max_framerate=max_framerate)
 
 class SonogramTransform(models.Model):
     n_fft = models.FloatField()
