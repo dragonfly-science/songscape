@@ -343,6 +343,7 @@ def api(request, id, action):
                 call_label.save()
                 check_identification(request, analysisset)
     elif action == 'call-label-delete':
+        print request.POST
         call_label = CallLabel.objects.get(code=request.POST.get('call_label_id'))
         analysisset = call_label.analysisset
         call_label.delete()
