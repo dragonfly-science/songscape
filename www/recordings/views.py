@@ -51,6 +51,12 @@ FILTERS = {
         'site': 'recording__deployment__site__code',
         'recorder': 'recording__deployment__recorder',
         'owner': 'recording__deployment__owner__code',
+        'ids_lt': 'num_id__lt',
+        'ids_gt': 'num_id__gt',
+        'tags_lt': 'num_tags__lt',
+        'tags_gt': 'num_tags__gt',
+        'labs_lt': 'num_labs__lt',
+        'labs_gt': 'num_labs__gt',
     },
     'recording': {
         'recording': 'id',
@@ -77,6 +83,10 @@ def _get_filters(request, level='snippet'):
     for key, field in fields.items():
         value = request.GET.get(key) or None
         if value:
+            try:
+                value = int(value)
+            except:
+                pass
             filters[field] = value
     return filters
 
@@ -376,25 +386,24 @@ def analysis_detail(request, code):
 def _get_analysis_snippets(request, analysis, snippet_id, refresh=False):
     snippets = request.session.get('analysis_set', [])
     refresh = request.GET.get('refresh', '0') == '1' or refresh
-    filt = request.GET.get('filter', '') or request.session.get('filter', '')
-    if not snippets or analysis.id != request.session.get('analysis_id', '') or refresh or request.session.get('filter') != filt:
-        print filt
-        if filt == 'tagged':
-            filters = {'num_tags__gt': 0}
-        else:
-            filters = {'num_id__lt': 1}
+    filters = _get_filters(request, level='snippet') or request.session.get('filters', {})
+    if not filters:
+        filters={'num_id__lt': 1}
+    print request.session.get('filters', {}), filters
+    if not snippets or analysis.id != request.session.get('analysis_id', '') or refresh or request.session.get('filters', {}) != filters:
         user_snippets = Snippet.objects.filter(sets__analysis=analysis,
             sets__identifications__user=request.user)
         snippets = list(Snippet.objects.filter(sets__analysis=analysis).\
             annotate(num_id=Count('sets__identifications')).\
             annotate(num_tags=Count('sets__identifications__tags')).\
+            annotate(num_labs=Count('sets__call_labels')).\
             filter(**filters).\
             exclude(id__in=user_snippets).\
             order_by('?').\
             values_list('id', flat=True))
         request.session['analysis_set'] = snippets
         request.session['analysis_id'] = analysis.id
-        request.session['filter'] = filt
+        request.session['filters'] = filters
     if snippet_id == 0:
         snippet_id = snippets[0]
     if not snippet_id in snippets:

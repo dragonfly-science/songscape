@@ -8,18 +8,12 @@
 {% endif %}
 </div>
 <div class="col-md-8">
-<form action="{% url 'analysis_snippet' analysis.code snippet.id %}" method="post" >{% csrf_token %}
 {% for tag in analysis.tags.all %}
-<input type="hidden" id="{{ tag.code }}_real" name="{{ tag.code }}" value={% if tag in tags %}true{% else %}false{% endif %}>
-<input type="button" class="btn btn-default tag-btn {% if tag in tags %}btn-success{% endif %}" id="{{ tag.code }}" value="{{ tag.name }}">
+<span class="btn btn-default tag-btn {% if tag in tags %}btn-success{% endif %}" id="{{ tag.code }}">{{ tag.name }}</span>
 {% endfor %}
-<input type="hidden" id="null_real" name="null_tag" value=true>
-<input type="hidden" name="next_snippet" value={{ next_snippet }}>
-<input type="hidden" name="snippet" value={{ snippet.id }}>
-<input type="submit" class="btn btn-primary" id="null_tag" value="Nothing to be tagged">
-</form>
 </div>
 <div class="col-md-2">
+<span class="btn btn-default"><a href="{% url 'analysis_snippet' analysis.code next_snippet %}">Next &rarr;</a></span>
 {% if skip != snippet.id %}
 <span class="btn btn-default"><a href="{% url 'analysis_snippet' analysis.code skip %}">Skip forwards &rarr;</a></span>
 {% endif %}
@@ -30,29 +24,17 @@
 
 {% block extrascript %}
 
-var check_save = function(){
-    if ($('.tag-btn').hasClass('btn-success')){
-	    $('#null_tag').attr('value', 'Save');
-	    $('#null_real').val(false);
-    } else {
-	    $('#null_tag').attr('value', 'Nothing to be tagged');
-	    $('#null_real').val(false);
-    };  
-};
 
-$(document).ready(check_save);
 var deactivate_button = function(){
     $(this).removeClass('btn-success');
     $(this).removeClass('active');
     $('#' + $(this).attr('id') + '_real').val(false);
-    check_save();
 };
 
 var activate_button = function(){
     $(this).addClass('btn-success');
     $(this).addClass('active');
     $('#' + $(this).attr('id') + '_real').val(true);
-    check_save();
 };
 
 var check_button = function(){
