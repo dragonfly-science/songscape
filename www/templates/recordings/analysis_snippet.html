@@ -151,7 +151,7 @@ var check_button = function(){
                 $(this).attr('data-call-id', tag_btn.attr('data-call-id'));
                 $(this).addClass('call-tagged');
                 $(this).removeClass('call-untagged');
-                $(this).children(':first').attr('data-dismiss-id', call_label_id);
+                $(this).children(':first').attr('data-dismiss-id', call_label_id).on("click", function(e){delete_call(e)}); 
             });
             tag_btn.each(check_button);
             if (call_labels.length > 0){
@@ -164,23 +164,18 @@ var check_button = function(){
         }
     });
 
-
-$('#canvas-container').delegate("button", "click", function(e){
-    console.log('clicked a button');
-});
-
-
 var delete_call = function(e){
-    console.log(e)
-    var call_id = $(this).parent().attr('data-call-id');
     console.log('Dismiss ' + call_id)
+    var call_id = $(e.delegateTarget).parent().attr('data-call-id');
+    var call_label_id = $(e.delegateTarget).attr('data-dismiss-id');
+    console.log('Dismiss ' + call_id + ' ' + call_label_id);
     if ($('.call-tagged[data-call-id="' + call_id + '"]').length <= 1){
         $('.tag-btn[data-call-id="' + call_id + '"]').each(deactivate_button);
     }
     var request = $.ajax({
         type: 'POST',
         url: "{% url 'api' snippet.id 'call-label-delete' %}",
-        data: {call_label_id: $(this).attr('data-dismiss-id')},
+        data: {call_label_id: call_label_id},
     });
 };
 $("[data-dismiss-id]").on("click", function(e){delete_call(e)}); 
