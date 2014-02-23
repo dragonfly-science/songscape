@@ -57,7 +57,7 @@
 <div id="canvas-container" style="position:relative; height:360px; width:1000px; z-index: 10000">
     <canvas id="canvas" width="1000" height="360" style="position:absolute; top:0; left: 0; z-index: 1000"></canvas>
     {% for call_label in call_labels %}
-    <div class="call-label call-tagged" style="left: {{ call_label.left }}px; top: {{ call_label.top }}px; height: {{call_label.height }}px; width: {{ call_label.width }}px;" data-call-label="{{ call_label.tag.name }}" data-call-id="{{ call_label.tag.code }}">{{ call_label.tag.name }}</div>
+    <div class="call-label call-tagged" style="left: {{ call_label.left }}px; top: {{ call_label.top }}px; height: {{call_label.height }}px; width: {{ call_label.width }}px;" data-call-label="{{ call_label.tag.name }}" data-call-id="{{ call_label.tag.code }}">{% if analysis %}<button type="button" data-dismiss="alert" aria-hidden="true">×</button>{% endif %}{{ call_label.tag.name }}</div>
     {% endfor %}
 </div>
 <a href="{{ snippet|wav_url }}" role="button" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-volume-up"></span> Download sound file</a>

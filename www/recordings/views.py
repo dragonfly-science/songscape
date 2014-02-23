@@ -135,20 +135,22 @@ def snippet(request, **kwargs):
     snippet = _get_snippet(**kwargs)
     analysis = kwargs.get('analysis', None)
     tags = Counter()
-    if analysis:
+    if analysis and request.user:
         template = 'recordings/analysis_snippet.html'
         analysisset = AnalysisSet.objects.get(
             snippet__id=kwargs['id'],
             analysis=kwargs['analysis'])
         call_labels = CallLabel.objects.filter(analysisset=analysisset)
-        try:
-            identification = Identification.objects.get(
-                analysisset=analysisset, 
-                user__id=request.user.id)
-            id_before = True
-            tags.update(identification.tags.all())
-        except Identification.DoesNotExist:
-            id_before = False
+        identification, created = Identification.objects.get_or_create(
+            analysisset=analysisset, 
+            user=request.user)
+        if created:
+            identification.save()
+            identification.tag_set = []
+            identification.tag_set.add(*analysisset.analysis.tags.all())
+            identification.save()
+        id_before = not created
+        tags.update(identification.tags.all())
     else:
         template = 'recordings/snippet.html'
         call_labels = CallLabel.objects.filter(analysisset__snippet=snippet)
@@ -280,6 +282,26 @@ def get_sonogram_by_index(request, index):
     return get_sonogram(request, id=_get_snippets(request, index)['id'])
 
 @login_required
+def check_identification(request, analysisset):
+    iden, created = Identification.objects.get_or_create(
+        user=request.user, 
+        analysisset=analysisset)
+    if created:
+        iden.save()
+        iden.tag_set = []
+        iden.tag_set.add(analysisset.analysis.tags.all())
+        iden.save()
+    label_tags = [label.tag for label in CallLabel.objects.filter(user=request.user, analysisset=analysisset)]
+    iden_tags = list(iden.tags.all())
+    for tag in iden.tag_set.all():
+        if tag in label_tags and tag not in iden_tags:
+            iden.tags.add(tag)
+        elif tag not in label_tags and tag in iden_tags:
+            iden.tags.remove(tag)
+    iden.save()
+    print iden.tags.all()
+
+@login_required
 @csrf_exempt
 def api(request, id, action):
     print action, id, request.POST
@@ -319,13 +341,16 @@ def api(request, id, action):
                 call_label.save()
                 call_label.tag_set.add(*analysis.tags.all())
                 call_label.save()
+                check_identification(request, analysisset)
     elif action == 'call-label-delete':
         call_label = CallLabel.objects.get(code=request.POST.get('call_label_id'))
+        analysisset = call_label.analysisset
         call_label.delete()
-
+        check_identification(request, analysisset)
     else:
        raise Http404 
     return HttpResponse(json.dumps(result), mimetype='application/json')
+
 
 def tags(request):
     # TODO: Login required!
