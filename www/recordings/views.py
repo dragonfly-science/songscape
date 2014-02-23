@@ -282,6 +282,7 @@ def get_sonogram_by_index(request, index):
 @login_required
 @csrf_exempt
 def api(request, id, action):
+    print action, id, request.POST
     snippet = _get_snippet(id=id)
     result = dict(snippet=snippet.id, action=action)
     if action in ('favourite', 'unfavourite'):
@@ -389,7 +390,6 @@ def _get_analysis_snippets(request, analysis, snippet_id, refresh=False):
     filters = _get_filters(request, level='snippet') or request.session.get('filters', {})
     if not filters:
         filters={'num_id__lt': 1}
-    print request.session.get('filters', {}), filters
     if not snippets or analysis.id != request.session.get('analysis_id', '') or refresh or request.session.get('filters', {}) != filters:
         user_snippets = Snippet.objects.filter(sets__analysis=analysis,
             sets__identifications__user=request.user)
