@@ -43,14 +43,7 @@ def get_md5(path):
 def save_canonical(recording):
     logging.debug('copy to canonical location: %s', recording.path)
     if os.path.exists(recording.path):
-        owner_dir = recording.deployment.owner.code
-        deployment_dir = "%s-%s" % (recording.deployment.site.code, 
-            recording.deployment.start.strftime('%Y-%m-%d')) 
-        name = "%s-%s-%s-%s.wav" % (recording.deployment.owner.code, 
-            recording.deployment.site.code, 
-            recording.datetime.strftime('%Y-%m-%dT%H:%M:%S'), 
-            recording.deployment.recorder.code)
-        new_path = os.path.join(BASE_PATH, owner_dir, deployment_dir, name)
+        new_path = recording.get_canonical_path()
         logging.debug('canonical location is: %s', new_path)
         if recording.path == new_path:
             return 
@@ -61,7 +54,7 @@ def save_canonical(recording):
             return
         try:
             try:
-                os.makedirs(os.path.join(BASE_PATH, owner_dir, deployment_dir))
+                os.makedirs(os.path.split(new_path, 0))
             except OSError:
                 pass
             shutil.copyfile(recording.path, new_path)
