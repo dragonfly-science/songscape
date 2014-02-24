@@ -100,7 +100,7 @@ class Recorder(models.Model):
 
 class Deployment(models.Model):
     site = models.ForeignKey(Site, related_name='deployments')
-    recorder = models.ForeignKey(Recorder, related_name='deployments')
+    recorder = models.ForeignKey(Recorder, related_name='deployments', null=True, blank=True)
     owner = models.ForeignKey(Organisation, related_name='deployments')
     start = models.DateTimeField()
     end = models.DateTimeField(null=True, blank=True)
@@ -136,7 +136,7 @@ class Recording(models.Model):
 
     def get_hash(self):
         hasher = hashlib.md5()
-        hasher.update(open(self.get_path()).read())
+        hasher.update(open(self.path).read())
         return hasher.hexdigest()
 
     def verify_hash(self):
@@ -149,7 +149,7 @@ class Recording(models.Model):
         except Recording.DoesNotExistError:
             return False
 
-    def get_path(self):
+    def get_canonical_path(self):
         owner_dir = self.deployment.owner.code
         deployment_dir = "%s-%s" % (self.deployment.site.code, 
             self.deployment.start.\
@@ -166,7 +166,7 @@ class Recording(models.Model):
 
     def save(self, *args, **kwargs):
         "Given a path, datetime, and a deployment, saves the recording and populates the other data"
-        wav = wave.open(self.get_path())
+        wav = wave.open(self.path)
         (nchannels, sampwidth, framerate, nframes, comptype, compname) = wav.getparams()
         self.framerate = framerate
         self.sampwidth = sampwidth
@@ -177,7 +177,7 @@ class Recording(models.Model):
 
 
     def get_audio(self, offset=0, duration=0, max_framerate=settings.MAX_FRAMERATE):
-        return wavy.get_audio(self.get_path(), offset=offset, duration=duration, max_framerate=max_framerate)
+        return wavy.get_audio(self.path, offset=offset, duration=duration, max_framerate=max_framerate)
 
 class SonogramTransform(models.Model):
     n_fft = models.FloatField()
