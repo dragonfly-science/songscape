@@ -14,7 +14,6 @@ snippet_regex = r"(?P<organisation>[\w]+)-(?P<site_code>[\w]+)-(?P<date_time>\d\
 
 urlpatterns = patterns(
     '',
-    url(r'', include('django_browserid.urls')),
     url(r'^snippet/(?P<id>\d+)/$', 'www.recordings.views.snippet', name='snippet'),
     url(r'^api/(?P<id>\d+)/(?P<action>[\w-]+)/$', 'www.recordings.views.api', name='api'),
     url(r'^snippet/%s/$' % snippet_regex, 'www.recordings.views.snippet', name='snippet_name'),
