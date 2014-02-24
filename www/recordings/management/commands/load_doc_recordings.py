@@ -64,7 +64,6 @@ class Command(BaseCommand):
         count = 0
         for f, path in recordings:
             count += 1
-            if count > 200: break
             site_code = '_'.join(f.split('_')[:2])
             date = tz.localize(datetime.strptime(f.split('_')[2], '%y%m%d'))
             starttime = tz.localize(datetime.strptime('_'.join(f.split('_')[2:4]), '%y%m%d_%H%M%S.wav'))
