@@ -357,8 +357,6 @@ class Tag(UniqueSlugMixin, models.Model):
     name = models.TextField()
     datetime = models.DateTimeField(auto_now=True)
     #TODO: Add in a link to species
-    #TODO: Rename the 'no-kiwis' tag to 'none'
-    #TODO: Drop the 'interesting' tag (we will stick with the favourites for that)
 
 
     def __unicode__(self):
