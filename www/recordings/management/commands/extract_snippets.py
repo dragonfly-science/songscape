@@ -15,7 +15,8 @@ class Command(BaseCommand):
                     path = row[0]
                     offset = float(row[1])
                     duration = float(row[2])
-                    md5 = hashlib.md5(open(path).read())
+                    md5 = hashlib.md5(open(path).read()).hexdigest()
+                    print i, md5, path
                     recording = Recording.objects.get(md5 = md5)
                     snippet = Snippet.objects.get(recording=recording, offset=offset, duration=duration)
                     wavy.slice_wave(path, os.path.join(BASE_DIR, snippet.get_soundfile_name()), offset, duration, 8000)

@@ -279,10 +279,13 @@ class Snippet(models.Model):
                 path = name)
             close()
 
-    def save_soundfile(self, replace=False):
+    def save_soundfile(self, replace=False, path='', max_framerate=None):
         filename = self.get_soundfile_name()
-        name = os.path.join(settings.SNIPPET_DIR, filename)
-        path = os.path.join(settings.MEDIA_ROOT, name)
+        if not path:
+            name = os.path.join(settings.SNIPPET_DIR, filename)
+            path = os.path.join(settings.MEDIA_ROOT, name)
+        else:
+            path = os.path.join(path, filename)
         try:
             if not os.path.exists(path):
                 replace = True
@@ -290,7 +293,7 @@ class Snippet(models.Model):
             replace = True
         if replace:
             wav_file = open(path, 'w')
-            wavy.slice_wave(self.recording.path, wav_file, self.offset, self.duration)
+            wavy.slice_wave(self.recording.path, wav_file, self.offset, self.duration, max_framerate=max_framerate)
             wav_file.close()
         return filename
 
