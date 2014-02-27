@@ -35,17 +35,27 @@
 </ul>
 {% endblock toprow %}
 {% block secondrow %}
-<button class="btn btn-default btn-sm {% if favourite %}liked{% else %}notliked{% endif %}"  id="favourite"><span class="glyphicon glyphicon-heart"></span></button>
+<div class="row">
+{{ all_tags }}
+<div class="foo">
+Foo
+  <button class="btn dropdown-toggle sr-only" type="button" id="dropdownMenu1" data-toggle="dropdown">
+    Dropdown
+    <span class="caret"></span>
+  </button>
+  <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+{% for tag in all_tags %}
+    <li role="presentation"><a role="menuitem" tabindex="-1" href="#">{{ tag.name }}</a></li>
+{% endfor %}
+  </ul>
+</div>
+</div>
+
 {% endblock secondrow %}
 {% if not analysis %}
 <div class="row">
-  <div>
-    <ul class="inline">
-        {% for tag, c in tags.items %}
-        <li class="outlined">{{ tag }} <span class="badge">{{ c }}</span></li>
-        {% endfor %}
-    </ul>
-  </div>
+<button class="btn btn-default btn-sm {% if favourite %}liked{% else %}notliked{% endif %}"  id="favourite" title="Mark as a favourite of yours"><span class="glyphicon glyphicon-heart"></span></button>
+<button class="btn btn-default btn-sm {% if flagged %}flagged{% else %}notflagged{% endif %}"  id="flag" title="Flag this recording as inappropriate (e.g, containing people talking)"><span class="glyphicon glyphicon-fire"></span></button>
 </div>
 {% endif %}
   <div>
@@ -170,7 +180,7 @@ $(document).ready(function() {
             break;
         }
     });
-
+    
     /* API callbacks */
     /* Favorite button */
     var favourite_flag = false;
@@ -195,9 +205,53 @@ $(document).ready(function() {
         }
     });
     
+    var flag_clicked = false;
+    $('#flag').bind('touchstart click', function() {
+        if (!flag_clicked) {
+            flag_clicked = true;
+            setTimeout(function(){flag_clicked = false;}, 100);
+            var $this = $(this);
+            var post_id = this.id;
+            if ($this.hasClass('flagged')){
+                var flag_url = "{% url 'api' snippet.id 'unflag' %}";
+            } 
+            else {
+                var flag_url = "{% url 'api' snippet.id 'flag' %}";
+            };
+            $this.toggleClass("flagged notflagged");
+            $.getJSON(flag_url, function(data) {
+                var newClass = (data["flag"] == 1) ? 'flagged' : 'notflagged'
+                $this.removeClass("flagged notflagged");
+                $this.addClass(newClass);
+            });
+        }
+    });
+     
     {% block extrascript %}
     {% endblock extrascript %}
     
+    {% block canvasmouseup %}
+    $('#canvas-container').on('mouseup', function(d) {
+        var offset = (d.pageX  - $('#canvas-container').offset().left)/ $(this).width();
+        // scale accordingly
+        offset -= sonogram_start;
+        offset /= sonogram_range;
+        if (offset > 1.0){
+            snippet.currentTime = snippet.duration;
+            draw_playback(canvas.width*sonogram_end);
+        } 
+        else if (offset < 0){
+            snippet.currentTime = 0.0;
+            snippet.pause();
+        }
+        else {
+            snippet.currentTime = offset * snippet.duration
+            draw_playback(d.offsetX);
+            snippet.play();
+        };
+        draw_line();
+    });
+    {% endblock canvasmouseup %}
 });
 
 

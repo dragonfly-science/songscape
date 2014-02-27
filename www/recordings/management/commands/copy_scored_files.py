@@ -77,6 +77,7 @@ class Command(BaseCommand):
             output.write(' '.join([str(s) for s in stack]))
             output.write('\n')
         output.close()
+        
 
 
         

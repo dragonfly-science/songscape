@@ -169,6 +169,8 @@ def snippet(request, **kwargs):
     count_user = kwargs.get('count_user', None)
     favourite = snippet.fans.filter(id=request.user.id).count()
     favourites = snippet.fans.count()
+    flagged = snippet.flags.count() > 0
+    all_tags = Tag.objects.all().annotate(labels=Count('call_labels')).filter(labels__gt=0)
     for label in call_labels:
         #TODO: use the actual transform
         transform = list(SonogramTransform.objects.all())[-1]
@@ -179,6 +181,7 @@ def snippet(request, **kwargs):
     return render(request,
                   template,
                   {'snippet': snippet,
+                   'all_tags': all_tags,
                    'datetime': snippet.datetime.astimezone(pytz.timezone(snippet.recording.deployment.start_timezone)),
                    'call_labels': call_labels,
                    'next_snippet': kwargs.get('next_snippet', None),
@@ -189,6 +192,7 @@ def snippet(request, **kwargs):
                    'random_index': kwargs.get('random_index', None),
                    'skip': kwargs.get('skip', None),
                    'count': count,
+                   'flagged': flagged,
                    'count_all': count_all,
                    'count_user': count_user,
                    'favourite': favourite,
@@ -317,6 +321,12 @@ def api(request, id, action):
             snippet.fans.remove(request.user)
         result['favourite'] = snippet.fans.filter(id=request.user.id).count()
         result['favourites'] = snippet.fans.count()
+    elif action in ('flag', 'unflag'):
+        if action == 'flag':
+            snippet.flags.add(request.user)
+        else:
+            snippet.flags.remove(request.user)
+        result['flag'] = int(snippet.flags.filter(id=request.user.id).count() > 0)
     elif action == 'call-label':
         labels = []
         for key in request.POST.keys():
