@@ -209,6 +209,7 @@ class Snippet(models.Model):
     duration = models.FloatField()
     soundcloud = models.IntegerField(null=True, blank=True)
     fans = models.ManyToManyField(User, related_name='favourites', null=True, blank=True)
+    flags = models.ManyToManyField(User, related_name='flags', null=True, blank=True)
 
     class Meta:
         unique_together = (('recording', 'offset', 'duration'),)

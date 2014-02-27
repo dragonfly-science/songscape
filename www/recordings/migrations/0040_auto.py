@@ -1,46 +1,27 @@
 # -*- coding: utf-8 -*-
 from south.utils import datetime_utils as datetime
-import csv
-
 from south.db import db
-from south.v2 import DataMigration
+from south.v2 import SchemaMigration
 from django.db import models
 
-class Migration(DataMigration):
+
+class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        "Write your forwards methods here."
-        # Note: Don't use "from appname.models import ModelName". 
-        # Use orm.ModelName to refer to models in this application,
-        # and orm['appname.ModelName'] for models in other applications.
-        
-        edward = orm['auth.User'].objects.get(username='edward')
-        male = orm.Tag.objects.get(code='male-kiwi')
-        female = orm.Tag.objects.get(code='female-kiwi')
-        uncertain = orm.Tag.objects.get(code='uncertain')
-       
-        analysis = orm.Analysis(name='DOC kiwi', code='doc-kiwi-2013', 
-            description='Training set provided by DOC, with kiwi calls', user=edward)
-        analysis.save()
-        analysis.tags.add(male, female, uncertain)
-        analysis.save()
+        # Adding M2M table for field flags on 'Snippet'
+        m2m_table_name = db.shorten_name(u'recordings_snippet_flags')
+        db.create_table(m2m_table_name, (
+            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
+            ('snippet', models.ForeignKey(orm[u'recordings.snippet'], null=False)),
+            ('user', models.ForeignKey(orm[u'auth.user'], null=False))
+        ))
+        db.create_unique(m2m_table_name, ['snippet_id', 'user_id'])
 
-        # find the files that have kiwis in them somewhere
-        paths = set([])
-        for year in ('2011-12', '2012-13'):
-            reader = open('/kiwi/nocturnal-calls/freebird-tags-training-%s.csv' % year):
-            for row in reader:
-                if 'Kiwi' in row['name']:
-                    paths.add('/kiwi/nocturnal-calls/TRAINING/%s/%s' %(year, row['file'] ))
-        for path in paths:
-            
-
-
-            
 
     def backwards(self, orm):
-        "Write your backwards methods here."
-        pass
+        # Removing M2M table for field flags on 'Snippet'
+        db.delete_table(db.shorten_name(u'recordings_snippet_flags'))
+
 
     models = {
         u'auth.group': {
@@ -190,6 +171,7 @@ class Migration(DataMigration):
             'Meta': {'unique_together': "(('recording', 'offset', 'duration'),)", 'object_name': 'Snippet'},
             'duration': ('django.db.models.fields.FloatField', [], {}),
             'fans': ('django.db.models.fields.related.ManyToManyField', [], {'blank': 'True', 'related_name': "'favourites'", 'null': 'True', 'symmetrical': 'False', 'to': u"orm['auth.User']"}),
+            'flags': ('django.db.models.fields.related.ManyToManyField', [], {'blank': 'True', 'related_name': "'flags'", 'null': 'True', 'symmetrical': 'False', 'to': u"orm['auth.User']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'offset': ('django.db.models.fields.FloatField', [], {}),
             'recording': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'snippets'", 'to': u"orm['recordings.Recording']"}),
@@ -228,4 +210,3 @@ class Migration(DataMigration):
     }
 
     complete_apps = ['recordings']
-    symmetrical = True

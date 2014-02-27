@@ -167,6 +167,9 @@ h1 {
 #favourite.liked {
     color: red;
 }
+#flag.flagged {
+    color: red;
+}
 
 /* Call labelling */
 
