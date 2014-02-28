@@ -55,6 +55,7 @@ FILTERS = {
         'owner': 'recording__deployment__owner__code',
         'ids_lt': 'num_id__lt',
         'ids_gt': 'num_id__gt',
+        'tag': 'sets__call_labels__tag__code',
         'tags_lt': 'num_tags__lt',
         'tags_gt': 'num_tags__gt',
         'labs_lt': 'num_labs__lt',
