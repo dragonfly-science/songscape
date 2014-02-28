@@ -3,74 +3,63 @@
 {% load recording_filters %}
 
 {% block content %}
-
+<!--<div class="row" style="z-index:2000">-->
+    <!-- Single button -->
+<!--/div>-->
 {% block toprow %}
-<ul class="pager">
+<div class="row" style="margin-top:70px">
 {% if previous_index and not analysis %}
-  <li class="previous">
-    <a href="{% url 'snippet_list' 1 %}">&larr; First</a>
-  </li>
-  <li class="previous">
-    <a href="{% url 'snippet_list' previous_index %}">&larr; Previous</a>
-  </li>
+<div class="btn-group">
+    <a class="btn btn-default" href="{% url 'snippet_list' 1 %}">&larr; First</a>
+    <a class="btn btn-default" href="{% url 'snippet_list' previous_index %}">&larr; Previous</a>
+</div>
 {% endif %}
-  <li>
-    <span>{{ snippet.recording.deployment.site }}, {{ datetime }}</span>
-  </li>
+<div class="btn-group">
+    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+      Select tags <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu" role="menu">
+        <li><a href="#">All recordings</a></li>
+        <li class="divider"></li>
+        {% for tag in all_tags %}<li><a href="{% url 'first_snippet' %}?tag={{ tag.code }}">{{ tag.name }} ({{ tag.labels }})</a></li>
+        {% endfor %}
+    </ul>
+</div>
+<div class="btn-group pull-right">
 {% if count_user %}
-  <li>
-    <span>You have analysed {{ count_user }} snippets, out of {{ count_all }}. There are {{ count }} to go. </span>
-  </li>
+    <button>You have analysed {{ count_user }} snippets, out of {{ count_all }}. There are {{ count }} to go. </button>
 {% endif %}
 {% if random_index and not analysis %}
-  <li class="next">
-    <a href="{% url 'snippet_list' random_index %}">Random</a>
-  </li>
+    <a class="btn btn-default" href="{% url 'snippet_list' random_index %}">Random</a>
 {% endif %}
 {% if next_index and not analysis %}
-  <li class="next">
-    <a href="{% url 'snippet_list' next_index %}">Next &rarr;</a>
-  </li>
+    <a class="btn btn-default" href="{% url 'snippet_list' next_index %}">Next &rarr;</a>
 {% endif %}
-</ul>
+</div>
+</div>
 {% endblock toprow %}
 {% block secondrow %}
-<div class="row">
-{{ all_tags }}
-<div class="foo">
-Foo
-  <button class="btn dropdown-toggle sr-only" type="button" id="dropdownMenu1" data-toggle="dropdown">
-    Dropdown
-    <span class="caret"></span>
-  </button>
-  <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
-{% for tag in all_tags %}
-    <li role="presentation"><a role="menuitem" tabindex="-1" href="#">{{ tag.name }}</a></li>
-{% endfor %}
-  </ul>
-</div>
-</div>
-
-{% endblock secondrow %}
+<div class="row text-center" style="margin-top:10px; margin-bottom:0px">
+<span class="label label-default" style="font-size:1.2em">{{ snippet.recording.deployment.site }}, {{ datetime }}</span>
 {% if not analysis %}
-<div class="row">
 <button class="btn btn-default btn-sm {% if favourite %}liked{% else %}notliked{% endif %}"  id="favourite" title="Mark as a favourite of yours"><span class="glyphicon glyphicon-heart"></span></button>
+<a href="{{ snippet|wav_url }}" role="button" class="btn btn-default btn-sm" title="Download the soundfile (CC-BY )"><span class="glyphicon glyphicon-arrow-down"></span> Download</a>
 <button class="btn btn-default btn-sm {% if flagged %}flagged{% else %}notflagged{% endif %}"  id="flag" title="Flag this recording as inappropriate (e.g, containing people talking)"><span class="glyphicon glyphicon-fire"></span></button>
-</div>
 {% endif %}
+</div>
+{% endblock secondrow %}
   <div>
     <audio id="snippet">
      <source src="{{ snippet|wav_url }}" type="audio/wav">
      "Hmm can't play the sound"
     </audio>
   </div>
-<div id="canvas-container" style="position:relative; height:360px; width:1000px; z-index: 10000">
-    <canvas id="canvas" width="1000" height="360" style="position:absolute; top:0; left: 0; z-index: 1000"></canvas>
+<div id="canvas-container" style="position:relative; height:360px; width:1000px; z-index: 4">
+    <canvas id="canvas" width="1000" height="360" style="position:absolute; top:0; left: 0; z-index: 1"></canvas>
     {% for call_label in call_labels %}
     <div class="call-label call-tagged" style="left: {{ call_label.left }}px; top: {{ call_label.top }}px; height: {{call_label.height }}px; width: {{ call_label.width }}px;" data-call-label="{{ call_label.tag.name }}" data-call-id="{{ call_label.tag.code }}">{% if analysis %}<button type="button" data-dismiss="alert" aria-hidden="true" data-dismiss-id="{{ call_label.code }}">×</button>{% endif %}{{ call_label.tag.name }}</div>
     {% endfor %}
 </div>
-<a href="{{ snippet|wav_url }}" role="button" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-volume-up"></span> Download sound file</a>
 
 
 <!-- TODO: just draw the image and pop up controls if no canvas
