@@ -99,33 +99,7 @@ var check_button = function(){
             new_call();
         }
     });
-    $('#canvas-container').on('mouseup', function(d) {
-        wasDragging = isDragging;
-        isDragging = false;
-        $('#canvas-container').unbind('mousemove');
-        if (wasDragging){
-            new_call();
-        } else {
-            var offset = d.offsetX / $(this).width();
-            // scale accordingly
-            offset -= sonogram_start;
-            offset /= sonogram_range;
-            if (offset > 1.0){
-                snippet.currentTime = snippet.duration;
-                draw_playback(canvas.width*sonogram_end);
-            } 
-            else if (offset < 0){
-                snippet.currentTime = 0.0;
-                snippet.pause();
-            }
-            else {
-                snippet.currentTime = offset * snippet.duration
-                draw_playback(d.offsetX);
-                snippet.play();
-            };
-            draw_line();
-        };
-    });
+
 
     /* Label calls */
     function randString(){
@@ -192,3 +166,32 @@ $("[data-dismiss-id]").on("click", function(e){delete_call(e)});
 
 {% endblock extrascript %}
 
+{% block canvasmouseup %}
+    $('#canvas-container').on('mouseup', function(d) {
+        wasDragging = isDragging;
+        isDragging = false;
+        $('#canvas-container').unbind('mousemove');
+        if (wasDragging){
+            new_call();
+        } else {
+            var offset = (d.pageX  - $('#canvas-container').offset().left)/ $(this).width();
+            // scale accordingly
+            offset -= sonogram_start;
+            offset /= sonogram_range;
+            if (offset > 1.0){
+                snippet.currentTime = snippet.duration;
+                draw_playback(canvas.width*sonogram_end);
+            } 
+            else if (offset < 0){
+                snippet.currentTime = 0.0;
+                snippet.pause();
+            }
+            else {
+                snippet.currentTime = offset * snippet.duration
+                draw_playback(d.offsetX);
+                snippet.play();
+            };
+            draw_line();
+        };
+    });
+{% endblock canvasmouseup %}
