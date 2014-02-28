@@ -1,7 +1,17 @@
 {% extends 'recordings/snippet.html' %}
 
+{% block toprow %}
+<span>{{ snippet.recording.deployment.site }}, {{ datetime }}</span>
+
+<div class="pull-right">
+{% if count_user %}
+    <span>{{ count_user }} snippets analysed, out of {{ count_all }}. There are {{ count }} to go. </span>
+{% endif %}
+</div>
+{% endblock %}
+
 {% block secondrow %}
-<div class="row">
+<div class="row" style="margin-top: 20px">
 <div class="col-md-2">
 {% if previous_snippet %}
 <span class="btn btn-default btn-sm"><a href="{% url 'analysis_snippet' analysis.code previous_snippet %}">&larr; Previous</a></span>
@@ -11,7 +21,6 @@
 {% for tag in analysis.tags.all %}
 <span class="btn btn-default btn-sm tag-btn {% if tag in tags %}btn-success{% endif %}" data-call-id="{{ tag.code }}">{{ tag.name }}</span>
 {% endfor %}
-<button class="btn btn-default btn-sm {% if favourite %}liked{% else %}notliked{% endif %}"  id="favourite"><span class="glyphicon glyphicon-heart"></span></button>
 <span class="btn btn-default btn-sm"><a href="{% url 'analysis_snippet' analysis.code next_snippet %}">Next &rarr;</a></span>
 {% if skip != snippet.id %}
 <span class="btn btn-default btn-sm"><a href="{% url 'analysis_snippet' analysis.code skip %}">Skip forwards &rarr;</a></span>

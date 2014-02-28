@@ -203,7 +203,10 @@ def snippet(request, **kwargs):
                    'tags': dict(tags)})
 
 def _get_snippets(request, index):
-    filters = _get_filters(request, level='snippet')
+    filters = _get_filters(request, level='snippet') or request.session.get('filters', {})
+    for k, v in filters.items():
+        if v == 'All':
+            del filters[k]
     order = _get_order(request) or '-scores__score'
     request_parameters = _get_parameters(request)
     try:
@@ -252,7 +255,7 @@ def _get_snippets(request, index):
     next_index = index + 1 if index < count else None
     next_snippet = snippets[(next_index - 1) % PER_PAGE] if next_index else None
     previous_index = index - 1 if index > 1 else None
-    previous_snippet = snippets[(next_index - 1) % PER_PAGE] if previous_index else None
+    previous_snippet = snippets[(previous_index - 1) % PER_PAGE] if previous_index else None
     
     return dict(id=snippets[page_index - 1],
         index=index,
@@ -427,9 +430,7 @@ def analysis_detail(request, code):
 def _get_analysis_snippets(request, analysis, snippet_id, refresh=False):
     snippets = request.session.get('analysis_set', [])
     refresh = request.GET.get('refresh', '0') == '1' or refresh
-    filters = _get_filters(request, level='snippet') or request.session.get('filters', {})
-    if not filters:
-        filters={'num_id__lt': 1}
+    filters={'num_id__lt': 1}
     if not snippets or analysis.id != request.session.get('analysis_id', '') or refresh or request.session.get('filters', {}) != filters:
         user_snippets = Snippet.objects.filter(sets__analysis=analysis,
             sets__identifications__user=request.user)
