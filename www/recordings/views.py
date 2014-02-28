@@ -203,7 +203,7 @@ def snippet(request, **kwargs):
                    'tags': dict(tags)})
 
 def _get_snippets(request, index):
-    filters = _get_filters(request, level='snippet') or request.session.get('filters', {})
+    filters = _get_filters(request, level='snippet') or request.session.get('snippets_filters', {})
     for k, v in filters.items():
         if v == 'All':
             del filters[k]
@@ -217,11 +217,11 @@ def _get_snippets(request, index):
         raise Http404 
     page = int(math.floor((index - 1)/PER_PAGE)) + 1
     # If we are still on the same page, return the next snippet
-    if page == (int(math.floor((request.session.get('index', 0) - 1)/PER_PAGE)) + 1) and \
-            order == request.session.get('order') and \
-            filters == request.session.get('filters'):
-        snippets = request.session.get('snippets', [])
-        count = request.session.get('count', 0)
+    if page == (int(math.floor((request.session.get('snippets_index', 0) - 1)/PER_PAGE)) + 1) and \
+            order == request.session.get('snippets_order') and \
+            filters == request.session.get('snippets_filters'):
+        snippets = request.session.get('snippets_snippets', [])
+        count = request.session.get('snippets_count', 0)
     # Otherwise, run a query to identify the next page
     else:
         code = 'simple-north-island-brown-kiwi'
@@ -243,11 +243,11 @@ def _get_snippets(request, index):
         snippets = list(snippet_page)
         count = paginator.count
         #Update the session
-        request.session['snippets'] = snippets
-        request.session['index'] = index
-        request.session['order'] = order
-        request.session['filters'] = filters
-        request.session['count'] = count
+        request.session['snippets_snippets'] = snippets
+        request.session['snippets_index'] = index
+        request.session['snippets_order'] = order
+        request.session['snippets_filters'] = filters
+        request.session['snippets_count'] = count
     page_index = (index - 1) % PER_PAGE + 1
     if page_index > len(snippets):
         raise Http404
@@ -431,7 +431,7 @@ def _get_analysis_snippets(request, analysis, snippet_id, refresh=False):
     snippets = request.session.get('analysis_set', [])
     refresh = request.GET.get('refresh', '0') == '1' or refresh
     filters={'num_id__lt': 1}
-    if not snippets or analysis.id != request.session.get('analysis_id', '') or refresh or request.session.get('filters', {}) != filters:
+    if not snippets or analysis.id != request.session.get('analysis_id', '') or refresh or request.session.get('analysis_filters', {}) != filters:
         user_snippets = Snippet.objects.filter(sets__analysis=analysis,
             sets__identifications__user=request.user)
         snippets = list(Snippet.objects.filter(sets__analysis=analysis).\
@@ -443,7 +443,7 @@ def _get_analysis_snippets(request, analysis, snippet_id, refresh=False):
             values_list('id', flat=True))
         request.session['analysis_set'] = snippets
         request.session['analysis_id'] = analysis.id
-        request.session['filters'] = filters
+        request.session['analysis_filters'] = filters
     if snippet_id == 0:
         snippet_id = snippets[0]
     if not snippet_id in snippets:
@@ -451,10 +451,10 @@ def _get_analysis_snippets(request, analysis, snippet_id, refresh=False):
     try:
         Identification.objects.get(analysisset__snippet__id=snippet_id,
             analysisset__analysis=analysis, user=request.user)
-        skip=request.session.get('skip', snippet_id)
+        skip=request.session.get('analysis_skip', snippet_id)
     except Identification.DoesNotExist:
         skip=snippet_id
-        request.session['skip'] = snippet_id
+        request.session['analysis_skip'] = snippet_id
     index = snippets.index(snippet_id)
     next_index = index + 1 if index < len(snippets) - 1 else None
     previous_index = index - 1 if index > 0 else None
