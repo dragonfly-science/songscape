@@ -148,10 +148,8 @@ var check_button = function(){
     });
 
 var delete_call = function(e){
-    console.log('Dismiss ' + call_id)
     var call_id = $(e.delegateTarget).parent().attr('data-call-id');
     var call_label_id = $(e.delegateTarget).attr('data-dismiss-id');
-    console.log('Dismiss ' + call_id + ' ' + call_label_id);
     if ($('.call-tagged[data-call-id="' + call_id + '"]').length <= 1){
         $('.tag-btn[data-call-id="' + call_id + '"]').each(deactivate_button);
     }
@@ -161,7 +159,7 @@ var delete_call = function(e){
         data: {call_label_id: call_label_id},
     });
 };
-$("[data-dismiss-id]").on("click", function(e){delete_call(e)}); 
+$("[data-dismiss-id]").on("click", function(e){delete_call(e); e.stopPropogation()}); 
 
 
 {% endblock extrascript %}
