@@ -198,3 +198,13 @@ h1 {
 .call-tagged button {
     color: #B7E8D4;
 }
+
+a.btn-default {
+    color: #1898C3;
+}
+
+a.btn-default:hover {
+    color: white;
+    background-color: #1898C3;
+    border-color: #1898C3;
+}
