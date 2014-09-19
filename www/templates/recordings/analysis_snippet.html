@@ -14,17 +14,17 @@
 <div class="row" style="margin-top: 20px">
 <div class="col-md-2">
 {% if previous_snippet %}
-<span class="btn btn-default btn-sm"><a href="{% url 'analysis_snippet' analysis.code previous_snippet %}">&larr; Previous</a></span>
+<a href="{% url 'analysis_snippet' analysis.code previous_snippet %}" class="btn btn-default btn-sm">&larr; Previous</a>
 {% endif %}
 </div>
 <div class="col-md-10">
 {% for tag in analysis.tags.all %}
 <span class="btn btn-default btn-sm tag-btn {% if tag in tags %}btn-success{% endif %}" data-call-id="{{ tag.code }}">{{ tag.name }}</span>
 {% endfor %}
-<span class="btn btn-default btn-sm"><a href="{% url 'analysis_snippet' analysis.code next_snippet %}">Next &rarr;</a></span>
-{% if skip != snippet.id %}
-<span class="btn btn-default btn-sm"><a href="{% url 'analysis_snippet' analysis.code skip %}">Skip forwards &rarr;</a></span>
-{% endif %}
+<a href="{% url 'analysis_snippet' analysis.code next_snippet %}" class="btn btn-default btn-sm">Next &rarr;
+</a>{% if skip != snippet.id %}
+<a class="btn btn-default btn-sm" href="{% url 'analysis_snippet' analysis.code skip %}">Skip forwards &rarr;
+</a>{% endif %}
 </div>
 </div>
 {% endblock secondrow %}
@@ -148,10 +148,8 @@ var check_button = function(){
     });
 
 var delete_call = function(e){
-    console.log('Dismiss ' + call_id)
     var call_id = $(e.delegateTarget).parent().attr('data-call-id');
     var call_label_id = $(e.delegateTarget).attr('data-dismiss-id');
-    console.log('Dismiss ' + call_id + ' ' + call_label_id);
     if ($('.call-tagged[data-call-id="' + call_id + '"]').length <= 1){
         $('.tag-btn[data-call-id="' + call_id + '"]').each(deactivate_button);
     }
@@ -161,7 +159,7 @@ var delete_call = function(e){
         data: {call_label_id: call_label_id},
     });
 };
-$("[data-dismiss-id]").on("click", function(e){delete_call(e)}); 
+$("[data-dismiss-id]").on("click", function(e){delete_call(e); e.stopPropogation()}); 
 
 
 {% endblock extrascript %}
