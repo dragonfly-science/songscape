@@ -99,7 +99,10 @@ $(document).ready(function() {
         context.drawImage(this, 0, 0);
     }
     sonogram.src = '{{ snippet|sonogram_url }}';
-
+    
+    /* touch enable the canvas*/
+    $('#canvas-container').children().addTouch();
+    
     function draw_playback(canvas_offset) {
         // SVG might be more efficient oh well.
         // And it could be animated cleanly - oh well you have to start somewhere
@@ -227,8 +230,10 @@ $(document).ready(function() {
             else {
                 var flag_url = "{% url 'api' snippet.id 'flag' %}";
             };
+            console.log(flag_url)
             $this.toggleClass("flagged notflagged");
             $.getJSON(flag_url, function(data) {
+                console.log(data)
                 var newClass = (data["flag"] == 1) ? 'flagged' : 'notflagged'
                 $this.removeClass("flagged notflagged");
                 $this.addClass(newClass);
