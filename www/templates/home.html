@@ -6,7 +6,7 @@
     <div class="jumbotron">
       <div class="container">
         <h1 style="color: white">Monitoring biodiversity with sound</h1>
-        <p><a class="btn btn-primary btn-lg" role="button" href="{% url 'first_snippet' %}">Explore the sounds &raquo;</a></p>
+        <p><a class="btn btn-primary btn-lg" role="button" href="http://bit.ly/songscapesurvey">Please take our survey &raquo;</a></p>
       </div>
     </div>
     <p class="jumbotron-byline">
@@ -16,19 +16,30 @@
     <div class="container">
       <!-- Example row of columns -->
       <div class="row">
-        <div class="col-md-4">
-          <h2> {{ duration }} days of recordings </h2>
-             <p>Recording birdsong and other animal sounds is an effective technique for monitoring biodiversity. The challenge is then to manage
-        and analyse the data. Songscape allows a combination of machine learning and himan classification to efficiently manage score large acoustic datasets.</p>
+        <div class="col-md-4 well">
+         <img src="/static/images/audio-web.png" width="60%">
+          <h2> 1. Record the noises </h2>
+          <p> Audio recorders are a simple way to monitor for the presence and abundance of birds, bats, frogs, marine mammals, and many other animals. Consistent recording allows the detection of changes over time and space.
+        </p>
         </div>
-        <div class="col-md-4">
-            <h2> From {{ sites }} sites</h2>
-          <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
+        <div class="col-md-4 well">
+         <img src="/static/images/cloud-web.png" width="60%">
+            <h2> 2. Analyse the data</h2>
+          Songscape is a service that allows researchers and community groups to manage and analyse acoustic data online.
+          Songscape uses a combination of machine learning and human identification to identify sounds within audio files, allowing 
+          efficient processing of many hours of recordings. 
        </div>
-        <div class="col-md-4">
-          <h2>Stay in touch</h2>
-          <p>Songscape is in development. We are interested in working with people who have acoustic datasets to analyse. Please email us to find out more,
-          </p>
+        <div class="col-md-4 well">
+         <img src="/static/images/animals-web.png" width="60%">
+          <h2>3. It's about the animals</h2>
+          <p>
+          Transform audio files into data on animals of interest. Understand where populations are found, and how they are changing.
+          </p>    
+        </div>
+      </div>
+      <div class="row">
+          <h2> Stay in touch </h2>
+          <p> Songscape is in development. We are interested in hearing from people who would like to carry out acosutic monitoring and don't know where to start, or from people who have large acoustic datasets that they would like to analyse. Please email Edward Abraham (<a href="mailto:edward@songscape.org">edward@songscape.org</a>) for more information.
           <form role="form" action="https://tinyletter.com/songscape" method="post" target="popupwindow" onsubmit="window.open('https://tinyletter.com/songscape', 'popupwindow', 'scrollbars=yes,width=800,height=600');return true">
             <div class="form-group">
                 <label for="tlemail">
@@ -44,7 +55,6 @@
                 </div>
             </div>
         </form> 
-        </div>
       </div>
     </div><!--/container-->
 {% endblock content %}
