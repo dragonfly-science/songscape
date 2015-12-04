@@ -16,7 +16,7 @@ from django.db import IntegrityError
 
 from www.recordings.models import Deployment, Recording, Snippet
 
-BASE_PATH = '/www/recordings/recordings'
+BASE_PATH = 'www/recordings/recordings'
 MIN_FILE_SIZE = 1000
 logging.basicConfig(
     format='%(asctime)s %(levelname)s: %(message)s', 
@@ -106,7 +106,7 @@ def get_recorder_site(path, count=0):
 class Command(BaseCommand):
     def handle(self, *args, **options):
         logging.debug("started")
-        for root, dirs, files in os.walk("/home/jasonhideki/Desktop/songscape-master/www/recordings/kiwi/recordings"):
+        for root, dirs, files in os.walk("/home/jasonhideki/songscape/www/recordings/recordings"):
             for f in files:
                 if f.endswith('.wav'):
                     # First check to see if it exists
