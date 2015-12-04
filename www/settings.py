@@ -2,7 +2,7 @@
 import os
 
 # generate SECRET_KEY as per instructions in local.setting.py.TEMPLATE?
-SECRET_KEY = ''
+#SECRET_KEY = 'n1*ncz1e+i2m0#u-bnofes7ee5-#-^a36ej4(f@colo&+tyn=6'
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -36,7 +36,7 @@ USE_TZ = True
 SITE_ID = 1
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
-RECORDINGS_ROOT = '/recordings/recordings'
+RECORDINGS_ROOT = '/home/jasonhideki/songscape/www/recordings/recordings'
 MEDIA_ROOT = os.path.join(PROJECT_DIR, 'media')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
@@ -155,7 +155,7 @@ LOGGING = {
     }
 }
 
-RECORDINGS_PATH = '' # Path of the raw recordings
+RECORDINGS_PATH = '/recordings/recordings' # Path of the raw recordings
 
 # organisation repositories. A dictionary with keys
 # being the organisation codes, and values
