@@ -16,7 +16,7 @@ from django.db import IntegrityError
 
 from www.recordings.models import Deployment, Recording, Snippet
 
-BASE_PATH = 'songscape-master/www/recordings/kiwi/recordings'
+BASE_PATH = '/www/recordings/recordings'
 MIN_FILE_SIZE = 1000
 logging.basicConfig(
     format='%(asctime)s %(levelname)s: %(message)s', 
