@@ -19,3 +19,4 @@ dumps/*
 static/*
 .coverage
 nosetests.xml
+www/recordings/recordings/*
