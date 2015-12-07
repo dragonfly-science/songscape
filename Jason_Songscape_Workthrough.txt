@@ -1,0 +1,217 @@
+###steps to setting up songscape server:###
+
+1. set up ubuntu in virtual machine (not sure if this is mandatory)
+
+2. download zip file of songscape from github
+
+3. install pip
+
+duplicate local_settings.py.TEMPLATE and rename copy as local_settings.py
+set SECRET_KEY in settings.py and local_settings.py (same code for both) as per instructions in local.setting.py.TEMPLATE
+
+sudo pip install Django
+sudo pip install south
+sudo pip install django_nose
+sudo apt-get install postgresql postgresql-contrib
+sudo apt-get install python-psycopg2
+sudo apt-get install libpq-dev
+sudo apt-get install python-numpy
+sudo apt-get install python-matplotlib
+sudo apt-get install python-pygame #apparently needed for wavy package
+sudo apt-get install mercurial #needed to clone bitbucket repository for wavy module
+hg clone https://bitbucket.org/nblouveton/wavy #obtained from https://bitbucket.org/nblouveton/wavy/src found after google search for wavy module (hope this is the right one...)
+# navigated to wavy directory and then once inside:
+sudo python setup.py install #to install wavy
+
+in Desktop/songscape-master/www/settings.py and Desktop/songscape-master/local_settings.py:
+under DATABASES:
+entered 'halosounds' as 'NAME',
+'jasonhideki' as 'USER',
+# change this!# 'shizen' as 'PASSWORD'.
+#also set DEBUG to True (in local_settings.py)
+
+## In Postgres
+#to enter postgres:
+sudo -u postgres psql
+# now in postgres:
+create database halosounds;
+create user jasonhideki with password 'shizen'; #not sure what I set as password...
+# to get into halosounds database:
+\c halosounds
+# to view contents (tables/sequences) of halosounds database (once in database):
+\d
+# to quit Postgres:
+\q
+NOTE: can get into halosounds just as default "postgres" user and need to sign in
+specifically as "jasonhideki" to be sure that that's the user
+(don't know if it matters...but it's specified in settings.py)
+## In Postgres
+
+# generating all tables and database structure needed for installed apps
+python manage.py syncdb
+# created superuser named 'jasonhideki' with email 'jhiikun@gmail.com' and password 'shizen'
+# www.recordings was not synced and command line promted me to use manage.py migrate to migrate these
+python manage.py migrate www.recordings
+# migrate moved around a bunch of recordings with numbers 0001-0040
+# and added recordings_analysis table to halosounds database
+
+# deleted halosounds (DROP DATABASE) in postgres to retry above two sections
+# django does not create the database on its own but only builds the tables and structure with syncdb/migrate
+
+#installed all packages listed in requirements.txt
+#django-debug-toolbar uninstalled django and reinstalled version 1.8, ran 1.6 installation again manually afterward
+
+#set RECORDINGS_PATH variable in www.settings.py to '/kiwi/recordings'
+
+#set DIR = 'www/fixtures' in www/recordings/management/commands/initial.py
+#error when trying to run initial.py is now:
+www.recordings.models.DoesNotExist: Site matching query does not exist.
+#instead of:
+No such file or directory: 'fixtures/Organisations.csv'
+#cleared out all but 3 lines of Deployments.csv (and made sure the other .csv's were ok) to match the 3 sample recordings I have in kiwi/recordings
+#error now reads:
+django.db.utils.IntegrityError: duplicate key value violates unique constraint "recordings_organisation_code_key"
+DETAIL: Key (code)=(RFPT) already exists.
+#cleared out contents of halosounds database to remove any possible complications there:
+python manage.py flush
+#I was asked to create superuser since I haven't before so I set:
+Username: jasonhideki
+Email: jhiikun@gmail.com
+Password: Takahashi2
+#commented out original section following line 40 in initial.py
+#replaced with a version of that section that didn't include 'Deployment_time' or 'Recovery_time' as these don't exist in Deployment.csv
+#also set comment to 'None' as Deployment.csv has no comment column either
+#had to flush after each change or else I would get the "Key (code)=(RFPT) already exists" error
+#after these steps python manage.py initial ran with only a warning about the timestamp and timestamps were set to 00:00:00 bc they aren't specified
+
+##load_recordings.py
+#ran python manage.py load_recordings and got:
+line 90, in handle
+for root, dirs, files in os.walk(args[0]):
+IndexError: tuple index out of range
+#I think that the arguement within os.walk() refers to the directory that needs to be walked so
+#I set it to '/www/kiwi/recordings' and error disappeared, load_recordings ran with no error
+#However, logging is not showing anything on console and although makes a log file, the file is empty
+#removed '_' in time structure arguement in line 31 of load_recording.py thinking that this will match our sound file name structures
+#changed load_recordings quite a bit in an attempt to allow for loading of halo proj .wav filenames
+# (i.e. getting record, site, datetime out of the filename not the path)
+#entered appropriate absolute path for raw recordings directory after os.walk under class Command(BaseCommand) in load_recordings.py
+#made sure that recorder and site numbers were in text format to include beginning 0 (in order to match numbers extracted from file names)
+#replaced all instances of RFPT or rfpt with VICU or vicu for Victoria Uni and removed Dragonfly from organisations
+#added 'import pytz' at the beginning, and pytz.utc.localize() to line 35 in initial.py to fix an error about naive datetime
+#commented out save_canonical and all references to this function in load_recordings2.py
+#because the paths and sound file directory format created by save_canonical conflicts with our file naming system
+#after removal of save_canonical, load_recordings2.py finally created snippets
+
+##extract_snippets.py
+#looked like line 11 refers to a csv file in media/snippets that will be read for snippet info so ran the following in postgres halosounds to create such a csv:
+COPY recordings_snippet TO 'path-of-snippets-directory/test_snippets.csv' DELIMITER ',' HEADER CSV;
+#if permissions issues arise use:
+chmod 777 path-of-snippets-directory/test_snippets.csv
+#changed 'args[0]' in line 11 of extract_snippets.py to absolute path of test_snippets.csv
+#after running extract_snippets again and failing due to the module not haveing function 'slice_wave'
+#realized that a different unrelated 'wavy' module was downloaded, not the dragonfly one 'numpy-wavy'
+#deleted this incorrect wavy module with:
+sudo pip uninstall wavy
+#which didn't completely uninstall (one directory 'wavy' was still left) so then ran:
+sudo rm -rf /usr/local/lib/python2.7/dist-packages/wavy
+#then cloned dragonfly's 'numpy-wavy' from github and installed by navigating to the numpy-wavy directory and then:
+sudo python setup.py install
+#running extract_snippets was giving an error about no file by the name described as the second argument of wavy.slice_wave in line 22
+#setting BASE_DIR to the absolute path of www/media/snippets instead of just 'www/media/snippets' seemed to fix it
+#60 sec snippets were properly generated! (listened to some to check for appropriate sounds)
+
+##score_snippets
+#no problems!
+
+##select_snippets_for_analysis & get_files_for_analysis_set
+#both of these result in error about analysis matching query not existing because there are no analysis with the code 'rimutaka-kiwi'
+#the recordings_analysis and recordings_analysisset tables are completely empty and will need to be filled
+#and the code set appropriately (maybe not 'rimutaka-kiwi' for us) in order for these commands to run
+#created a file, analysis.csv, with 1 row to enter into recordings_analysis
+#the data in that row are: 1, slug, rimutaka-kiwi, this is a test, 2015-11-12 15.51.07.745331+13, 1
+#the datetime value sample in analysis.csv was obtained by copying from one of the rows in recordings_score table
+#slug was written for the slug column because I didn't know what else to write for a slugfield
+#1 was written for the id and user_id because I didn't know what else to write
+#imported analysis.csv data into recordings_analysis:
+COPY recordings_analysis from '/home/jasonhideki/Desktop/analysis.csv' DELIMITERS ',' CSV;
+#running python manage.py select_snippets_for_anlysis now produces no error and the following:
+VICU-VICU-0379-2015-06-01T00:00:00Z 30 0 1 1
+VICU-VICU-0220-2015-06-06T00:00:00Z 60 0 3 1
+VICU-VICU-0842-2015-04-14T00:00:00Z 22 0 1 0
+#seems like 0842 should also have 60 snippets...not sure why it prints 22 when there are 60 in the recordings_snippets table
+#sonograms, soundfiles, and get_files_for_analysis_set all failed due to errors related to missing files
+#adjusted SONOGRAM and SNIPPET_DIR in settings.py to the appropriate paths of those directories in www/media/
+#now ran soundfiles, sonograms, and get_files_for_analysis_set (in that order) with no errors
+#running sonograms first didn't seem to change anything 
+#not sure what soundfiles did, sonograms populated the sonograms folder with sonogram images of the analysset snippets
+#not sure what get_files_for_analysis_set did
+#python manage.py runserver now gets to the analyses interface but doesn't display the sonogram, just the snippet name
+
+#thought I needed these from songscape's readme so ran:
+sudo apt-get update
+sudo apt-get install nginx
+#install nginx failed due to reading package error, maybe I don't need this at this stage since I'm still only on my local comp
+
+##getting halosounds version of songscape on github
+#trying to push local songscape modifications to overwrite github songscape master:
+#after getting into halosounds file ran:
+git push origin --force
+#wasn't ignoring recording files at first (too big to push to github) so had to update and stage .gitignore
+#that didn't work for some reason so manually moved the www/recordings/kiwi/ folder out of the songscape directory for pushing
+#that didn't work either I think because that file was already committed so I removed the last commit using:
+git reset --soft HEAD^
+#removed all commits except initial one and checked that recordings folder was not staged and .gitignore was using:
+git status
+#still getting error because of recording file sizes and those files not being ignored
+#tried:
+git rm -r --cached .
+git add .
+git commit -m "RESOLVED: .gitignore now working"
+#still didn't work...
+#tried removing all commits even initial one, removing remote, and finally just deleted entire .git directory to start over:
+rm -rf .git
+
+##TRYING TO GET SONOGRAM TO DISPLAY ON WEBSITE
+#the closest so far is setting SNIPPET_DIR in settings.py to:
+'/home/jasonhideki/Desktop/songscape-master/www/media/snippets'
+#the above properly generates the snippets site page but doesn't display the sonogram or a play button for the snippet
+#using the debugging console shows that the error is due to not being able to find the file given the PROJECT_DIR, MEDIA_ROOT, SNIPPET_DIR path
+#this seems to be due to a double // between media and the SNIPPET_DIR part of that file path
+#from copying the erroring file path from the console and copying it into a new window and playing with it, it seems the path I want is of the structure:
+/media/sonograms/sonogram-name
+#however, when I set SNIPPET_DIR accordingly (MEDIA_ROOT and PROJECT_DIR don't look like they need changing), I get an IO Error
+#because for some reason '/kiwi/' gets added before 'snippets/' in the file path
+#this '/kiwi/' is not being based on the www/recordings/kiwi directory (I checked by changing that directories name, refreshing the page, and then changing it back)
+#somewhere in the code it must be saying to put '/kiwi/' before the rest of the path name but not when you use the full path name for SNIPPET_DIR as mentioned earlier
+#found it! the website was using local_settings.py and that's where MEDIA_ROOT was set to '/kiwi'
+#changed MEDIA_ROOT in local_settings.py to:
+'/home/jasonhideki/Desktop/songscape-master/www/media'
+#leaving out /home or /jasonhideki etc gave same error as before so apparently needed the whole path
+#however, this is all only on the explore page of songscape where you can play snippets and see sonograms but can't tag...
+
+##GETTING ANALYSIS PAGE LOGIN TO WORK
+#clicking analyse on the songscape homepage takes you to the login page
+#username: jasonhideki and password: shizen as described in local_settings (but probably for database) resulted in:
+your username and password didn't match, try again
+#username: jasonhideki and password: Takahashi2 resulted in no error but just the same login page
+#maybe this login part hasn't been set up? that wouldn't make sense though if RFTP has already used this site before...
+#tried logging in to admin page of songscape but couldn't, changed password for superuser jasonhideki:
+python manage.py changepassword jasonhideki
+#changed password to Takahashi2
+#changed SESSION_COOKIE_SECURE to False in local_settings.py
+#can now get into analysis and admin pages of songscape
+#analysis page has sonograms that play and I can drag boxes around areas of the sonogram, however I can't type or input a bird tag...
+#next time should try inputting tags into the analysis or analysisset tables...
+
+notes:  determined what packages were needed by attempting python manage.py runserver once in songscape directory and reattempting over and over
+        open terminal with ctrl+alt+t in ubuntu
+        capitalization matters in file names (e.g. Desktop != desktop)
+        USE Django 1.6.10 (South is not supported by Django >= 1.7) #had to downgrade my initial django 1.8 download
+        to delete a psql database: "drop databasename' in psql
+
+tried python manage.py syncdb --migrate --noinput and it did stuff but
+python manage.py migrate still had nothing to migrate
+and had same error after runserver
+
+look into markdown
