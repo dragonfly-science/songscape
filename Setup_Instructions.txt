@@ -146,3 +146,9 @@ TODO: should fix things so you don't have to awkwardly set SONOGRAM and SNIPPET_
 16. FIXING SONGSCAPE LOGIN
 #in local_settings.py find and set SESSION_COOKIE_SECURE to False
 #you can now login by clicking login or analyse (not exaclty sure where it finds your username/password but it doesn't seem to be the previously set postgres superuser)
+
+###CONNECTING TO REMOTE DATABASE###
+#followed andre's instructions from email but had to change permissions on birdsong key
+#changed permissions by (while in songscape directory) running:
+chmod 600 keys/birdsong
+
