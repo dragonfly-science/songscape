@@ -43,10 +43,10 @@ sudo pip install git+https://github.com/dragonfly-science/kokako.git
 sudo pip install git+https://github.com/dragonfly-science/numpy-wavy.git
 sudo pip install git+https://github.com/django-nose/django-nose.git@4ffb4fab1895
 sudo apt-get install postgresql postgresql-contrib
-sudo apt-get install python-psycopg2 ###gave errors with both 'apt-get' and 'sudo'###
-sudo apt-get install libpq-dev ###gave errors with both 'apt-get' and 'sudo'###
-sudo apt-get install python-numpy ###gave errors with both 'apt-get' and 'sudo'###
-sudo apt-get install python-matplotlib ###gave errors with both 'apt-get' and 'sudo'###
+sudo apt-get install python-psycopg2
+sudo apt-get install libpq-dev
+sudo apt-get install python-numpy
+sudo apt-get install python-matplotlib
 ###may not need to enter 'sudo' before every install command but it prevents errors about user permissions###
 ###PUT IN NOTE: WHATS THE DIFFERENCE BETWEEN PIP AND APT-GET?###
 
@@ -64,7 +64,7 @@ python -c 'import random; print "".join([random.choice("abcdefghijklmnopqrstuvwx
 #'database-name' as 'NAME' (songscape_dev is default in settings.py)
 #'your-user-name' as 'USER'
 #'your-password' as 'PASSWORD'
-#'localhost' as 'HOST' 
+#'localhost' as 'HOST' only in settings.py (leave 'HOST' set to '' in local_settings.py)
 ### I set my username and password as the same as my superuser
 ### my username and password are saved in settings.py and thus visible to people with access to songscape...
 #enter postgres:
@@ -102,10 +102,11 @@ to double check that www/recordings/recordings/* is in .gitignore so that git do
 #Changed sites to match ours but did not need to input latitude/longitude (left blank)
 #or comments (kept one's already there from Rimutaka) in cites.csv. Those fields would probably allow for more utility in songscape
 #(e.g. the map sites feature)
-NOTE: commands for songscape are located in www/recordings/management/commands
-NOTE: initial.py command loads site, deployment, organisation, recorder data from fixtures csv's
-NOTE: I modified the inital.py command to fit our data
-run: python manage.py initial
+#NOTE: commands for songscape are located in www/recordings/management/commands
+#NOTE: initial.py command loads site, deployment, organisation, recorder data from fixtures csv's
+#NOTE: I modified the inital.py command to fit our data
+#run: 
+python manage.py initial
 
 9. LOAD RECORDINGS DATA
 NOTE: I modified load_recordings.py command to fit our soundfile naming conventions but check to make sure the BASE_PATH
@@ -126,16 +127,18 @@ sudo -u postgres psql
 \c songscape_dev
 #now copy the contents of the recordings_snippet and recordings_recording tables in the right column sequence (see code in extract_snippets.py) to the test_snippets.csv:
 COPY (SELECT recordings_recording.path, recordings_snippet.offset, recordings_snippet.duration, recordings_snippet.recording_id, recordings_snippet.id FROM recordings_snippet, recordings_recording WHERE recording_id = recordings_recording.id) TO 'absolute-path-of-test_snippets.csv' DELIMITER ',' CSV HEADER;
-remember that 'absolute-path-of-test_snippets.csv' in the above code stands for the absolute path of 'test_snippets.csv' and needs to be filled in appropriately!
-#this should print: COPY x (where x is whatever number of snippets you should get from your recordings and snippet settings--default 60sec)
+#remember that 'absolute-path-of-test_snippets.csv' in the above code stands for the absolute path of 'test_snippets.csv' and needs #to be filled in appropriately!
+#this should print: COPY x (where x is whatever number of snippets you should get from your recordings and snippet settings--default #60sec)
 #now edit Line 11 of the command extract_snippets.py to have the correct absolute path of test_snippets.csv following 'csv.reader(open(''
-#now run: python manage.py extract_snippets
+#now run: 
+python manage.py extract_snippets
 #which should slowly print out numbered lines for each snippet soundfile being generated into the www/media/snippets folder
 NOTE: the www/media/snippets folder (including the test_snippets.csv) is in .gitignore so is not tracked by git (all the soundfiles would be overwhelming) 
 TODO: put the code for creating test_snippet.csv (or maybe call it snippet.csv for general use) directly into extract_snippets.py or load_recordings.py
 
 11. SCORE SNIPPETS
-#run: python manage.py score_snippets
+#run: 
+python manage.py score_snippets
 #this will take a few minutes
 
 12. SELECT SNIPPETS FOR ANALYSIS
@@ -148,22 +151,20 @@ TODO: put the code for creating test_snippet.csv (or maybe call it snippet.csv f
 #1 was written for the id and user_id because I didn't know what else to write
 #imported analysis.csv data into recordings_analysis (again, remember to fill in the appropriate absolute path for 'analysis.csv':
 COPY recordings_analysis from 'absolute-path-of-analysis.csv' DELIMITERS ',' CSV;
-#run: python manage.py select_snippets_for_analysis.py
+#run: 
+python manage.py select_snippets_for_analysis
 
 13. SET SONOGRAM AND SNIPPET_DIR
-#in settings.py, find and set RECORDINGS_ROOT,MEDIA_ROOT,SONOGRAM_DIR,SNIPPET_DIR to the appropriate absolute directory paths (i.e. whereever you have your sonograms and snippets folders)
+#in settings.py, find and set RECORDINGS_ROOT to the appropriate absolute directory path (i.e. whatever directory you have your #recordings stored in)
 #in settings.py, make sure that SONOGRAM_DIR and SNIPPET_DIR are 'sonograms/' and 'snippets/' respectively
-#in local_settings.py find and set MEDIA_ROOT to the absolute path for your media directory (e.g. '/home/jasonhideki/Desktop/songscape-master/www/media') and set SESSION_COOKIE_SECURE (Ln 24) to False
-NOTE: local_settings.py is in .gitignore so won't be tracked by git and will need to be modified locally with each setup
-TODO: should fix things so you don't have to awkwardly set SONOGRAM and SNIPPET_DIR twice (in step 13 and again here) for things to work
+#in local_settings.py find and set MEDIA_ROOT to the absolute path for your media directory (e.g. '/home/jasonhideki/songscape-master/#www/media') and set SESSION_COOKIE_SECURE (Ln 24) to False
+#NOTE: local_settings.py is in .gitignore so won't be tracked by git and will need to be modified locally with each setup
+#TODO: should fix things so you don't have to awkwardly set SONOGRAM and SNIPPET_DIR twice (in step 13 and again here) for things to work
 
 14. RUN SONOGRAMS
-#run: python manage.py sonograms (this will generate sonograms into the sonogram directory you set previously
+#run: 
+python manage.py sonograms (this will generate sonograms into the sonogram directory you set previously
 # based on the snippets that meet selection critera from the select_snippets_for_analysis command)
-
-16. FIXING SONGSCAPE LOGIN
-#in local_settings.py find and set SESSION_COOKIE_SECURE to False
-#you can now login by clicking login or analyse (not exaclty sure where it finds your username/password but it doesn't seem to be the previously set postgres superuser)
 
 ###CONNECTING TO REMOTE DATABASE###
 #followed andre's instructions from email but had to change permissions on birdsong key
