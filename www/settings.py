@@ -2,7 +2,7 @@
 import os
 
 # generate SECRET_KEY as per instructions in local.setting.py.TEMPLATE?
-#SECRET_KEY = 'n1*ncz1e+i2m0#u-bnofes7ee5-#-^a36ej4(f@colo&+tyn=6'
+SECRET_KEY = 'qv3^mi)r9t3eeeyrq-ohch8r^7v%*(cfxvl9)6kxbrd9dz=+ek'
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -20,10 +20,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'songscape_dev',
-        'USER': 'jasonhideki',
-        'PASSWORD': 'shizen',
+        'USER': 'birdsong',
+        'PASSWORD': 'golgeinEnImvaur',
         'HOST': 'localhost',
-        'PORT': '',
+        'PORT': '5000',
     }
 }
 
