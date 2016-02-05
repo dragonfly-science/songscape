@@ -214,6 +214,18 @@ get_files_for_analysis_set: from what I figure this runs save_sonogram and save_
 NOTE: we may want to make different versions of these commands for each of our analyses.
 NOTE: detectors are in kokako and if we create new ones, they would go in the kokako detectors folder. We would then modify the score_snippets command to properly take the detectors we are interested in and append them to the recordings_detector table as well as use them in scoring snippets. Alternatively, we could figure out the analysis/create/ page and try to do this all form there (although this may require appending new detectors to the recordings_detector table beforehand).
 
+###SELECTING RECORDINGS FOR WEATHER TEST###
+#started a python script called select_weather_test_recordings.py in songscape/ for reading a csv file for the filenames we want for
+#weather conditions analysis and then copy those from the Solardrive to some external drive (e.g. flashdrive)
+
+###CUSTOMISING SELECTION OF SNIPPETS###
+#created a new .py file called select_snippets_for_halo_analysis.py in the commands directory in order to play with ways of getting
+#only morning recordings. Also to learn how to add/remove filters and detectors.
+#started by copying all contents from select_snippets_for_analysis.py
+#note that score_snippets.py is where detectors are added to the recordings_detector table for use by select_snippets_for_analysis.py
+#seems we could make a new scoring system for our filters with a modified score_snippets.py or modify #select_snippets_for_halo_analysis to not use scoring
+#NEXT TIME: figure out how to get recording filename so that you can parse name for time of recording
+
 notes:  determined what packages were needed by attempting python manage.py runserver once in songscape directory and reattempting over and over
         open terminal with ctrl+alt+t in ubuntu
         capitalization matters in file names (e.g. Desktop != desktop)
