@@ -41,13 +41,14 @@ class Command(BaseCommand):
                     exclude(id__in=kiwi_snippets).\
                     order_by('?')[:(round(n_snippets*0.02) - len(random_already))])
 	    '''
-	   
-            #Select only morning recordings
+	    #Select only morning recordings
 	    morn_recordings = []
 	    for r in recording_datetime:
 		recording_hour = r.hour
 		if recordings_start < 11 and recordings_start > 06:		
 			morn_recordings = morn_recordings.append(recording_file)
+	   
+
 
 	    #Select a random 5 snippets
 	    random_snippets = []
