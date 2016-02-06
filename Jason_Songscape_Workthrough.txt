@@ -217,6 +217,8 @@ NOTE: detectors are in kokako and if we create new ones, they would go in the ko
 ###SELECTING RECORDINGS FOR WEATHER TEST###
 #started a python script called select_weather_test_recordings.py in songscape/ for reading a csv file for the filenames we want for
 #weather conditions analysis and then copy those from the Solardrive to some external drive (e.g. flashdrive)
+#it works!
+#NEXT TIME: make this code only select morning recordings for later analyses (not necessary for this one I think)
 
 ###CUSTOMISING SELECTION OF SNIPPETS###
 #created a new .py file called select_snippets_for_halo_analysis.py in the commands directory in order to play with ways of getting
