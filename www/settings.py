@@ -1,7 +1,7 @@
 # Django settings for www project.
 import os
 
-# generate SECRET_KEY as per instructions in local.setting.py.TEMPLATE?
+# generate SECRET_KEY as per instructions in local.setting.py.TEMPLATE
 SECRET_KEY = 'qv3^mi)r9t3eeeyrq-ohch8r^7v%*(cfxvl9)6kxbrd9dz=+ek'
 
 DEBUG = True
