@@ -26,7 +26,7 @@ class Command(BaseCommand):
             if not row['Longitude'].strip():
                 row['Longitude'] = None
 
-            o = Site(code=row['Code'], latitude=row['Latitude'], longitude=row['Longitude'], habitat=row['Habitat'], altitude=row['Altitude'], slope=row['Slope'], aspect=row['Aspect'], north_densiometer=row['North_densiometer'], south_densiometer=row['South_densiometer'], east_densiometer=row['East_densiometer'], west_densiometer=row['West_densiometer'], vegetation=row['Vegetation'], pet=row['Pet'], compost=row['Compost'], contacts=row['Contacts'], directions=row['Directions'], address=row['Address'], site_changed_2015=row['Site_changed_2015'], changes_2015=row['Changes_2015'], comments=row['Comments'], organisation=vicu_org)
+            o = Site(code=row['Code'], latitude=row['Latitude'], longitude=row['Longitude'], description=row['Comments'], organisation=vicu_org)
             o.save()
 
         recorders = csv.DictReader(open(os.path.join(DIR, 'Recorders.csv')))
