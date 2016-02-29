@@ -117,22 +117,22 @@ NOTE: wouldn't hurt to check the recordings_snippet table to make sure load_reco
 10. SNIPPETS
 #you will need to create a csv file that tells the extract_snippets command how to create snippets based on the recordings_snippet table
 #start by directing into www/media/snippets, then:
-touch test_snippets.csv (or whatever you want to call this file)
+touch snippets.csv (or whatever you want to call this file)
 #then you'll need to adjust the permissions so that postgres can write to it:
-chmod 777 test_snippets.csv
+chmod 777 snippets.csv
 #then go into postgres and the songscape_dev database:
 sudo -u postgres psql
 \c songscape_dev
-#now copy the contents of the recordings_snippet and recordings_recording tables in the right column sequence (see code in extract_snippets.py) to the test_snippets.csv:
-COPY (SELECT recordings_recording.path, recordings_snippet.offset, recordings_snippet.duration, recordings_snippet.recording_id, recordings_snippet.id FROM recordings_snippet, recordings_recording WHERE recording_id = recordings_recording.id) TO 'absolute-path-of-test_snippets.csv' DELIMITER ',' CSV HEADER;
-#remember that 'absolute-path-of-test_snippets.csv' in the above code stands for the absolute path of 'test_snippets.csv' and needs #to be filled in appropriately!
+#now copy the contents of the recordings_snippet and recordings_recording tables in the right column sequence (see code in extract_snippets.py) to the snippets.csv:
+COPY (SELECT recordings_recording.path, recordings_snippet.offset, recordings_snippet.duration, recordings_snippet.recording_id, recordings_snippet.id FROM recordings_snippet, recordings_recording WHERE recording_id = recordings_recording.id) TO 'absolute-path-of-snippets.csv' DELIMITER ',' CSV HEADER;
+#remember that 'absolute-path-of-snippets.csv' in the above code stands for the absolute path of 'snippets.csv' and needs #to be filled in appropriately!
 #this should print: COPY x (where x is whatever number of snippets you should get from your recordings and snippet settings--default #60sec)
-#now edit Line 11 of the command extract_snippets.py to have the correct absolute path of test_snippets.csv following 'csv.reader(open(''
+#now edit Line 11 of the command extract_snippets.py to have the correct absolute path of snippets.csv following 'csv.reader(open(''
 #now run: 
 python manage.py extract_snippets
 #which should slowly print out numbered lines for each snippet soundfile being generated into the www/media/snippets folder
-NOTE: the www/media/snippets folder (including the test_snippets.csv) is in .gitignore so is not tracked by git (all the soundfiles would be overwhelming) 
-TODO: put the code for creating test_snippet.csv (or maybe call it snippet.csv for general use) directly into extract_snippets.py or load_recordings.py
+NOTE: the www/media/snippets folder (including the snippets.csv) is in .gitignore so is not tracked by git (all the soundfiles would be overwhelming) 
+TODO: put the code for creating snippet.csv (or maybe call it snippet.csv for general use) directly into extract_snippets.py or load_recordings.py
 
 11. SCORE SNIPPETS
 #run: 
