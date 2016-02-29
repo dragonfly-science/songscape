@@ -1,0 +1,43 @@
+Feb 20, 2016
+#Andre has destroyed the old remote songscape_dev database after I stuffed it up after manually dropping tables
+#Only the new server address has changed (each user should note this down for future access)
+
+###Checking new remote server###
+#Changed just the server address in the tunnel making commands and it works! 
+#Remote songscape_dev currently empty, will rebuild schema after testing out locally
+
+###Creating local songscape_dev database###
+#In postgres:
+CREATE DATABASE songscape_dev;
+CREATE USER jasonhideki password 'Takahashi2';
+#In settings.py and local_settings.py, changed USER to 'jasonhideki', PASSWORD to 'Takahashi2', HOST to 'localhost', and PORT to ''
+#Also generated a separate SECRET_KEY for the local server and commented out the remote server one
+python manage.py syncdb
+python manage.py migrate
+#NOTE: both the above commands printed:
+Error loading local settings #indicating that the command couldn't locate local_settings.py but the command still seemed to run properly to construct all the database tables
+#TODO: check if Victor gets the same local settings error when he runs it without all my changes (don't commit till then)
+python manage.py initial
+
+###Modifying fixtures csv's###
+#Had to modify dates to DD/MM/YY format for commands to run properly
+#Had to add leading 0's to make sites 4 digits, recorders 6 digits in all fixtures for load_recordings to work properly
+NOTE: running load_recording.py generates songscape_load_recordings.log which is useful for debugging
+TODO:add the 9 Zealandia site deployments
+
+Feb 28, 2016
+#Tried and failed with Victor to finish script for extracting 5 random snippets from each recording
+
+Feb 29, 2016
+#Got extract_5_snippets script to successfully print 5 random snippets!
+#Deleted superfluous extract_5_snippet script attempts
+#Added a recorder number 000000 to recorders.csv and added 000000 deployments for each site in deployments.csv
+#Flushed database and reloaded tables with initial.py and load_recordings.py
+#In extract_5_snippets.py changed selection criteria for Recordings.get from md5=md5 to path=path (line 49)
+#Ran extract_5_snippetys.py
+#Get error after 168 snippets:
+File "/home/jasonhideki/songscape/www/recordings/management/commands/extract_5_snippets.py", line 44, in handle
+    offset = float(row[1])
+IndexError: list index out of range
+TODO: fix error so that extract_5_snippets generates all the snippets
+
