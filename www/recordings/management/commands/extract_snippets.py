@@ -8,7 +8,9 @@ import wavy
 BASE_DIR = 'www/media/snippets'
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        reader = csv.reader(open('/home/jasonhideki/songscape/www/media/snippets/snippets.csv'))
+        #reader = csv.reader(open('/home/jasonhideki/songscape/www/media/snippets/snippets.csv'))
+	#trying out using outputs.csv instead:
+	reader = csv.reader(open('/home/jasonhideki/songscape/output.csv'))
         for i, row in enumerate(reader):
             if i:
                 try:   
