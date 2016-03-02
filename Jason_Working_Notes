@@ -41,3 +41,13 @@ File "/home/jasonhideki/songscape/www/recordings/management/commands/extract_5_s
 IndexError: list index out of range
 TODO: fix error so that extract_5_snippets generates all the snippets
 
+Mar 2, 2016
+#Nirosha's noise removal script warped some sounds to make them more difficut to recognise 
+#so I reloaded the database removing the 000000 recordings from the database and undid lines written to deal with 000000 recordings
+#also in extract_5_snippets.py changed selection criteria for Recordings.get from path=path back to md5=md5 (line 49)
+#was still getting error after 168 snippets mentioned Feb 29, 2016
+#error went away and all snippets were generated when I had extract_5_snippets only create the output.csv 
+#and had extract_snippets read output.csv to generate the snippets
+#renamed extract_5_snippets select_5_snippets
+
+
