@@ -22,9 +22,13 @@ class Command(BaseCommand):
 	for i in range(len(Recordings)):
 	    random_numbers = []
 	    while len(random_numbers) < 5:
-		random_number = random.randrange(2+i*60,63+i*60,1)
+		if i == 0:
+		    random_number = random.randrange(0,60,1)
+		elif i >= 0:
+		    random_number = random.randrange(1+i*60,60+i*60,1)
 		if random_number not in random_numbers:
 	            random_numbers.append(random_number)
+	    	print random_numbers
 	    random_rows.extend(random_numbers)
 	reader = csv.reader(open('/home/jasonhideki/songscape/www/media/snippets/snippets.csv'))
 	reader.next()
