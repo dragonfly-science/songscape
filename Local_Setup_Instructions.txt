@@ -13,9 +13,11 @@ sudo apt-get install virtualbox-guest-dkms
 # if not, ask Jason or Victor for access.
 #Install git (version used is 1.9.1):
 sudo apt-get install git
-#in your root directory or whereever you would like your songscape repository (don't forget to replace 'your-git-username' with your #git username):
-git clone https://github.com/your-git-username/songscape.git
+#in your root directory or whereever you would like your songscape repository:
+git clone https://github.com/jasonhideki/songscape.git
 #this will clone songscape as a git repository onto your local computer.
+#if cloned as 'songscape-master' rename directory to be 'songscape'(important for pathing later)
+#make sure that songscape directory is in home folder
 
 #3. INSTALL NECESSARY MODULES
 #Install pip (these instructions from http://www.saltycrane.com/blog/2010/02/how-install-pip-ubuntu/):
@@ -33,10 +35,10 @@ sudo pip install pymongo
 sudo pip install nose-cov
 sudo pip install pytz
 sudo pip install Pillow
-sudo pip install numpy
-sudo pip install matplotlib==1.3 #didn't work once and had to use: sudo apt-get install python-matplotlib which downloaded 1.3.1
+sudo pip install numpy #it might be required to install python-dev using: sudo apt-get install python-dev
+sudo pip install matplotlib==1.3 #didn't work once and had to use: sudo apt-get install python-matplotlib #which downloaded 1.3.1
 sudo pip install git+https://github.com/mozilla/django-browserid.git@04e4a860e282432 ###what the heck is this?
-sudo pip install git+git://github.com/ferrouswheel/dragonfab.git
+sudo pip install git+git://github.com/ferrouswheel/dragonfab.git #didn't work because of UnboundLocalError: local variable 'all-output' referenced before assignment
 sudo pip install git+https://github.com/dragonfly-science/kokako.git
 sudo pip install git+https://github.com/dragonfly-science/numpy-wavy.git
 sudo pip install git+https://github.com/django-nose/django-nose.git@4ffb4fab1895
@@ -48,14 +50,6 @@ sudo apt-get install python-numpy
 sudo apt-get install python-matplotlib
 #may not need to enter 'sudo' before every install command but it prevents errors about user permissions, may give you weird comments #on not being the owner of the pip directory tho so maybe should omit...
 #note that versions are important and having the wrong version of django for example will give you errors later on
-
-3. SET SECRET KEY ###update this without the need to dublicate local_settings.py.TEMPLATE because I added local_settings.py to git tracking
-#duplicate local_settings.py.TEMPLATE and rename copy as local_settings.py (in same directory as template, use 'copy' not 'copy to' #and just paste into same directory)
-#generate a SECRET_KEY (these instructions from bottom of local_settings.py.TEMPLATE):
-python -c 'import random; print "".join([random.choice("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)") for i in range(50)])'
-#enter the output of the above code for SECRET_KEY in settings.py (in www/ directory) and in local_settings.py (same key for both)
-#NOTE: the SECRET_KEY variable is commented out in settings.py and the old secret key will need to be replaced with the one you just #generated and then that line uncommented to function.
-#Note: local_settings.py is in .gitignore so this file does not update and needs to be generated for each local project. however, #settings.py is not ignored and thus shows an old secret key from the last project git pushed.
 
 7. PUT IN RAW RECORDINGS ###edit this to include instructions on getting raw recordings through vpn using script for finding and copying specified files
 in www/settings.py RECORDINGS_PATH (Line 158) should be:
