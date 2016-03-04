@@ -16,7 +16,7 @@ DATABASES = {
 DEBUG = True
 
 SITE_URL = ''
-MEDIA_ROOT = '/kiwi'
+MEDIA_ROOT = '/home/jasonhideki/songscape/www/media'
 
 EMAIL_HOST = ''
 SERVER_EMAIL = ''
