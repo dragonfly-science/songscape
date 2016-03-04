@@ -29,3 +29,4 @@ BROWSERID_AUDIENCES = ['https://songscape-staging.dragonfly.co.nz',]
 # generate this per server, and add to debconf
 # python -c 'import random; print "".join([random.choice("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)") for i in range(50)])'
 SECRET_KEY = '1^8)k29v9fm)=oy1exyl_#cnr0mw=^mx@j()5rshb+*b(70fbg'
+#SECRET_KEY = 'qv3^mi)r9t3eeeyrq-ohch8r^7v%*(cfxvl9)6kxbrd9dz=+ek'
