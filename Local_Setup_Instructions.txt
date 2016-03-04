@@ -52,7 +52,37 @@ sudo pip install Django==1.6.10 #double-checking version of Django because more 
 #may not need to enter 'sudo' before every install command but it prevents errors about user permissions, may give you weird comments #on not being the owner of the pip directory tho so maybe should omit...
 #note that versions are important and having the wrong version of django for example will give you errors later on
 
-4. PUT IN RAW RECORDINGS ###edit this to include instructions on getting raw recordings through vpn using script for finding and copying specified files
+#If you are transferring snippets that are already synchronised with the database go to 4. 
+#If you are creating new recordings go to 8.
+#######TRANSFER SNIPPETS#############################
+#4.COPY SNIPPETS AND SONOGRAMS
+#Copy the snippets and sonograms folders to songscape/www/media
+#5.CONNECT TO REMOTE DATABASE
+#following andre's instructions change permissions by running:
+cd songscape
+chmod 600 keys/birdsong
+#connect to tunnel
+ssh -L 5000:localhost:5432 -i keys/birdsong birdsong@54.206.115.207
+#in a separate Terminal window connect to database
+psql -U birdsong -h localhost -p 5000
+#write the pasword for birdsong
+golgeinEnImvaur
+
+#6. RUN THE WEBSITE IN YOUR COMPTUER
+#Open a new terminal window and run:
+cd songscape
+python manage.py runserver
+
+#7.ADJUSTING LOCAL PATH OF RECORDINGS###
+#This has to be done locally each time before starting analysis if another user has done so since your last session
+#or else songscape won't be able to find the recordings
+#Run the following (don't forget to change the user names as appropriate) in the remote songscape_dev database on psql:
+update recordings_recording set path = replace(path, 'victoranton', 'jasonhideki');
+#the above code replaces the string 'victoranton' with 'jasonhideki' in the path column of recordings_recording
+
+
+#######CREATE NEW RECORDINGS#############################
+#8. PUT IN RAW RECORDINGS ###edit this to include instructions on getting raw recordings through vpn using script for finding and copying specified files
 in www/settings.py RECORDINGS_PATH (Line 158) should be:
 '/recordings/recordings' #(this is where you'll put the raw soundfiles)
 copy and paste your raw soundfiles into www/recordings/recordings (you will have to create a new folder in www/recordings and name it recordings)
@@ -60,7 +90,14 @@ use:
 nano .gitignore
 to double check that www/recordings/recordings/* is in .gitignore so that git doesn't try to sync soundfiles (they're too large)
 
-5. LOAD DATA FROM FIXTURES ###need to adapt some csv's for all our data and then update them into the remote database, should make another instructions or workthrough document outlining what things we needed to do once but then don't need to do subsequent times because of git tracking and the remote db.
+#9.ADJUSTING LOCAL PATH OF RECORDINGS###
+#This has to be done locally each time before starting analysis if another user has done so since your last session
+#or else songscape won't be able to find the recordings
+#Run the following (don't forget to change the user names as appropriate) in the remote songscape_dev database on psql:
+update recordings_recording set path = replace(path, 'victoranton', 'jasonhideki');
+#the above code replaces the string 'victoranton' with 'jasonhideki' in the path column of recordings_recording
+
+#10. LOAD DATA FROM FIXTURES ###need to adapt some csv's for all our data and then update them into the remote database, should make another instructions or workthrough document outlining what things we needed to do once but then don't need to do subsequent times because of git tracking and the remote db.
 #The csv's in www/fixtures are where the database will pull its data for those 4 tables
 #Edit these csv's to reflect the data you want to use (they currently reflect 3 sample soundfiles)
 #I chose to use 'Victoria University' with code 'VICU' as our organisation
@@ -73,7 +110,7 @@ to double check that www/recordings/recordings/* is in .gitignore so that git do
 #run: 
 python manage.py initial
 
-6. LOAD RECORDINGS DATA
+#11. LOAD RECORDINGS DATA
 NOTE: I modified load_recordings.py command to fit our soundfile naming conventions but check to make sure the BASE_PATH
       (where the raw recordings should be) is set appropriately (can start from www/ doesn't need to be absolute path.
       The absolute path (full path not just from www/) for the raw recordings should also be entered after os.walk on line 109.
@@ -81,7 +118,7 @@ run: python manage.py load_recordings
 #this command populates the recordings_recording and recordings_snippet table in the database based on our raw soundfiles and their names
 NOTE: wouldn't hurt to check the recordings_snippet table to make sure load_recordings worked properly
 
-7. SNIPPETS
+#12. SNIPPETS
 #you will need to create a csv file that tells the extract_snippets command how to create snippets based on the recordings_snippet table
 #start by directing into www/media/snippets, then:
 touch test_snippets.csv (or whatever you want to call this file)
@@ -101,12 +138,12 @@ python manage.py extract_snippets
 NOTE: the www/media/snippets folder (including the test_snippets.csv) is in .gitignore so is not tracked by git (all the soundfiles would be overwhelming) 
 TODO: put the code for creating test_snippet.csv (or maybe call it snippet.csv for general use) directly into extract_snippets.py or load_recordings.py
 
-8. SCORE SNIPPETS
+#13. SCORE SNIPPETS
 #run: 
 python manage.py score_snippets
 #this will take a few minutes
 
-12. SELECT SNIPPETS FOR ANALYSIS
+#14. SELECT SNIPPETS FOR ANALYSIS
 #the recordings_analysis and recordings_analysisset tables are completely empty and will need to be filled
 #and the code set appropriately (maybe not 'rimutaka-kiwi' for us) in order for these commands to run
 #created a file, analysis.csv, with 1 row to enter into recordings_analysis
@@ -119,19 +156,19 @@ COPY recordings_analysis from 'absolute-path-of-analysis.csv' DELIMITERS ',' CSV
 #run: 
 python manage.py select_snippets_for_analysis
 
-9. SET SONOGRAM AND SNIPPET_DIR
+#15. SET SONOGRAM AND SNIPPET_DIR
 #in settings.py, find and set RECORDINGS_ROOT to the appropriate absolute directory path (i.e. whatever directory you have your #recordings stored in)
 #in settings.py, make sure that SONOGRAM_DIR and SNIPPET_DIR are 'sonograms/' and 'snippets/' respectively
 #in local_settings.py find and set MEDIA_ROOT to the absolute path for your media directory (e.g. '/home/jasonhideki/songscape-master/#www/media') and set SESSION_COOKIE_SECURE (Ln 24) to False
 #NOTE: local_settings.py is in .gitignore so won't be tracked by git and will need to be modified locally with each setup
 #TODO: should fix things so you don't have to awkwardly set SONOGRAM and SNIPPET_DIR twice (in step 13 and again here) for things to work
 
-10. RUN SONOGRAMS
+#16. RUN SONOGRAMS
 #run: 
 python manage.py sonograms (this will generate sonograms into the sonogram directory you set previously
 # based on the snippets that meet selection critera from the select_snippets_for_analysis command)
 
-###CONNECTING TO REMOTE DATABASE###
+#17.CONNECTING TO REMOTE DATABASE
 #followed andre's instructions 
 #changed permissions by (while in songscape directory) running:
 chmod 600 keys/birdsong
@@ -143,17 +180,11 @@ psql -U birdsong -h localhost -p 5000
 #write the pasword for birdsong
 golgeinEnImvaur
 
-###Run the website in your computer###
+#18.Run the website in your computer
 #Open a new terminal window
 cd songscape
 python manage.py runserver
 
-###ADJUSTING LOCAL PATH OF RECORDINGS###
-#This has to be done locally each time before starting analysis if another user has done so since your last session
-#or else songscape won't be able to find the recordings
-#Run the following (don't forget to change the user names as appropriate) in the remote songscape_dev database on psql:
-update recordings_recording set path = replace(path, 'victoranton', 'jasonhideki');
-#the above code replaces the string 'victoranton' with 'jasonhideki' in the path column of recordings_recording
 
 TO SELF:
 delete everything between ###
