@@ -21,7 +21,7 @@ MEDIA_ROOT = '/kiwi'
 EMAIL_HOST = ''
 SERVER_EMAIL = ''
 
-SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = False
 ALLOWED_HOSTS = ['.dragonfly.co.nz']
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTOCOL', 'https')
 BROWSERID_AUDIENCES = ['https://songscape-staging.dragonfly.co.nz',]
