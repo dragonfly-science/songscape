@@ -21,7 +21,7 @@ git clone https://github.com/jasonhideki/songscape.git
 
 #3. INSTALL NECESSARY MODULES
 #Install pip (these instructions from http://www.saltycrane.com/blog/2010/02/how-install-pip-ubuntu/):
-sudo apt-get install python-pip python-dev build essential
+sudo apt-get install python-pip python-dev build essential #if build and essential aren't found run command without
 sudo pip install --upgrade pip
 sudo pip install --upgrade virtualenv
 #Install everything else (enter one at a time to ensure proper installs and check for errors):
@@ -38,7 +38,7 @@ sudo pip install Pillow
 sudo pip install numpy #it might be required to install python-dev using: sudo apt-get install python-dev
 sudo pip install matplotlib==1.3 #didn't work once and had to use: sudo apt-get install python-matplotlib #which downloaded 1.3.1
 sudo pip install git+https://github.com/mozilla/django-browserid.git@04e4a860e282432 ###what the heck is this?
-sudo pip install git+git://github.com/ferrouswheel/dragonfab.git #didn't work because of UnboundLocalError: local variable 'all-output' referenced before assignment
+sudo pip install git+https://github.com/ferrouswheel/dragonfab.git
 sudo pip install git+https://github.com/dragonfly-science/kokako.git
 sudo pip install git+https://github.com/dragonfly-science/numpy-wavy.git
 sudo pip install git+https://github.com/django-nose/django-nose.git@4ffb4fab1895
@@ -48,10 +48,11 @@ sudo apt-get install libpq-dev
 ###didn't install the following because seemed redundant, if nothing gets screwed up, delete from the instructions. 
 sudo apt-get install python-numpy
 sudo apt-get install python-matplotlib
+sudo pip install Django==1.6.10 #double-checking version of Django because more recent versions will give errors about module named Creation
 #may not need to enter 'sudo' before every install command but it prevents errors about user permissions, may give you weird comments #on not being the owner of the pip directory tho so maybe should omit...
 #note that versions are important and having the wrong version of django for example will give you errors later on
 
-7. PUT IN RAW RECORDINGS ###edit this to include instructions on getting raw recordings through vpn using script for finding and copying specified files
+4. PUT IN RAW RECORDINGS ###edit this to include instructions on getting raw recordings through vpn using script for finding and copying specified files
 in www/settings.py RECORDINGS_PATH (Line 158) should be:
 '/recordings/recordings' #(this is where you'll put the raw soundfiles)
 copy and paste your raw soundfiles into www/recordings/recordings (you will have to create a new folder in www/recordings and name it recordings)
@@ -59,7 +60,7 @@ use:
 nano .gitignore
 to double check that www/recordings/recordings/* is in .gitignore so that git doesn't try to sync soundfiles (they're too large)
 
-8. LOAD DATA FROM FIXTURES ###need to adapt some csv's for all our data and then update them into the remote database, should make another instructions or workthrough document outlining what things we needed to do once but then don't need to do subsequent times because of git tracking and the remote db.
+5. LOAD DATA FROM FIXTURES ###need to adapt some csv's for all our data and then update them into the remote database, should make another instructions or workthrough document outlining what things we needed to do once but then don't need to do subsequent times because of git tracking and the remote db.
 #The csv's in www/fixtures are where the database will pull its data for those 4 tables
 #Edit these csv's to reflect the data you want to use (they currently reflect 3 sample soundfiles)
 #I chose to use 'Victoria University' with code 'VICU' as our organisation
@@ -68,11 +69,11 @@ to double check that www/recordings/recordings/* is in .gitignore so that git do
 #(e.g. the map sites feature)
 #NOTE: commands for songscape are located in www/recordings/management/commands
 #NOTE: initial.py command loads site, deployment, organisation, recorder data from fixtures csv's
-#NOTE: I modified the inital.py command to fit our data
+#NOTE: I modified the initial.py command to fit our data
 #run: 
 python manage.py initial
 
-9. LOAD RECORDINGS DATA
+6. LOAD RECORDINGS DATA
 NOTE: I modified load_recordings.py command to fit our soundfile naming conventions but check to make sure the BASE_PATH
       (where the raw recordings should be) is set appropriately (can start from www/ doesn't need to be absolute path.
       The absolute path (full path not just from www/) for the raw recordings should also be entered after os.walk on line 109.
@@ -80,7 +81,7 @@ run: python manage.py load_recordings
 #this command populates the recordings_recording and recordings_snippet table in the database based on our raw soundfiles and their names
 NOTE: wouldn't hurt to check the recordings_snippet table to make sure load_recordings worked properly
 
-10. SNIPPETS
+7. SNIPPETS
 #you will need to create a csv file that tells the extract_snippets command how to create snippets based on the recordings_snippet table
 #start by directing into www/media/snippets, then:
 touch test_snippets.csv (or whatever you want to call this file)
@@ -100,7 +101,7 @@ python manage.py extract_snippets
 NOTE: the www/media/snippets folder (including the test_snippets.csv) is in .gitignore so is not tracked by git (all the soundfiles would be overwhelming) 
 TODO: put the code for creating test_snippet.csv (or maybe call it snippet.csv for general use) directly into extract_snippets.py or load_recordings.py
 
-11. SCORE SNIPPETS
+8. SCORE SNIPPETS
 #run: 
 python manage.py score_snippets
 #this will take a few minutes
@@ -118,22 +119,34 @@ COPY recordings_analysis from 'absolute-path-of-analysis.csv' DELIMITERS ',' CSV
 #run: 
 python manage.py select_snippets_for_analysis
 
-13. SET SONOGRAM AND SNIPPET_DIR
+9. SET SONOGRAM AND SNIPPET_DIR
 #in settings.py, find and set RECORDINGS_ROOT to the appropriate absolute directory path (i.e. whatever directory you have your #recordings stored in)
 #in settings.py, make sure that SONOGRAM_DIR and SNIPPET_DIR are 'sonograms/' and 'snippets/' respectively
 #in local_settings.py find and set MEDIA_ROOT to the absolute path for your media directory (e.g. '/home/jasonhideki/songscape-master/#www/media') and set SESSION_COOKIE_SECURE (Ln 24) to False
 #NOTE: local_settings.py is in .gitignore so won't be tracked by git and will need to be modified locally with each setup
 #TODO: should fix things so you don't have to awkwardly set SONOGRAM and SNIPPET_DIR twice (in step 13 and again here) for things to work
 
-14. RUN SONOGRAMS
+10. RUN SONOGRAMS
 #run: 
 python manage.py sonograms (this will generate sonograms into the sonogram directory you set previously
 # based on the snippets that meet selection critera from the select_snippets_for_analysis command)
 
 ###CONNECTING TO REMOTE DATABASE###
-#followed andre's instructions from email but had to change permissions on birdsong key
+#followed andre's instructions 
 #changed permissions by (while in songscape directory) running:
 chmod 600 keys/birdsong
+#connect to tunnel
+cd songscape
+ssh -L 5000:localhost:5432 -i keys/birdsong birdsong@54.206.115.207
+#in a separate Terminal window connect to database
+psql -U birdsong -h localhost -p 5000
+#write the pasword for birdsong
+golgeinEnImvaur
+
+###Run the website in your computer###
+#Open a new terminal window
+cd songscape
+python manage.py runserver
 
 ###ADJUSTING LOCAL PATH OF RECORDINGS###
 #This has to be done locally each time before starting analysis if another user has done so since your last session
