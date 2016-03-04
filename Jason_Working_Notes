@@ -50,4 +50,53 @@ Mar 2, 2016
 #and had extract_snippets read output.csv to generate the snippets
 #renamed extract_5_snippets select_5_snippets
 
+Mar 3, 2016
+#had to adjust select_5_snippets to have two cases for random_number = random.randrange(), one for when i is 0 and one for all others
+#because math would be different with 0 and was resulting in some recordings have 6 snippets and some 4 previously
+#manually added in a header line to outputs.csv because extract_snippets was producing 1 less snippet than the total and that fixed it
+TODO: make it so I don't have to manually enter outputs.csv's header
+NOTE: currently no detectors in database because score_snippets.py is what loads them and I didn't use that command for weather test
+#ended work at this error running select_snippets_for_weather_analysis:
+ValueError: Cannot assign "('VICU-0220-2015-04-04T07:39:58Z-1020-60',)": "AnalysisSet.snippet" must be a "Snippet" instance.
+
+Mar 4, 2016
+#going to try creating a list of snippets matching those in output.csv using filters so that the snippets remain instances of Snippet #of Snippet (in models) with all their fields
+#select_snippets_for_weather_analysis seemed to work after commenting out bit about zip(snippets), I guess not needed as there aren't #multiple lists of snippets as in the original select_snippets_for_analysis
+#195 snippets now in analysisset as they should be
+#ran:
+python manage.py sonograms
+#successfully generated 195 sonograms without any modifications to sonograms.py
+#ran:
+python manage.py runserver
+#navigating to analysis button fails because its set up to go to an analysis named rimutaka-kiwi but going to 
+#the server address /analysis lets you select 'slug' and then takes you to the weather test
+#created 3 tags for weather test: clear, noisy, and too_noisy
+#changed settings and local_settings to reflect remote database settings: 'USER' = 'birdsong' and 'PORT' = '5000' and password as per #andre's email
+#remote link worked, now to set up database:
+python manage.py syncdb
+#created django superuser jasonhideki, Takahashi2, jhiikun@gmail.com
+python manage.py migrate
+QUESTION: why do I always get error loading local settings when I run songscape commands?
+python manage.py initial
+python manage.py load_recordings
+NOTE: load_recordings took a long time to run (just let it run and it was successful)
+In remote postgres songscape_dev:
+\copy recordings_analysis from '/home/jasonhideki/songscape/analysis.csv' DELIMITERS ',' CSV;
+NOTE: COPY command didn't work here because not superuser but anyone can use \copy
+back in regular terminal command line:
+python manage.py select_snippets_for_weather_analysis
+python manage.py runserver
+#it worked!!
+#created clear, noisy, too_noisy tags and added to weather analysis
+#analysed a few snippets in weather analysis just to make sure it works
+
+
+
+
+ 
+
+
+
+
+
 
