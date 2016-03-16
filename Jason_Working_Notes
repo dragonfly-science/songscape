@@ -91,6 +91,10 @@ python manage.py runserver
 #analysed a few snippets in weather analysis just to make sure it works
 #committed/pushed changes to git
 
+Mar 16, 2016
+#Victor and I can both login to songscape but analysis only works from my computer because it #looks for recordings with 'jasonhideki' in path (recordings were loaded on my computer).
+#Will need to change this behaviour somehow to allow multiple computers to access. 
+#Maybe in load_recordings, only the part of the path after 'jasonhideki' could be uploaded to the #path column and then when looking for the recordings, a piece of code adds the local root portion #of the whole path.
 
 
  

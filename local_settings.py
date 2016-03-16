@@ -14,9 +14,8 @@ DATABASES = {
 }
 # Change this to True if you are doing local development
 DEBUG = True
-
 SITE_URL = ''
-MEDIA_ROOT = '/home/jasonhideki/songscape/www/media'
+MEDIA_ROOT = '/home/victor/songscape/www/media'
 
 EMAIL_HOST = ''
 SERVER_EMAIL = ''
