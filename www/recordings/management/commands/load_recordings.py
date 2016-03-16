@@ -113,7 +113,7 @@ class Command(BaseCommand):
                     path = os.path.join(root, f)
                     if os.path.getsize(path) < MIN_FILE_SIZE:
                         logging.info('small file ignored: %s', path)
-                        continue
+                        continue	
 		    md5 = get_md5(path)
                     '''
 		    try:                      
