@@ -289,12 +289,18 @@ class Snippet(models.Model):
             path = os.path.join(path, filename)
         try:
             if not os.path.exists(path):
-                replace = True
+		colonpath = path.replace(':', '_')
+            	if os.path.exists(colonpath):
+		    filename = filename.replace(':', '_')
+                    path = colonpath
+		    replace = False
+                else:
+                    replace = True
         except (ValueError, SuspiciousOperation, AttributeError):
             replace = True
         if replace:
             wav_file = open(path, 'w')
-            wavy.slice_wave(self.recording.path, wav_file, self.offset, self.duration, max_framerate=max_framerate)
+            wavy.slice_wave(settings.RECORDINGS_ROOT, wav_file, self.offset, self.duration, max_framerate=max_framerate)
             wav_file.close()
         return filename
 
