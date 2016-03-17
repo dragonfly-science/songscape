@@ -94,7 +94,15 @@ python manage.py runserver
 Mar 16, 2016
 #Victor and I can both login to songscape but analysis only works from my computer because it #looks for recordings with 'jasonhideki' in path (recordings were loaded on my computer).
 #Will need to change this behaviour somehow to allow multiple computers to access. 
-#Maybe in load_recordings, only the part of the path after 'jasonhideki' could be uploaded to the #path column and then when looking for the recordings, a piece of code adds the local root portion #of the whole path.
+#Maybe in load_recordings, only the part of the path after 'jasonhideki' could be uploaded to the 
+#path column and then when looking for the recordings, a piece of code adds the local root portion 
+#of the whole path.
+#Tested out tagging as both user jasonhideki and vykanton (both ok on my computer), by doing about 50 each
+#If one user tags a snippet, it is considered analysed and the second user will not see it.
+#Did have two snippets (882, 416: must be the snippet table snippet id's) that didn't display sonograms #but tagged them blind (had to go to previous snippet and then forward again to play sound)
+#Trying to query what call labels were tagged to each recording (not snippet, recording):
+\copy (SELECT tag.name, rec.path, us.first_name FROM recordings_tag as tag INNER JOIN recordings_calllabel as cl ON tag.id = cl.tag_id INNER JOIN auth_user us ON cl.user_id = us.id INNER JOIN recordings_analysisset ns ON cl.analysisset_id = ns.id INNER JOIN recordings_snippet sn ON ns.snippet_id = sn.id INNER JOIN recordings_recording rec ON sn.recording_id = rec.id) TO '/home/jasonhideki/songscape/weather_query.csv' WITH CSV HEADER;
+#Worked! can now look at weather_query.csv and see which recordings got which tags from which users
 
 
  
