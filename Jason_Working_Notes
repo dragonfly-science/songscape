@@ -104,8 +104,20 @@ Mar 16, 2016
 \copy (SELECT tag.name, rec.path, us.first_name FROM recordings_tag as tag INNER JOIN recordings_calllabel as cl ON tag.id = cl.tag_id INNER JOIN auth_user us ON cl.user_id = us.id INNER JOIN recordings_analysisset ns ON cl.analysisset_id = ns.id INNER JOIN recordings_snippet sn ON ns.snippet_id = sn.id INNER JOIN recordings_recording rec ON sn.recording_id = rec.id) TO '/home/jasonhideki/songscape/weather_query.csv' WITH CSV HEADER;
 #Worked! can now look at weather_query.csv and see which recordings got which tags from which users
 
+Mar 17, 2016
+git commit #yesterday's stuff
+#going to change analysis button on songscape page to route to analysis page not rimutaka kiwi analysis
+#Songscape now giving error about no recording files with victor in the name (because I loaded a couple on victor's comp yesterday)
+#Manually deleted from snippets and recordings tables the victor loaded recordings and still didn't work!
+DELETE FROM recordings_snippet WHERE recording_id>=40 RETURNING recording_id;
+DELETE FROM recordings_recording WHERE id>=40 RETURNING path;
+#Figured it out: had to replace victor with jasonhideki in the MEDIA_ROOT path in local settings and settings
+#TODO: figure out a system where we each have a different non-git local_settings that overrides any #changing local paths in settings so we don't have to change back and forth after each git commit
+#changed analysis button to go to weather analysis by changing 'rimutaka-kiwi' with 'weather in base.html line 44   
+TODO: figure out how to change analysis button to go to analysis selection page 
+#FYI: victor's username is vykanton and password Victor
+NOTE: when a snippet is not tagged and user clicks next, next snippet does not have a previous button but number of snippets to be analysed decreases as normal
 
- 
 
 
 
