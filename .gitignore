@@ -1,3 +1,4 @@
+local_security.txt
 local_settings.py
 call-labels-*
 *db-journal

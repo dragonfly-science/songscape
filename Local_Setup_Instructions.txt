@@ -175,16 +175,15 @@ chmod 600 keys/birdsong
 #connect to tunnel
 cd songscape
 ssh -L 5000:localhost:5432 -i keys/birdsong birdsong@54.206.115.207
-#in a separate Terminal window connect to database
+#in a separate Terminal window connect to database:
+cd songscape
 psql -U birdsong -h localhost -p 5000
 #write the pasword for birdsong
-golgeinEnImvaur
 
 #18.Run the website in your computer
 #Open a new terminal window
 cd songscape
 python manage.py runserver
-
 
 TO SELF:
 delete everything between ###

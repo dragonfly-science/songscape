@@ -118,6 +118,14 @@ TODO: figure out how to change analysis button to go to analysis selection page
 #FYI: victor's username is vykanton and password Victor
 NOTE: when a snippet is not tagged and user clicks next, next snippet does not have a previous button but number of snippets to be analysed decreases as normal
 
+Mar 19, 2016
+#Removed secret key and passwords from settings.py and local_setup_instructions to improve security with git tracked files (local_settings still has secret key/password but not git tracked)
+#Wrote security passwords and keys in non-git tracked file called local_security.txt
+#Finished snippets in weather analysis
+#Weather analysis got to list index out of range error after number 2 left to go snippet
+#Query described Mar 16 for weather_query.csv only resulted in 158 rows and calllabels table in database reflects that only 158 tags exist...where'd the other snippets go?? did I miss that many?
+#Songscape's summary page shows that all 196 snippets were analysed but identifications: 85 clear, 43 too_noisy, 30 noisy only add up to 158
+#How do I find the snippets that weren't tagged and tag them?
 
 
 
