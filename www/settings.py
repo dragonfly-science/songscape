@@ -2,10 +2,7 @@
 import os
 
 # generate SECRET_KEY as per instructions in local.setting.py.TEMPLATE
-#Secret key for remote server:
-#SECRET_KEY = 'qv3^mi)r9t3eeeyrq-ohch8r^7v%*(cfxvl9)6kxbrd9dz=+ek'
-#Secret key for local server:
-SECRET_KEY = '1^8)k29v9fm)=oy1exyl_#cnr0mw=^mx@j()5rshb+*b(70fbg'
+SECRET_KEY = ''
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
