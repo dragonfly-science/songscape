@@ -127,6 +127,11 @@ Mar 19, 2016
 #Songscape's summary page shows that all 196 snippets were analysed but identifications: 85 clear, 43 too_noisy, 30 noisy only add up to 158
 #How do I find the snippets that weren't tagged and tag them?
 
+Mar 20, 2016
+#Successfully identified all the snippets in weather analysis set that were not call labeled (see queries.txt and weather_nontagged_query.csv)
+#Then tried to manually delete these entries from the child: recordings_identification_tag_set table (worked)
+#and parent recordings_identification table (didn't work and don't know why it still says that the child table has a foreignkey reference)
+
 
 
 
