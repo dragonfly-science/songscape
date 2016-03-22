@@ -1,0 +1,17 @@
+#Trying to query what call labels were tagged to each recording (not snippet, recording):
+\copy (SELECT tag.name, rec.path, us.first_name FROM recordings_tag as tag INNER JOIN recordings_calllabel as cl ON tag.id = cl.tag_id INNER JOIN auth_user us ON cl.user_id = us.id INNER JOIN recordings_analysisset ns ON cl.analysisset_id = ns.id INNER JOIN recordings_snippet sn ON ns.snippet_id = sn.id INNER JOIN recordings_recording rec ON sn.recording_id = rec.id) TO '/home/jasonhideki/songscape/weather_query.csv' WITH CSV HEADER;
+
+#What snippets in weather analysis do not have call labels?
+\copy (SELECT tag.name, ns.id as analysisset_id, sn.id as snippet_id FROM recordings_snippet as sn INNER JOIN recordings_analysisset as ns ON ns.snippet_id = sn.id LEFT OUTER JOIN recordings_calllabel as cl ON cl.analysisset_id = ns.id LEFT OUTER JOIN recordings_tag as tag ON tag.id = cl.tag_id WHERE tag.name IS NULL) TO '/home/jasonhideki/songscape/weather_nontagged_query.csv' WITH CSV HEADER;
+
+#Delete from recordings_identification those snippets that were't identified with call_labels:
+CREATE TEMP TABLE Delete AS SELECT tag.name, ns.id as analysisset_id, sn.id as snippet_id FROM recordings_snippet as sn INNER JOIN recordings_analysisset as ns ON ns.snippet_id = sn.id LEFT OUTER JOIN recordings_calllabel as cl ON cl.analysisset_id = ns.id LEFT OUTER JOIN recordings_tag as tag ON tag.id = cl.tag_id WHERE tag.name IS NULL;
+
+DELETE FROM recordings_identification_tag_set as ts USING Delete as d WHERE ts.identification_id = d.analysisset_id;
+#Worked, deleted 114
+DELETE FROM recordings_identification as id USING Delete as d WHERE id.analysisset_id = d.analysisset_id;
+ERROR:  update or delete on table "recordings_identification" violates foreign key constraint "identification_id_refs_id_03e07d19" on table "recordings_identification_tag_set"
+DETAIL:  Key (id)=(24) is still referenced from table "recordings_identification_tag_set".
+
+
+

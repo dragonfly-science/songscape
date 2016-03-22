@@ -5,10 +5,12 @@ from django.core.management.base import BaseCommand
 from www.recordings.models import Snippet, Recording
 
 import wavy
-BASE_DIR = '/kiwi/identifications/rfpt/snippets'
+BASE_DIR = 'www/media/snippets'
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        reader = csv.reader(open(args[0]))
+        #reader = csv.reader(open('/home/jasonhideki/songscape/www/media/snippets/snippets.csv'))
+	#trying out using outputs.csv instead:
+	reader = csv.reader(open('/home/jasonhideki/songscape/output.csv'))
         for i, row in enumerate(reader):
             if i:
                 try:   

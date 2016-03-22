@@ -1,6 +1,9 @@
 # Django settings for www project.
 import os
 
+# generate SECRET_KEY as per instructions in local.setting.py.TEMPLATE
+SECRET_KEY = ''
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -17,10 +20,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'songscape_dev',
-        'USER': 'dba',
+        'USER': 'birdsong',
         'PASSWORD': '***',
         'HOST': 'localhost',
-        'PORT': '',
+        'PORT': '5000',
     }
 }
 
@@ -33,7 +36,7 @@ USE_TZ = True
 SITE_ID = 1
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
-RECORDINGS_ROOT = '/kiwi/recordings'
+RECORDINGS_ROOT = '/home/jasonhideki/songscape/www/recordings/recordings'
 MEDIA_ROOT = os.path.join(PROJECT_DIR, 'media')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
@@ -152,7 +155,7 @@ LOGGING = {
     }
 }
 
-RECORDINGS_PATH = '' # Path of the raw recordings
+RECORDINGS_PATH = '/recordings/recordings' # Path of the raw recordings
 
 # organisation repositories. A dictionary with keys
 # being the organisation codes, and values
