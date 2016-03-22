@@ -19,3 +19,5 @@ dumps/*
 static/*
 .coverage
 nosetests.xml
+rfpt-2015-10-18-file-copy/*
+kiwi-*.*
