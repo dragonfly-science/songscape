@@ -13,7 +13,7 @@ import urllib
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import StreamingHttpResponse, HttpResponse, HttpResponseRedirect, Http404
-from django.core.servers.basehttp import FileWrapper
+from wsgiref.util import FileWrapper
 from django.conf import settings
 from django.db.models import Sum, Count
 from django.core.files import File

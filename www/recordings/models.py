@@ -75,7 +75,7 @@ class Organisation(models.Model):
 class Site(models.Model):
     code = models.SlugField(max_length=64)
     name = models.TextField(null=True, blank=True)
-    organisation = models.ForeignKey(Organisation, related_name='sites')
+    organisation = models.ForeignKey(Organisation, related_name='sites', on_delete=models.CASCADE)
     description = models.TextField(null=True, blank=True)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
@@ -89,7 +89,7 @@ class Site(models.Model):
 
 class Recorder(models.Model):
     code = models.SlugField(max_length=64)
-    organisation = models.ForeignKey(Organisation, related_name='recorders')
+    organisation = models.ForeignKey(Organisation, related_name='recorders', on_delete=models.CASCADE)
     comments = models.TextField(null=True, blank=True)
 
     def __unicode__(self):
@@ -99,9 +99,9 @@ class Recorder(models.Model):
         unique_together = (('code', 'organisation'),)
 
 class Deployment(models.Model):
-    site = models.ForeignKey(Site, related_name='deployments')
-    recorder = models.ForeignKey(Recorder, related_name='deployments', null=True, blank=True)
-    owner = models.ForeignKey(Organisation, related_name='deployments')
+    site = models.ForeignKey(Site, related_name='deployments', on_delete=models.CASCADE)
+    recorder = models.ForeignKey(Recorder, related_name='deployments', null=True, blank=True, on_delete=models.CASCADE)
+    owner = models.ForeignKey(Organisation, related_name='deployments',  on_delete=models.CASCADE)
     start = models.DateTimeField()
     end = models.DateTimeField(null=True, blank=True)
     comments = models.TextField(null=True, blank=True)
@@ -119,7 +119,7 @@ class Deployment(models.Model):
 
 class Recording(models.Model):
     datetime = models.DateTimeField()
-    deployment = models.ForeignKey(Deployment, related_name='recordings')
+    deployment = models.ForeignKey(Deployment, related_name='recordings',  on_delete=models.CASCADE)
     md5 = models.TextField()
     framerate = models.IntegerField()
     sampwidth = models.IntegerField()
@@ -204,12 +204,12 @@ class SonogramTransform(models.Model):
 
 
 class Snippet(models.Model):
-    recording = models.ForeignKey(Recording, related_name='snippets')
+    recording = models.ForeignKey(Recording, related_name='snippets',  on_delete=models.CASCADE)
     offset = models.FloatField() #seconds
     duration = models.FloatField()
     soundcloud = models.IntegerField(null=True, blank=True)
-    fans = models.ManyToManyField(User, related_name='favourites', null=True, blank=True)
-    flags = models.ManyToManyField(User, related_name='flags', null=True, blank=True)
+    fans = models.ManyToManyField(User, related_name='favourites', blank=True)
+    flags = models.ManyToManyField(User, related_name='flags', blank=True)
 
     class Meta:
         unique_together = (('recording', 'offset', 'duration'),)
@@ -328,8 +328,8 @@ class Snippet(models.Model):
         return positive, negative, len(identifications)
 
 class Sonogram(models.Model):
-    snippet = models.ForeignKey(Snippet)
-    transform = models.ForeignKey(SonogramTransform)
+    snippet = models.ForeignKey(Snippet, on_delete=models.CASCADE)
+    transform = models.ForeignKey(SonogramTransform,  on_delete=models.CASCADE)
     path = models.TextField()
 
 class Detector(models.Model):
@@ -344,8 +344,8 @@ class Detector(models.Model):
         unique_together = (('code', 'version'),)
 
 class Score(models.Model):
-    snippet = models.ForeignKey(Snippet, related_name='scores')
-    detector = models.ForeignKey(Detector, related_name='scores')
+    snippet = models.ForeignKey(Snippet, related_name='scores',  on_delete=models.CASCADE)
+    detector = models.ForeignKey(Detector, related_name='scores',  on_delete=models.CASCADE)
     score = models.FloatField(null=True, blank=True)
     description = models.TextField(default="")
     datetime = models.DateTimeField(auto_now=True)
@@ -373,7 +373,7 @@ class Analysis(SlugMixin, models.Model):
     datetime = models.DateTimeField(auto_now=True)
     tags = models.ManyToManyField(Tag)
     snippets = models.ManyToManyField(Snippet, through='AnalysisSet', related_name="analyses")
-    user = models.ForeignKey(User, related_name="analyses")
+    user = models.ForeignKey(User, related_name="analyses", on_delete=models.CASCADE)
 
     class Meta:
         unique_together = (('user', 'code'),)
@@ -382,8 +382,8 @@ class Analysis(SlugMixin, models.Model):
         return '%s' % (self.name)
 
 class AnalysisSet(models.Model):
-    analysis = models.ForeignKey(Analysis, related_name="sets")
-    snippet = models.ForeignKey(Snippet, related_name="sets")
+    analysis = models.ForeignKey(Analysis, related_name="sets",  on_delete=models.CASCADE)
+    snippet = models.ForeignKey(Snippet, related_name="sets",  on_delete=models.CASCADE)
     selection_method = models.TextField(default="")
     datetime = models.DateTimeField(auto_now=True)
     
@@ -391,8 +391,8 @@ class AnalysisSet(models.Model):
         unique_together = (('analysis', 'snippet'),)
 
 class Identification(models.Model):
-    user = models.ForeignKey(User, related_name="identifications")
-    analysisset = models.ForeignKey(AnalysisSet, related_name="identifications")
+    user = models.ForeignKey(User, related_name="identifications",  on_delete=models.CASCADE)
+    analysisset = models.ForeignKey(AnalysisSet, related_name="identifications",  on_delete=models.CASCADE)
     datetime = models.DateTimeField(auto_now=True)
     tags = models.ManyToManyField(Tag, related_name="identifications") 
     tag_set = models.ManyToManyField(Tag) 
@@ -403,10 +403,10 @@ class Identification(models.Model):
 
 class CallLabel(models.Model):
     code = models.TextField(unique=True)
-    user = models.ForeignKey(User, related_name="call_labels")
-    analysisset = models.ForeignKey(AnalysisSet, related_name="call_labels")
+    user = models.ForeignKey(User, related_name="call_labels",  on_delete=models.CASCADE)
+    analysisset = models.ForeignKey(AnalysisSet, related_name="call_labels",  on_delete=models.CASCADE)
     datetime = models.DateTimeField(auto_now=True)
-    tag = models.ForeignKey(Tag, related_name="call_labels") 
+    tag = models.ForeignKey(Tag, related_name="call_labels",  on_delete=models.CASCADE) 
     tag_set = models.ManyToManyField(Tag)
     start_time = models.FloatField()
     end_time = models.FloatField()

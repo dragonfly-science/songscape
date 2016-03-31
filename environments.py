@@ -34,6 +34,8 @@ environments = {
         'hosts': ['127.0.0.1'],
         'db_host': '',
         'db_name': 'songscape_dev',
+        'db_user': 'dba',
+        'db_port': '5434',
     }
 
 }
