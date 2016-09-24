@@ -1,0 +1,139 @@
+Feb 20, 2016
+#Andre has destroyed the old remote songscape_dev database after I stuffed it up after manually dropping tables
+#Only the new server address has changed (each user should note this down for future access)
+
+###Checking new remote server###
+#Changed just the server address in the tunnel making commands and it works! 
+#Remote songscape_dev currently empty, will rebuild schema after testing out locally
+
+###Creating local songscape_dev database###
+#In postgres:
+CREATE DATABASE songscape_dev;
+CREATE USER jasonhideki password 'Takahashi2';
+#In settings.py and local_settings.py, changed USER to 'jasonhideki', PASSWORD to 'Takahashi2', HOST to 'localhost', and PORT to ''
+#Also generated a separate SECRET_KEY for the local server and commented out the remote server one
+python manage.py syncdb
+python manage.py migrate
+#NOTE: both the above commands printed:
+Error loading local settings #indicating that the command couldn't locate local_settings.py but the command still seemed to run properly to construct all the database tables
+#TODO: check if Victor gets the same local settings error when he runs it without all my changes (don't commit till then)
+python manage.py initial
+
+###Modifying fixtures csv's###
+#Had to modify dates to DD/MM/YY format for commands to run properly
+#Had to add leading 0's to make sites 4 digits, recorders 6 digits in all fixtures for load_recordings to work properly
+NOTE: running load_recording.py generates songscape_load_recordings.log which is useful for debugging
+TODO:add the 9 Zealandia site deployments
+
+Feb 28, 2016
+#Tried and failed with Victor to finish script for extracting 5 random snippets from each recording
+
+Feb 29, 2016
+#Got extract_5_snippets script to successfully print 5 random snippets!
+#Deleted superfluous extract_5_snippet script attempts
+#Added a recorder number 000000 to recorders.csv and added 000000 deployments for each site in deployments.csv
+#Flushed database and reloaded tables with initial.py and load_recordings.py
+#In extract_5_snippets.py changed selection criteria for Recordings.get from md5=md5 to path=path (line 49)
+#Ran extract_5_snippetys.py
+#Get error after 168 snippets:
+File "/home/jasonhideki/songscape/www/recordings/management/commands/extract_5_snippets.py", line 44, in handle
+    offset = float(row[1])
+IndexError: list index out of range
+TODO: fix error so that extract_5_snippets generates all the snippets
+
+Mar 2, 2016
+#Nirosha's noise removal script warped some sounds to make them more difficut to recognise 
+#so I reloaded the database removing the 000000 recordings from the database and undid lines written to deal with 000000 recordings
+#also in extract_5_snippets.py changed selection criteria for Recordings.get from path=path back to md5=md5 (line 49)
+#was still getting error after 168 snippets mentioned Feb 29, 2016
+#error went away and all snippets were generated when I had extract_5_snippets only create the output.csv 
+#and had extract_snippets read output.csv to generate the snippets
+#renamed extract_5_snippets select_5_snippets
+
+Mar 3, 2016
+#had to adjust select_5_snippets to have two cases for random_number = random.randrange(), one for when i is 0 and one for all others
+#because math would be different with 0 and was resulting in some recordings have 6 snippets and some 4 previously
+#manually added in a header line to outputs.csv because extract_snippets was producing 1 less snippet than the total and that fixed it
+TODO: make it so I don't have to manually enter outputs.csv's header
+NOTE: currently no detectors in database because score_snippets.py is what loads them and I didn't use that command for weather test
+#ended work at this error running select_snippets_for_weather_analysis:
+ValueError: Cannot assign "('VICU-0220-2015-04-04T07:39:58Z-1020-60',)": "AnalysisSet.snippet" must be a "Snippet" instance.
+
+Mar 4, 2016
+#going to try creating a list of snippets matching those in output.csv using filters so that the snippets remain instances of Snippet #of Snippet (in models) with all their fields
+#select_snippets_for_weather_analysis seemed to work after commenting out bit about zip(snippets), I guess not needed as there aren't #multiple lists of snippets as in the original select_snippets_for_analysis
+#195 snippets now in analysisset as they should be
+#ran:
+python manage.py sonograms
+#successfully generated 195 sonograms without any modifications to sonograms.py
+#ran:
+python manage.py runserver
+#navigating to analysis button fails because its set up to go to an analysis named rimutaka-kiwi but going to 
+#the server address /analysis lets you select 'slug' and then takes you to the weather test
+#created 3 tags for weather test: clear, noisy, and too_noisy
+#changed settings and local_settings to reflect remote database settings: 'USER' = 'birdsong' and 'PORT' = '5000' and password as per #andre's email
+#remote link worked, now to set up database:
+python manage.py syncdb
+#created django superuser jasonhideki, Takahashi2, jhiikun@gmail.com
+python manage.py migrate
+QUESTION: why do I always get error loading local settings when I run songscape commands?
+python manage.py initial
+python manage.py load_recordings
+NOTE: load_recordings took a long time to run (just let it run and it was successful)
+In remote postgres songscape_dev:
+\copy recordings_analysis from '/home/jasonhideki/songscape/analysis.csv' DELIMITERS ',' CSV;
+NOTE: COPY command didn't work here because not superuser but anyone can use \copy
+back in regular terminal command line:
+python manage.py select_snippets_for_weather_analysis
+python manage.py runserver
+#it worked!!
+#created clear, noisy, too_noisy tags and added to weather analysis
+#analysed a few snippets in weather analysis just to make sure it works
+#committed/pushed changes to git
+
+Mar 16, 2016
+#Victor and I can both login to songscape but analysis only works from my computer because it #looks for recordings with 'jasonhideki' in path (recordings were loaded on my computer).
+#Will need to change this behaviour somehow to allow multiple computers to access. 
+#Maybe in load_recordings, only the part of the path after 'jasonhideki' could be uploaded to the 
+#path column and then when looking for the recordings, a piece of code adds the local root portion 
+#of the whole path.
+#Tested out tagging as both user jasonhideki and vykanton (both ok on my computer), by doing about 50 each
+#If one user tags a snippet, it is considered analysed and the second user will not see it.
+#Did have two snippets (882, 416: must be the snippet table snippet id's) that didn't display sonograms #but tagged them blind (had to go to previous snippet and then forward again to play sound)
+#Trying to query what call labels were tagged to each recording (not snippet, recording):
+\copy (SELECT tag.name, rec.path, us.first_name FROM recordings_tag as tag INNER JOIN recordings_calllabel as cl ON tag.id = cl.tag_id INNER JOIN auth_user us ON cl.user_id = us.id INNER JOIN recordings_analysisset ns ON cl.analysisset_id = ns.id INNER JOIN recordings_snippet sn ON ns.snippet_id = sn.id INNER JOIN recordings_recording rec ON sn.recording_id = rec.id) TO '/home/jasonhideki/songscape/weather_query.csv' WITH CSV HEADER;
+#Worked! can now look at weather_query.csv and see which recordings got which tags from which users
+
+Mar 17, 2016
+git commit #yesterday's stuff
+#going to change analysis button on songscape page to route to analysis page not rimutaka kiwi analysis
+#Songscape now giving error about no recording files with victor in the name (because I loaded a couple on victor's comp yesterday)
+#Manually deleted from snippets and recordings tables the victor loaded recordings and still didn't work!
+DELETE FROM recordings_snippet WHERE recording_id>=40 RETURNING recording_id;
+DELETE FROM recordings_recording WHERE id>=40 RETURNING path;
+#Figured it out: had to replace victor with jasonhideki in the MEDIA_ROOT path in local settings and settings
+#TODO: figure out a system where we each have a different non-git local_settings that overrides any #changing local paths in settings so we don't have to change back and forth after each git commit
+#changed analysis button to go to weather analysis by changing 'rimutaka-kiwi' with 'weather in base.html line 44   
+TODO: figure out how to change analysis button to go to analysis selection page 
+#FYI: victor's username is vykanton and password Victor
+NOTE: when a snippet is not tagged and user clicks next, next snippet does not have a previous button but number of snippets to be analysed decreases as normal
+
+Mar 19, 2016
+#Removed secret key and passwords from settings.py and local_setup_instructions to improve security with git tracked files (local_settings still has secret key/password but not git tracked)
+#Wrote security passwords and keys in non-git tracked file called local_security.txt
+#Finished snippets in weather analysis
+#Weather analysis got to list index out of range error after number 2 left to go snippet
+#Query described Mar 16 for weather_query.csv only resulted in 158 rows and calllabels table in database reflects that only 158 tags exist...where'd the other snippets go?? did I miss that many?
+#Songscape's summary page shows that all 196 snippets were analysed but identifications: 85 clear, 43 too_noisy, 30 noisy only add up to 158
+#How do I find the snippets that weren't tagged and tag them?
+
+Mar 20, 2016
+#Successfully identified all the snippets in weather analysis set that were not call labeled (see queries.txt and weather_nontagged_query.csv)
+#Then tried to manually delete these entries from the child: recordings_identification_tag_set table (worked)
+#and parent recordings_identification table (didn't work and don't know why it still says that the child table has a foreignkey reference)
+
+
+
+
+
+

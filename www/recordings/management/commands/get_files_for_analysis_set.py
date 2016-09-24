@@ -6,7 +6,7 @@ from www.recordings.models import Snippet, Analysis, AnalysisSet, Detector, Scor
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        analysis = Analysis.objects.get(code='rimutaka-kiwi')
+        analysis = Analysis.objects.get(code='weather')
         snippets = [x.snippet for x in AnalysisSet.objects.filter(analysis=analysis)]
         count = 0
         for snippet in snippets:

@@ -1,9 +1,10 @@
+local_security.txt
+local_settings.py
 call-labels-*
 *db-journal
 *.log
 *.pot
 *.pyc
-local_settings.py
 static/sonograms/*
 www/media/sonograms/*
 www/media/snippets/*
@@ -19,3 +20,4 @@ dumps/*
 static/*
 .coverage
 nosetests.xml
+www/recordings/recordings/*
