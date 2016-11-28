@@ -18,7 +18,7 @@ from www.recordings.models import Deployment, Recording, Snippet
 BASE_PATH = '/kiwi/recordings'
 MIN_FILE_SIZE = 1000
 logging.basicConfig(
-    format='%(asctime)s %(levelname)s: %(message)s', 
+    format='%(asctime)s %(levelname)s: %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S',
     level=logging.INFO,
     filename='songscape-load-recordings.log')
@@ -46,7 +46,7 @@ def save_canonical(recording):
         new_path = recording.get_canonical_path()
         logging.debug('canonical location is: %s', new_path)
         if recording.path == new_path:
-            return 
+            return
         if os.path.exists(new_path) and recording.md5 == get_md5(new_path):
             recording.path = new_path
             recording.save()
@@ -85,9 +85,12 @@ def get_recorder_site(path):
     raise RecorderSiteError
 
 class Command(BaseCommand):
+    def add_arguments(self, parser):
+        parser.add_argument('data_directory')
     def handle(self, *args, **options):
+        data_dir = options['data_directory']
         logging.debug("started")
-        for root, dirs, files in os.walk(args[0]):
+        for root, dirs, files in os.walk(data_dir):
             for f in files:
                 if f.endswith('.wav'):
                     # First check to see if it exists
@@ -113,17 +116,17 @@ class Command(BaseCommand):
                         recorder_code, site_code = get_recorder_site(path)
                         logging.debug('recorder %s and site %s: %s', recorder_code, site_code, path)
                         if site_code and recorder_code:
-                            deployment = Deployment.objects.get(recorder__code=recorder_code, 
+                            deployment = Deployment.objects.get(recorder__code=recorder_code,
                                 site__code=site_code,
-                                start__lt=starttime, 
+                                start__lt=starttime,
                                 end__gt=starttime)
                         elif recorder_code:
-                            deployment = Deployment.objects.get(recorder__code=recorder_code, 
-                                start__lt=starttime, 
+                            deployment = Deployment.objects.get(recorder__code=recorder_code,
+                                start__lt=starttime,
                                 end__gt=starttime)
                         elif site_code:
-                            deployment = Deployment.objects.get(site__code=site_code, 
-                                start__lt=starttime, 
+                            deployment = Deployment.objects.get(site__code=site_code,
+                                start__lt=starttime,
                                 end__gt=starttime)
                         else:
                             logging.error('no site or recorder identified in path: %s', path)
@@ -153,7 +156,7 @@ class Command(BaseCommand):
                                     snippet_overlap = 0
                                     snippet_minimum = 59.9
                                     seconds = 0
-                                    while seconds + snippet_minimum < length: 
+                                    while seconds + snippet_minimum < length:
                                         offset = max(seconds - snippet_overlap, 0)
                                         duration = min(snippet_length + 2*snippet_overlap, length - offset)
                                         Snippet(recording=recording, offset=offset, duration=duration).save()
@@ -176,4 +179,3 @@ class Command(BaseCommand):
                         break
                     #except:
                     #    logging.error('Hmmm. Something weird happened with this file: %s', path)
-                                
